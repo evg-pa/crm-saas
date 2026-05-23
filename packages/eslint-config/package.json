@@ -1,0 +1,19 @@
+{
+  "name": "@app/eslint-config",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js"
+  },
+  "peerDependencies": {
+    "eslint": ">=8.0.0",
+    "@typescript-eslint/parser": ">=7.0.0",
+    "@typescript-eslint/eslint-plugin": ">=7.0.0"
+  },
+  "peerDependenciesMeta": {
+    "eslint": { "optional": false },
+    "@typescript-eslint/parser": { "optional": false },
+    "@typescript-eslint/eslint-plugin": { "optional": false }
+  }
+}
