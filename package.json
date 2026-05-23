@@ -1,0 +1,25 @@
+{
+  "name": "app-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Autonomous SaaS App Generation Monorepo",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "dev": "pnpm -r --parallel run dev",
+    "lint": "pnpm -r run lint",
+    "test": "pnpm -r run test",
+    "clean": "pnpm -r exec rm -rf dist node_modules .turbo",
+    "format": "prettier --write '**/*.{ts,tsx,js,jsx,json,md,yaml}'",
+    "format:check": "prettier --check '**/*.{ts,tsx,js,jsx,json,md,yaml}'",
+    "typecheck": "pnpm -r run typecheck"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@11.2.2",
+  "devDependencies": {
+    "prettier": "^3.3.0",
+    "typescript": "^5.6.0"
+  }
+}
