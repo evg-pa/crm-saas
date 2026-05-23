@@ -1,28 +1,32 @@
 // ============================================================
-// @app/eslint-config — Shared ESLint flat configuration
-//
-// Usage (in consumer's eslint.config.mjs):
-//   import appConfig from "@app/eslint-config";
-//   export default [...appConfig, { /* overrides */ }];
+// Root ESLint flat config for the APP monorepo
 // ============================================================
 
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
+import prettierConfig from 'eslint-config-prettier';
 
-/** @returns {import("eslint").Linter.FlatConfig[]} */
-export default [
+export default tseslint.config(
   // Base recommended configs
   js.configs.recommended,
   ...tseslint.configs.recommended,
 
   // Global ignores
   {
-    ignores: ['**/dist/**', '**/node_modules/**', '**/.next/**', '**/.nuxt/**', '**/coverage/**'],
+    ignores: [
+      '**/dist/**',
+      '**/node_modules/**',
+      '**/.next/**',
+      '**/.nuxt/**',
+      '**/coverage/**',
+      'pnpm-lock.yaml',
+    ],
   },
 
-  // Default rules for all TypeScript packages
+  // Global rules for all files
   {
     rules: {
+      // TypeScript-specific
       '@typescript-eslint/no-unused-vars': [
         'warn',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
@@ -30,9 +34,17 @@ export default [
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        { prefer: 'type-imports' },
+      ],
+
+      // General
       'no-console': 'warn',
       'prefer-const': 'error',
     },
   },
-];
+
+  // Prettier compatibility — must come last
+  prettierConfig,
+);

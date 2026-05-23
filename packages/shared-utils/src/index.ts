@@ -2,6 +2,8 @@
 // @app/shared-utils — Shared utility functions
 // ============================================================
 
+import type { ID } from '@app/shared-types';
+
 // ---------------------------------------------------------------------------
 // Slugify
 // ---------------------------------------------------------------------------
@@ -14,12 +16,12 @@
  * - Strips leading / trailing hyphens
  * - Falls back to a default if the result is empty
  */
-export function slugify(input: string, fallback = "untitled"): string {
+export function slugify(input: string, fallback = 'untitled'): string {
   const slug = input
     .toLowerCase()
     .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 
   return slug.length > 0 ? slug : fallback;
 }
@@ -42,7 +44,7 @@ export function isValidEmail(value: string): boolean {
 
 /** Require a string to be non-empty after trimming. */
 export function isNonEmptyString(value: unknown): value is string {
-  return typeof value === "string" && value.trim().length > 0;
+  return typeof value === 'string' && value.trim().length > 0;
 }
 
 /** Require the value to be at most `max` characters. */
@@ -53,11 +55,6 @@ export function isMaxLength(value: string, max: number): boolean {
 // ---------------------------------------------------------------------------
 // Misc helpers
 // ---------------------------------------------------------------------------
-
-/** Delay execution for `ms` milliseconds. */
-export function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 /** Safely parse JSON with a fallback value on failure. */
 export function safeJsonParse<T>(json: string, fallback: T): T {

@@ -6,12 +6,13 @@
   "scripts": {
     "build": "pnpm -r run build",
     "dev": "pnpm -r --parallel run dev",
-    "lint": "pnpm -r run lint",
-    "test": "pnpm -r run test",
-    "clean": "pnpm -r exec rm -rf dist node_modules .turbo",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "format": "prettier --write '**/*.{ts,tsx,js,jsx,json,md,yaml}'",
     "format:check": "prettier --check '**/*.{ts,tsx,js,jsx,json,md,yaml}'",
-    "typecheck": "pnpm -r run typecheck"
+    "typecheck": "pnpm -r run typecheck",
+    "test": "pnpm -r run test",
+    "clean": "pnpm -r exec rm -rf dist node_modules .turbo"
   },
   "engines": {
     "node": ">=20.0.0",
@@ -19,7 +20,12 @@
   },
   "packageManager": "pnpm@11.2.2",
   "devDependencies": {
+    "@eslint/js": "^9.15.0",
+    "@types/node": "^22.19.19",
+    "eslint": "^9.15.0",
+    "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.3.0",
-    "typescript": "^5.6.0"
+    "typescript": "^5.6.0",
+    "typescript-eslint": "^8.15.0"
   }
 }

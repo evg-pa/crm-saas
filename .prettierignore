@@ -1,0 +1,9 @@
+node_modules/
+dist/
+build/
+.next/
+.nuxt/
+coverage/
+pnpm-lock.yaml
+.git/
+*.tsbuildinfo

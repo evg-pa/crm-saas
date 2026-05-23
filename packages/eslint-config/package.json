@@ -7,13 +7,15 @@
     ".": "./index.js"
   },
   "peerDependencies": {
-    "eslint": ">=8.0.0",
-    "@typescript-eslint/parser": ">=7.0.0",
-    "@typescript-eslint/eslint-plugin": ">=7.0.0"
+    "eslint": ">=9.0.0",
+    "typescript-eslint": ">=8.0.0"
   },
   "peerDependenciesMeta": {
-    "eslint": { "optional": false },
-    "@typescript-eslint/parser": { "optional": false },
-    "@typescript-eslint/eslint-plugin": { "optional": false }
+    "eslint": {
+      "optional": false
+    },
+    "typescript-eslint": {
+      "optional": false
+    }
   }
 }
