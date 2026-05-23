@@ -15,7 +15,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --build --noEmit"
   },
   "dependencies": {
     "@app/shared-types": "workspace:*"
