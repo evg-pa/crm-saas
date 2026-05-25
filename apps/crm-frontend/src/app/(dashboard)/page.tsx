@@ -10,7 +10,6 @@ import {
   Users,
   Building2,
   Handshake,
-  TrendingUp,
 } from "lucide-react";
 
 export default function DashboardPage() {
@@ -41,14 +40,6 @@ export default function DashboardPage() {
       icon: Handshake,
       loading: dealsLoading,
     },
-    {
-      label: "Active Deals",
-      value: dealsData?.items.filter(
-        (d) => !["closed_won", "closed_lost"].includes(d.stage)
-      ).length ?? null,
-      icon: TrendingUp,
-      loading: dealsLoading,
-    },
   ];
 
   return (
@@ -61,7 +52,7 @@ export default function DashboardPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-3">
         {kpis.map((kpi) => (
           <Card key={kpi.label}>
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">

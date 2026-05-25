@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { dealSchema, type DealFormValues } from "@/lib/validators/deal";
 import { useContacts } from "@/lib/hooks/use-contacts";
 import { useCompanies } from "@/lib/hooks/use-companies";
-import { DEAL_STAGES } from "@/types";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { DEAL_STAGES } from "@/types";
 import type { Deal } from "@/types";
 
 interface DealFormProps {
@@ -33,15 +33,6 @@ interface DealFormProps {
   deal?: Deal | null;
   isSubmitting?: boolean;
 }
-
-const STAGE_LABELS: Record<string, string> = {
-  new: "New",
-  discovery: "Discovery",
-  proposal: "Proposal",
-  negotiation: "Negotiation",
-  closed_won: "Closed Won",
-  closed_lost: "Closed Lost",
-};
 
 export function DealForm({
   open,
@@ -70,7 +61,9 @@ export function DealForm({
           stage: deal.stage,
           contact_id: deal.contact_id,
           company_id: deal.company_id,
-          expected_close_date: deal.expected_close_date,
+          expected_close_date: deal.expected_close_date
+            ? deal.expected_close_date.split("T")[0]
+            : null,
         }
       : {
           name: "",
@@ -84,7 +77,6 @@ export function DealForm({
 
   const selectedContactId = watch("contact_id");
   const selectedCompanyId = watch("company_id");
-  const selectedStage = watch("stage");
 
   const handleFormSubmit = (values: DealFormValues) => {
     onSubmit(values);
@@ -108,7 +100,7 @@ export function DealForm({
             <Label htmlFor="name">Deal Name *</Label>
             <Input
               id="name"
-              placeholder="Enterprise License"
+              placeholder="Enterprise license"
               {...register("name")}
             />
             {errors.name && (
@@ -118,62 +110,35 @@ export function DealForm({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="amount">Amount ($)</Label>
+              <Label htmlFor="amount">Amount (USD)</Label>
               <Input
                 id="amount"
                 type="number"
-                min={0}
                 placeholder="10000"
-                {...register("amount", {
-                  setValueAs: (v: string) =>
-                    v === "" ? null : parseInt(v, 10),
-                })}
+                {...register("amount", { valueAsNumber: true })}
               />
               {errors.amount && (
-                <p className="text-sm text-destructive">
-                  {errors.amount.message}
-                </p>
+                <p className="text-sm text-destructive">{errors.amount.message}</p>
               )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="stage">Stage</Label>
               <Select
-                value={selectedStage}
+                value={watch("stage")}
                 onValueChange={(v) => setValue("stage", v)}
               >
                 <SelectTrigger id="stage">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {DEAL_STAGES.map((stage) => (
-                    <SelectItem key={stage} value={stage}>
-                      {STAGE_LABELS[stage]}
+                  {DEAL_STAGES.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              {errors.stage && (
-                <p className="text-sm text-destructive">
-                  {errors.stage.message}
-                </p>
-              )}
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="expected_close_date">Expected Close Date</Label>
-            <Input
-              id="expected_close_date"
-              type="date"
-              {...register("expected_close_date", {
-                setValueAs: (v: string) => (v === "" ? null : v),
-              })}
-            />
-            {errors.expected_close_date && (
-              <p className="text-sm text-destructive">
-                {errors.expected_close_date.message}
-              </p>
-            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -190,18 +155,13 @@ export function DealForm({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">None</SelectItem>
-                  {contactsData?.items.map((contact) => (
-                    <SelectItem key={contact.id} value={contact.id}>
-                      {contact.first_name} {contact.last_name}
+                  {contactsData?.items.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.first_name} {c.last_name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              {errors.contact_id && (
-                <p className="text-sm text-destructive">
-                  {errors.contact_id.message}
-                </p>
-              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="company_id">Company</Label>
@@ -216,19 +176,25 @@ export function DealForm({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">None</SelectItem>
-                  {companiesData?.items.map((company) => (
-                    <SelectItem key={company.id} value={company.id}>
-                      {company.name}
+                  {companiesData?.items.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              {errors.company_id && (
-                <p className="text-sm text-destructive">
-                  {errors.company_id.message}
-                </p>
-              )}
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="expected_close_date">Expected Close Date</Label>
+            <Input
+              id="expected_close_date"
+              type="date"
+              {...register("expected_close_date", {
+                setValueAs: (v: string) => (v === "" ? null : v),
+              })}
+            />
           </div>
 
           <DialogFooter>
