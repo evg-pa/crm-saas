@@ -3,20 +3,28 @@
 import { useContacts } from "@/lib/hooks/use-contacts";
 import { useCompanies } from "@/lib/hooks/use-companies";
 import { useDeals } from "@/lib/hooks/use-deals";
+import { useActivities } from "@/lib/hooks/use-activities";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import Link from "next/link";
 import {
   Users,
   Building2,
   Handshake,
+  Activity,
 } from "lucide-react";
+import { formatDate } from "@/lib/utils";
 
 export default function DashboardPage() {
   // Fetch totals with minimal payload (limit: 1 just to get metadata)
   const { data: contactsData, isLoading: contactsLoading } = useContacts({ limit: 1 });
   const { data: companiesData, isLoading: companiesLoading } = useCompanies({ limit: 1 });
   const { data: dealsData, isLoading: dealsLoading } = useDeals({ limit: 1 });
+
+  // Fetch 5 most recent activities
+  const { data: activitiesData, isLoading: activitiesLoading } = useActivities({ limit: 5 });
 
   // Use metadata directly — these are counts from the server
   const dealsTotal = dealsData?.total;
@@ -101,13 +109,52 @@ export default function DashboardPage() {
 
       {/* Recent Activity */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base">Recent Activity</CardTitle>
+          <Link
+            href="/activities"
+            className="text-sm text-muted-foreground hover:text-primary transition-colors"
+          >
+            View all
+          </Link>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Recent activity feed will be displayed here once activities are recorded.
-          </p>
+          {activitiesLoading ? (
+            <div className="space-y-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <Skeleton className="h-8 w-8 rounded-full" />
+                  <div className="space-y-1 flex-1">
+                    <Skeleton className="h-4 w-48" />
+                    <Skeleton className="h-3 w-24" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : activitiesData && activitiesData.items.length > 0 ? (
+            <div className="space-y-1">
+              {activitiesData.items.map((act, i) => (
+                <div key={act.id}>
+                  <div className="flex items-center gap-3 py-2">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
+                      <Activity className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{act.subject}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {act.activity_type} &middot; {formatDate(act.occurred_at)}
+                      </p>
+                    </div>
+                  </div>
+                  {i < activitiesData.items.length - 1 && <Separator />}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No recent activity. Activities will appear here as your team logs calls, meetings, and notes.
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -41,8 +41,8 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "flex h-screen flex-col border-r bg-sidebar text-sidebar-foreground transition-all duration-300",
-        isCollapsed ? "w-16" : "w-64"
+        "hidden lg:flex h-screen flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-all duration-300",
+        isCollapsed ? "w-16" : "w-60"
       )}
     >
       {/* Brand */}
