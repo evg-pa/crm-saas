@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDeals, useCreateDeal, useDeleteDeal } from "@/lib/hooks/use-deals";
 import { useContact } from "@/lib/hooks/use-contacts";
-import { useCompany } from "@/lib/hooks/use-companies";
+import { CompanyNameCell } from "@/components/shared/company-name-cell";
 import { DealForm } from "@/features/deals/components/deal-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -281,10 +281,3 @@ function ContactNameCell({ contactId }: { contactId: string | null }) {
   return <>{contact.first_name} {contact.last_name}</>;
 }
 
-/** Fetches and displays a company name from a company ID. */
-function CompanyNameCell({ companyId }: { companyId: string | null }) {
-  const { data: company } = useCompany(companyId ?? "");
-  if (!companyId) return <>—</>;
-  if (!company) return <span className="text-muted-foreground/50">…</span>;
-  return <>{company.name}</>;
-}

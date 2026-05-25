@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useActivities } from "@/lib/hooks/use-activities";
+import { useContact } from "@/lib/hooks/use-contacts";
+import { useDeal } from "@/lib/hooks/use-deals";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -170,7 +172,7 @@ export default function ActivitiesPage() {
                             }}
                             className="text-primary hover:underline"
                           >
-                            {activity.contact_id.slice(0, 8)}...
+                            <ContactNameCell contactId={activity.contact_id} />
                           </button>
                         ) : (
                           "—"
@@ -185,7 +187,7 @@ export default function ActivitiesPage() {
                             }}
                             className="text-primary hover:underline"
                           >
-                            {activity.deal_id.slice(0, 8)}...
+                            <DealNameCell dealId={activity.deal_id} />
                           </button>
                         ) : (
                           "—"
@@ -232,4 +234,18 @@ export default function ActivitiesPage() {
       )}
     </div>
   );
+}
+
+/** Resolves and displays a contact name from a contact ID. */
+function ContactNameCell({ contactId }: { contactId: string }) {
+  const { data: contact } = useContact(contactId);
+  if (!contact) return <span className="text-muted-foreground/50">…</span>;
+  return <>{contact.first_name} {contact.last_name}</>;
+}
+
+/** Resolves and displays a deal name from a deal ID. */
+function DealNameCell({ dealId }: { dealId: string }) {
+  const { data: deal } = useDeal(dealId);
+  if (!deal) return <span className="text-muted-foreground/50">…</span>;
+  return <>{deal.name}</>;
 }

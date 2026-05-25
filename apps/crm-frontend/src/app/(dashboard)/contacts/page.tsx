@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useContacts, useCreateContact, useDeleteContact } from "@/lib/hooks/use-contacts";
+import { CompanyNameCell } from "@/components/shared/company-name-cell";
 import { ContactForm } from "@/features/contacts/components/contact-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -142,7 +143,7 @@ export default function ContactsPage() {
                         )}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {contact.company_id ? contact.company_id.slice(0, 8) + "..." : "—"}
+                        <CompanyNameCell companyId={contact.company_id} />
                       </TableCell>
                       <TableCell className="text-muted-foreground text-sm">
                         {formatDate(contact.created_at)}
@@ -229,3 +230,4 @@ export default function ContactsPage() {
     </div>
   );
 }
+
