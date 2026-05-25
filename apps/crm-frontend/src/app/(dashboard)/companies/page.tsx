@@ -1,12 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useCompanies, useCreateCompany, useDeleteCompany } from "@/lib/hooks/use-companies";
 import { CompanyForm } from "@/features/companies/components/company-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -29,6 +36,7 @@ import type { CompanyFormValues } from "@/lib/validators/company";
 export default function CompaniesPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
+  const [industry, setIndustry] = useState<string>("all");
   const [page, setPage] = useState(0);
   const [formOpen, setFormOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -36,9 +44,16 @@ export default function CompaniesPage() {
   const limit = 20;
   const { data, isLoading, isError, error } = useCompanies({
     q: search || undefined,
+    industry: industry !== "all" ? industry : undefined,
     offset: page * limit,
     limit,
   });
+
+  // Extract unique industries from the loaded items for the filter dropdown.
+  const industries = useMemo(() => {
+    const all = data?.items.map((c) => c.industry).filter(Boolean) as string[];
+    return [...new Set(all)].sort();
+  }, [data?.items]);
 
   const createCompany = useCreateCompany();
   const deleteCompany = useDeleteCompany();
@@ -67,21 +82,42 @@ export default function CompaniesPage() {
         </div>
         <Button onClick={() => setFormOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Company
+          New Company
         </Button>
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Search companies by name or industry..."
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
+      <div className="flex gap-4 items-center">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search companies by name or industry..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(0);
+            }}
+            className="pl-9"
+          />
+        </div>
+        <Select
+          value={industry}
+          onValueChange={(v) => {
+            setIndustry(v);
             setPage(0);
           }}
-          className="pl-9 max-w-md"
-        />
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="All Industries" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Industries</SelectItem>
+            {industries.map((ind) => (
+              <SelectItem key={ind} value={ind}>
+                {ind}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {isLoading ? (

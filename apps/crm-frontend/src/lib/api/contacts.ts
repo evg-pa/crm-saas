@@ -8,7 +8,7 @@ import type {
 
 export async function listContacts(
   organizationId: string,
-  params?: { q?: string; offset?: number; limit?: number }
+  params?: { q?: string; company_id?: string; offset?: number; limit?: number }
 ): Promise<PaginatedResponse<Contact>> {
   const { data } = await apiClient.get<PaginatedResponse<Contact>>("/contacts", {
     params: { organization_id: organizationId, ...params },

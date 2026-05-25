@@ -7,7 +7,7 @@ import type { ContactCreate, ContactUpdate } from "@/types";
 
 const STALE_TIME = 30_000; // 30 seconds
 
-export function useContacts(params?: { q?: string; offset?: number; limit?: number }) {
+export function useContacts(params?: { q?: string; company_id?: string; offset?: number; limit?: number }) {
   const orgId = useAuthStore((s) => s.orgId);
   return useQuery({
     queryKey: ["contacts", orgId, params],

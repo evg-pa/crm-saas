@@ -3,11 +3,22 @@
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useDeal, useUpdateDeal, useDeleteDeal } from "@/lib/hooks/use-deals";
+import { useContact } from "@/lib/hooks/use-contacts";
+import { useCompany } from "@/lib/hooks/use-companies";
+import { useActivities } from "@/lib/hooks/use-activities";
 import { DealForm } from "@/features/deals/components/deal-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,6 +50,12 @@ export default function DealDetailPage() {
   const [deleting, setDeleting] = useState(false);
 
   const { data: deal, isLoading, isError, error } = useDeal(id);
+  const { data: contact } = useContact(deal?.contact_id ?? "");
+  const { data: company } = useCompany(deal?.company_id ?? "");
+  const { data: activitiesData, isLoading: activitiesLoading } = useActivities({
+    deal_id: id,
+    limit: 50,
+  });
   const updateDeal = useUpdateDeal();
   const deleteDeal = useDeleteDeal();
 
@@ -142,12 +159,24 @@ export default function DealDetailPage() {
               value={formatDate(deal.expected_close_date)}
             />
             <DetailRow
-              label="Contact ID"
-              value={deal.contact_id ? deal.contact_id.slice(0, 8) + "..." : null}
+              label="Contact"
+              value={
+                deal.contact_id
+                  ? contact
+                    ? `${contact.first_name} ${contact.last_name}`
+                    : "—"
+                  : null
+              }
             />
             <DetailRow
-              label="Company ID"
-              value={deal.company_id ? deal.company_id.slice(0, 8) + "..." : null}
+              label="Company"
+              value={
+                deal.company_id
+                  ? company
+                    ? company.name
+                    : "—"
+                  : null
+              }
             />
             <DetailRow label="Created" value={formatDate(deal.created_at)} />
             <DetailRow label="Updated" value={formatDate(deal.updated_at)} />
@@ -156,12 +185,44 @@ export default function DealDetailPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Activity Timeline</CardTitle>
+            <CardTitle className="text-base">Related Activities</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Activity timeline for this deal will be displayed here.
-            </p>
+            {activitiesLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-8 w-full" />
+              </div>
+            ) : activitiesData && activitiesData.items.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Subject</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Date</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {activitiesData.items.map((activity) => (
+                    <TableRow key={activity.id}>
+                      <TableCell className="font-medium">
+                        {activity.subject}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary">{activity.activity_type}</Badge>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {formatDate(activity.occurred_at)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No activities recorded for this deal.
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>

@@ -3,10 +3,19 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDeals, useCreateDeal, useDeleteDeal } from "@/lib/hooks/use-deals";
+import { useContact } from "@/lib/hooks/use-contacts";
+import { useCompany } from "@/lib/hooks/use-companies";
 import { DealForm } from "@/features/deals/components/deal-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -24,6 +33,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Plus, Search, MoreHorizontal, Pencil, Trash2, Loader2 } from "lucide-react";
 import { formatDate, formatCurrency } from "@/lib/utils";
+import { DEAL_STAGES } from "@/types";
 import type { DealFormValues } from "@/lib/validators/deal";
 
 const stageColors: Record<string, string> = {
@@ -38,6 +48,7 @@ const stageColors: Record<string, string> = {
 export default function DealsPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
+  const [stage, setStage] = useState<string>("all");
   const [page, setPage] = useState(0);
   const [formOpen, setFormOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -45,6 +56,7 @@ export default function DealsPage() {
   const limit = 20;
   const { data, isLoading, isError, error } = useDeals({
     q: search || undefined,
+    stage: stage !== "all" ? stage : undefined,
     offset: page * limit,
     limit,
   });
@@ -79,21 +91,42 @@ export default function DealsPage() {
         </div>
         <Button onClick={() => setFormOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Deal
+          New Deal
         </Button>
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Search deals by name..."
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
+      <div className="flex gap-4 items-center">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search deals by name..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(0);
+            }}
+            className="pl-9"
+          />
+        </div>
+        <Select
+          value={stage}
+          onValueChange={(v) => {
+            setStage(v);
             setPage(0);
           }}
-          className="pl-9 max-w-md"
-        />
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="All Stages" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Stages</SelectItem>
+            {DEAL_STAGES.map((s) => (
+              <SelectItem key={s} value={s}>
+                {stageLabel(s)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {isLoading ? (
@@ -118,15 +151,16 @@ export default function DealsPage() {
                   <TableHead>Name</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Stage</TableHead>
-                  <TableHead>Expected Close</TableHead>
-                  <TableHead>Created</TableHead>
+                  <TableHead>Contact</TableHead>
+                  <TableHead>Company</TableHead>
+                  <TableHead>Close Date</TableHead>
                   <TableHead className="w-[50px]" />
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {data && data.items.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                    <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
                       No deals found.
                     </TableCell>
                   </TableRow>
@@ -149,11 +183,14 @@ export default function DealsPage() {
                           {stageLabel(deal.stage)}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {formatDate(deal.expected_close_date)}
+                      <TableCell className="text-muted-foreground">
+                        <ContactNameCell contactId={deal.contact_id} />
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        <CompanyNameCell companyId={deal.company_id} />
                       </TableCell>
                       <TableCell className="text-muted-foreground text-sm">
-                        {formatDate(deal.created_at)}
+                        {formatDate(deal.expected_close_date)}
                       </TableCell>
                       <TableCell>
                         <DropdownMenu>
@@ -234,4 +271,20 @@ export default function DealsPage() {
       />
     </div>
   );
+}
+
+/** Fetches and displays a contact name from a contact ID. */
+function ContactNameCell({ contactId }: { contactId: string | null }) {
+  const { data: contact } = useContact(contactId ?? "");
+  if (!contactId) return <>—</>;
+  if (!contact) return <span className="text-muted-foreground/50">…</span>;
+  return <>{contact.first_name} {contact.last_name}</>;
+}
+
+/** Fetches and displays a company name from a company ID. */
+function CompanyNameCell({ companyId }: { companyId: string | null }) {
+  const { data: company } = useCompany(companyId ?? "");
+  if (!companyId) return <>—</>;
+  if (!company) return <span className="text-muted-foreground/50">…</span>;
+  return <>{company.name}</>;
 }
