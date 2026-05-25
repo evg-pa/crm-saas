@@ -3,6 +3,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* --- Base shadcn/ui semantic surface tokens --- */
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
   --color-card: hsl(var(--card));
@@ -22,6 +23,16 @@
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
+
+  /* --- Success / Warning / Info semantic colors (APP-19 design tokens) --- */
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+  --color-info: hsl(var(--info));
+  --color-info-foreground: hsl(var(--info-foreground));
+
+  /* --- Sidebar tokens --- */
   --color-sidebar: hsl(var(--sidebar-background));
   --color-sidebar-foreground: hsl(var(--sidebar-foreground));
   --color-sidebar-primary: hsl(var(--sidebar-primary));
@@ -30,73 +41,114 @@
   --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
   --color-sidebar-border: hsl(var(--sidebar-border));
   --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  /* --- Radii (APP-19 design tokens) --- */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* --- Font families — Inter (APP-19 design tokens) --- */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
+/* ============================================================
+   APP-19 Design System Token Foundation
+   Palette: Indigo primary + Slate neutral
+   Font: Inter
+   ============================================================ */
+
 :root {
-  --background: 0 0% 100%;
-  --foreground: 0 0% 3.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 0 0% 3.9%;
+  /* --- Neutral / Surface (Slate) --- */
+  --background: 210 40% 98%;       /* slate-50 */
+  --foreground: 222 47% 11%;       /* slate-900 */
+  --card: 0 0% 100%;               /* white */
+  --card-foreground: 222 47% 11%;  /* slate-900 */
   --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 3.9%;
-  --primary: 0 0% 9%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 0 0% 96.1%;
-  --secondary-foreground: 0 0% 9%;
-  --muted: 0 0% 96.1%;
-  --muted-foreground: 0 0% 45.1%;
-  --accent: 0 0% 96.1%;
-  --accent-foreground: 0 0% 9%;
-  --destructive: 0 84.2% 60.2%;
+  --popover-foreground: 222 47% 11%;
+
+  /* --- Brand / Primary (Indigo) --- */
+  --primary: 239 84% 67%;          /* indigo-500 */
+  --primary-foreground: 0 0% 100%; /* white */
+
+  /* --- Secondary / Muted / Accent (Slate) --- */
+  --secondary: 210 40% 96%;        /* slate-100 */
+  --secondary-foreground: 215 25% 27%; /* slate-700 */
+  --muted: 210 40% 96%;            /* slate-100 */
+  --muted-foreground: 215 16% 47%; /* slate-500 */
+  --accent: 210 40% 96%;           /* slate-100 */
+  --accent-foreground: 215 25% 27%; /* slate-700 */
+
+  /* --- Semantic: Destructive (Red) --- */
+  --destructive: 0 84% 60%;        /* red-500 */
   --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 89.8%;
-  --input: 0 0% 89.8%;
-  --ring: 0 0% 3.9%;
-  --radius: 0.5rem;
-  --sidebar-background: 0 0% 98%;
-  --sidebar-foreground: 240 5.3% 26.1%;
-  --sidebar-primary: 240 5.9% 10%;
-  --sidebar-primary-foreground: 0 0% 98%;
-  --sidebar-accent: 240 4.8% 95.9%;
-  --sidebar-accent-foreground: 240 5.9% 10%;
-  --sidebar-border: 220 13% 91%;
-  --sidebar-ring: 217.2 91.2% 59.8%;
+
+  /* --- Semantic: Success (Green) --- */
+  --success: 142 71% 45%;          /* green-500 */
+  --success-foreground: 0 0% 98%;
+
+  /* --- Semantic: Warning (Amber) --- */
+  --warning: 38 92% 50%;           /* amber-500 */
+  --warning-foreground: 0 0% 98%;
+
+  /* --- Semantic: Info (Blue) --- */
+  --info: 217 91% 60%;             /* blue-500 */
+  --info-foreground: 0 0% 98%;
+
+  /* --- Borders / Inputs / Rings --- */
+  --border: 214 32% 91%;           /* slate-200 */
+  --input: 214 32% 91%;            /* slate-200 */
+  --ring: 239 84% 67%;             /* indigo-500 */
+
+  /* --- Radius --- */
+  --radius: 0.375rem;              /* radius-md (default per APP-19) */
+
+  /* --- Sidebar --- */
+  --sidebar-background: 210 40% 96%;   /* slate-100 */
+  --sidebar-foreground: 215 25% 27%;   /* slate-700 */
+  --sidebar-primary: 239 84% 67%;      /* indigo-500 */
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 214 32% 91%;       /* slate-200 */
+  --sidebar-accent-foreground: 215 25% 27%;
+  --sidebar-border: 214 32% 91%;       /* slate-200 */
+  --sidebar-ring: 239 84% 67%;         /* indigo-500 */
 }
 
 .dark {
-  --background: 0 0% 3.9%;
-  --foreground: 0 0% 98%;
-  --card: 0 0% 3.9%;
-  --card-foreground: 0 0% 98%;
-  --popover: 0 0% 3.9%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 0 0% 98%;
-  --primary-foreground: 0 0% 9%;
-  --secondary: 0 0% 14.9%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 0 0% 14.9%;
-  --muted-foreground: 0 0% 63.9%;
-  --accent: 0 0% 14.9%;
-  --accent-foreground: 0 0% 98%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 14.9%;
-  --input: 0 0% 14.9%;
-  --ring: 0 0% 83.1%;
-  --sidebar-background: 240 5.9% 10%;
-  --sidebar-foreground: 240 4.8% 95.9%;
-  --sidebar-primary: 224.3 76.3% 48%;
+  --background: 222 47% 11%;        /* slate-900 */
+  --foreground: 210 40% 98%;        /* slate-50 */
+  --card: 222 47% 11%;
+  --card-foreground: 210 40% 98%;
+  --popover: 217 33% 17%;           /* slate-800 */
+  --popover-foreground: 210 40% 98%;
+  --primary: 239 84% 67%;           /* indigo-500 */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 217 33% 17%;         /* slate-800 */
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 20% 65%;  /* slate-400 */
+  --accent: 217 33% 17%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 63% 31%;         /* red-700 */
+  --destructive-foreground: 210 40% 98%;
+  --success: 142 71% 45%;
+  --success-foreground: 0 0% 98%;
+  --warning: 38 92% 50%;
+  --warning-foreground: 0 0% 98%;
+  --info: 217 91% 60%;
+  --info-foreground: 0 0% 98%;
+  --border: 217 33% 17%;
+  --input: 217 33% 17%;
+  --ring: 239 84% 67%;
+  --sidebar-background: 222 47% 11%;
+  --sidebar-foreground: 210 40% 96%;
+  --sidebar-primary: 239 84% 67%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 240 3.7% 15.9%;
-  --sidebar-accent-foreground: 240 4.8% 95.9%;
-  --sidebar-border: 240 3.7% 15.9%;
-  --sidebar-ring: 217.2 91.2% 59.8%;
+  --sidebar-accent: 217 33% 17%;
+  --sidebar-accent-foreground: 210 40% 96%;
+  --sidebar-border: 217 33% 17%;
+  --sidebar-ring: 239 84% 67%;
 }
 
 * {
