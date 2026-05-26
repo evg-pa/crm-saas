@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Search, MoreHorizontal, Pencil, Trash2, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { DEAL_STAGES } from "@/types";
 import type { DealFormValues } from "@/lib/validators/deal";
@@ -66,13 +67,25 @@ export default function DealsPage() {
 
   const handleCreate = (values: DealFormValues) => {
     createDeal.mutate(values, {
-      onSuccess: () => setFormOpen(false),
+      onSuccess: (data) => {
+        toast.success(`Deal "${data.name}" created`);
+        setFormOpen(false);
+      },
+      onError: (err) =>
+        toast.error(
+          err instanceof Error ? err.message : "Failed to create deal"
+        ),
     });
   };
 
   const handleDelete = (id: string) => {
     setDeletingId(id);
     deleteDeal.mutate(id, {
+      onSuccess: () => toast.success("Deal deleted"),
+      onError: (err) =>
+        toast.error(
+          err instanceof Error ? err.message : "Failed to delete deal"
+        ),
       onSettled: () => setDeletingId(null),
     });
   };

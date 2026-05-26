@@ -115,7 +115,10 @@ export function DealForm({
                 id="amount"
                 type="number"
                 placeholder="10000"
-                {...register("amount", { valueAsNumber: true })}
+                {...register("amount", {
+                  setValueAs: (v: string) =>
+                    v === "" ? null : parseInt(v, 10),
+                })}
               />
               {errors.amount && (
                 <p className="text-sm text-destructive">{errors.amount.message}</p>

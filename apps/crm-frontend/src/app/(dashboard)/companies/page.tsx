@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Plus, Building2 } from "lucide-react";
+import { toast } from "sonner";
 import { formatDate } from "@/lib/utils";
 import type { CompanyFormValues } from "@/lib/validators/company";
 import type { Company } from "@/types";
@@ -66,7 +67,14 @@ export default function CompaniesPage() {
   const handleCreate = useCallback(
     (values: CompanyFormValues) => {
       createCompany.mutate(values, {
-        onSuccess: () => setFormOpen(false),
+        onSuccess: (data) => {
+          toast.success(`Company "${data.name}" created`);
+          setFormOpen(false);
+        },
+        onError: (err) =>
+          toast.error(
+            err instanceof Error ? err.message : "Failed to create company"
+          ),
       });
     },
     [createCompany],
@@ -74,7 +82,13 @@ export default function CompaniesPage() {
 
   const handleDelete = useCallback(
     (company: Company) => {
-      deleteCompany.mutate(company.id);
+      deleteCompany.mutate(company.id, {
+        onSuccess: () => toast.success(`Company "${company.name}" deleted`),
+        onError: (err) =>
+          toast.error(
+            err instanceof Error ? err.message : "Failed to delete company"
+          ),
+      });
     },
     [deleteCompany],
   );

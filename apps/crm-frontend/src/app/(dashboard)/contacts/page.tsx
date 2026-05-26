@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Users } from "lucide-react";
+import { toast } from "sonner";
 import { formatDate } from "@/lib/utils";
 import type { Contact } from "@/types";
 import type { ContactFormValues } from "@/lib/validators/contact";
@@ -87,12 +88,29 @@ export default function ContactsPage() {
 
   const handleCreate = (values: ContactFormValues) => {
     createContact.mutate(values, {
-      onSuccess: () => setFormOpen(false),
+      onSuccess: (data) => {
+        toast.success(`Contact "${data.first_name} ${data.last_name}" created`);
+        setFormOpen(false);
+      },
+      onError: (err) => {
+        toast.error(
+          err instanceof Error ? err.message : "Failed to create contact"
+        );
+      },
     });
   };
 
   const handleDelete = (contact: Contact) => {
-    deleteContact.mutate(contact.id);
+    deleteContact.mutate(contact.id, {
+      onSuccess: () =>
+        toast.success(
+          `Contact "${contact.first_name} ${contact.last_name}" deleted`
+        ),
+      onError: (err) =>
+        toast.error(
+          err instanceof Error ? err.message : "Failed to delete contact"
+        ),
+    });
   };
 
   // SearchInput fires onChange after built-in 300 ms debounce.
