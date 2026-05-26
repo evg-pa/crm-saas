@@ -3,11 +3,13 @@
 import { useTheme } from "next-themes";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { useCurrentOrganization } from "@/lib/hooks/use-organizations";
+import { useTranslation } from "@/lib/i18n";
+import { useLanguageStore, type Language } from "@/lib/stores/language-store";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Sun, Moon, Monitor, User, Building2, Hash, AlertTriangle } from "lucide-react";
+import { Sun, Moon, Monitor, User, Building2, Hash, AlertTriangle, Globe } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -17,6 +19,8 @@ export default function SettingsPage() {
   const { data: organization, isLoading: orgLoading, isError: orgError } =
     useCurrentOrganization();
   const [mounted, setMounted] = useState(false);
+  const { t } = useTranslation();
+  const { language, setLanguage } = useLanguageStore();
 
   // Prevent hydration mismatch by only rendering theme UI after mount
   useEffect(() => {
@@ -24,18 +28,25 @@ export default function SettingsPage() {
   }, []);
 
   const themes = [
-    { value: "light", label: "Light", icon: Sun },
-    { value: "dark", label: "Dark", icon: Moon },
-    { value: "system", label: "System", icon: Monitor },
+    { value: "light", labelKey: "settings.themeLight", icon: Sun },
+    { value: "dark", labelKey: "settings.themeDark", icon: Moon },
+    { value: "system", labelKey: "settings.themeSystem", icon: Monitor },
   ] as const;
+
+  const languages: { value: Language; labelKey: string }[] = [
+    { value: "en", labelKey: "settings.english" },
+    { value: "ru", labelKey: "settings.russian" },
+  ];
 
   if (!mounted) {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {t("settings.title")}
+          </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Manage your preferences and account.
+            {t("settings.description")}
           </p>
         </div>
         <div className="grid gap-6 md:grid-cols-2">
@@ -67,9 +78,11 @@ export default function SettingsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
+        <h1 className="text-2xl font-bold tracking-tight">
+          {t("settings.title")}
+        </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Manage your preferences and account.
+          {t("settings.description")}
         </p>
       </div>
 
@@ -79,9 +92,9 @@ export default function SettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Building2 className="h-4 w-4" />
-              Organization
+              {t("settings.organization")}
             </CardTitle>
-            <CardDescription>Your organization details</CardDescription>
+            <CardDescription>{t("settings.organizationDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {orgLoading ? (
@@ -101,11 +114,11 @@ export default function SettingsPage() {
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="h-4 w-4 text-destructive shrink-0" />
                   <p className="text-sm text-destructive font-medium">
-                    Failed to load organization
+                    {t("settings.orgLoadError")}
                   </p>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1 ml-6">
-                  Organization data is currently unavailable.
+                  {t("settings.orgLoadErrorDetail")}
                 </p>
               </div>
             ) : (
@@ -120,8 +133,8 @@ export default function SettingsPage() {
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {organization?.slug
-                        ? `Slug: ${organization.slug}`
-                        : "Active account"}
+                        ? `${t("settings.slug")}: ${organization.slug}`
+                        : t("settings.activeAccount")}
                     </p>
                   </div>
                 </div>
@@ -131,7 +144,7 @@ export default function SettingsPage() {
                     <Hash className="h-4 w-4 text-muted-foreground shrink-0" />
                     <div>
                       <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                        Organization ID
+                        {t("settings.orgId")}
                       </p>
                       <p className="text-sm font-mono">{orgId ?? "—"}</p>
                     </div>
@@ -147,13 +160,13 @@ export default function SettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Monitor className="h-4 w-4" />
-              Appearance
+              {t("settings.appearance")}
             </CardTitle>
-            <CardDescription>Choose your preferred theme</CardDescription>
+            <CardDescription>{t("settings.appearanceDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex gap-2">
-              {themes.map(({ value, label, icon: Icon }) => (
+              {themes.map(({ value, labelKey, icon: Icon }) => (
                 <Button
                   key={value}
                   variant={theme === value ? "default" : "outline"}
@@ -162,28 +175,54 @@ export default function SettingsPage() {
                   className="flex-1"
                 >
                   <Icon className="mr-2 h-4 w-4" />
-                  {label}
+                  {t(labelKey)}
                 </Button>
               ))}
             </div>
             <p className="text-xs text-muted-foreground">
               {theme === "system"
-                ? "Theme follows your system preference."
+                ? t("settings.themeSystemDesc")
                 : theme === "dark"
-                  ? "Dark mode is active."
-                  : "Light mode is active."}
+                  ? t("settings.themeDarkDesc")
+                  : t("settings.themeLightDesc")}
             </p>
           </CardContent>
         </Card>
 
+        {/* Language Selector */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Globe className="h-4 w-4" />
+              {t("settings.language")}
+            </CardTitle>
+            <CardDescription>{t("settings.languageDesc")}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex gap-2">
+              {languages.map(({ value, labelKey }) => (
+                <Button
+                  key={value}
+                  variant={language === value ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setLanguage(value)}
+                  className="flex-1"
+                >
+                  {t(labelKey)}
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
         {/* User Profile */}
-        <Card className="md:col-span-2">
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <User className="h-4 w-4" />
-              Profile
+              {t("settings.profile")}
             </CardTitle>
-            <CardDescription>Your account information</CardDescription>
+            <CardDescription>{t("settings.profileDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-4">
@@ -191,13 +230,13 @@ export default function SettingsPage() {
                 <User className="h-6 w-6 text-muted-foreground" />
               </div>
               <div className="space-y-1">
-                <p className="font-medium">CRM User</p>
+                <p className="font-medium">{t("settings.user")}</p>
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary" className="text-xs">
-                    Member
+                    {t("settings.member")}
                   </Badge>
                   <span className="text-xs text-muted-foreground">
-                    Active session
+                    {t("settings.activeSession")}
                   </span>
                 </div>
               </div>
@@ -206,7 +245,7 @@ export default function SettingsPage() {
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Organization
+                  {t("settings.organization")}
                 </p>
                 <p className="text-sm mt-0.5">
                   {organization?.name ?? "CRM Organization"}
@@ -214,7 +253,7 @@ export default function SettingsPage() {
               </div>
               <div>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Org ID
+                  {t("settings.orgId")}
                 </p>
                 <p className="text-sm font-mono mt-0.5">{orgId ?? "—"}</p>
               </div>

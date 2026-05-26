@@ -14,6 +14,8 @@ import {
   DataTable,
   EmptyState,
 } from "@/components/shared";
+import { useTranslation } from "@/lib/i18n";
+import { useLocale } from "@/lib/i18n/use-locale";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -32,6 +34,8 @@ import type { Company } from "@/types";
 
 export default function CompaniesPage() {
   const router = useRouter();
+  const { t } = useTranslation();
+  const { locale } = useLocale();
   const [search, setSearch] = useState("");
   const [industry, setIndustry] = useState<string>("all");
   const [page, setPage] = useState(0);
@@ -68,29 +72,34 @@ export default function CompaniesPage() {
     (values: CompanyFormValues) => {
       createCompany.mutate(values, {
         onSuccess: (data) => {
-          toast.success(`Company "${data.name}" created`);
+          toast.success(
+            t("companies.companyCreated", { name: data.name })
+          );
           setFormOpen(false);
         },
         onError: (err) =>
           toast.error(
-            err instanceof Error ? err.message : "Failed to create company"
+            err instanceof Error ? err.message : t("companies.createError")
           ),
       });
     },
-    [createCompany],
+    [createCompany, t]
   );
 
   const handleDelete = useCallback(
     (company: Company) => {
       deleteCompany.mutate(company.id, {
-        onSuccess: () => toast.success(`Company "${company.name}" deleted`),
+        onSuccess: () =>
+          toast.success(
+            t("companies.companyDeleted", { name: company.name })
+          ),
         onError: (err) =>
           toast.error(
-            err instanceof Error ? err.message : "Failed to delete company"
+            err instanceof Error ? err.message : t("companies.deleteError")
           ),
       });
     },
-    [deleteCompany],
+    [deleteCompany, t]
   );
 
   // ── Column definitions for DataTable ────────────────────────────────
@@ -98,106 +107,111 @@ export default function CompaniesPage() {
     () => [
       {
         accessorKey: "name",
-        header: "Name",
+        header: t("companies.name"),
         cell: ({ row }) => (
           <span className="font-medium">{row.original.name}</span>
         ),
       },
       {
         accessorKey: "industry",
-        header: "Industry",
+        header: t("companies.industry"),
         cell: ({ row }) =>
           row.original.industry ? (
             <Badge variant="secondary">{row.original.industry}</Badge>
           ) : (
-            <span className="text-muted-foreground">—</span>
+            <span className="text-muted-foreground">{t("common.none")}</span>
           ),
       },
       {
         accessorKey: "size",
-        header: "Size",
+        header: t("companies.size"),
         cell: ({ row }) => (
           <span className="text-muted-foreground">
-            {row.original.size?.toLocaleString() ?? "—"}
+            {row.original.size?.toLocaleString() ?? t("common.none")}
           </span>
         ),
       },
       {
         accessorKey: "website",
-        header: "Website",
+        header: t("companies.website"),
         cell: ({ row }) => (
           <span className="block max-w-[200px] truncate text-muted-foreground">
-            {row.original.website ?? "—"}
+            {row.original.website ?? t("common.none")}
           </span>
         ),
       },
       {
         accessorKey: "created_at",
-        header: "Created",
+        header: t("companies.created"),
         cell: ({ row }) => (
           <span className="text-sm text-muted-foreground">
-            {formatDate(row.original.created_at)}
+            {formatDate(row.original.created_at, locale)}
           </span>
         ),
       },
     ],
-    [],
+    [t, locale]
   );
 
   const rowActions = useMemo(
     () => [
       {
-        label: "Edit",
+        label: t("common.edit"),
         onClick: (company: Company) =>
           router.push(`/companies/${company.id}`),
       },
       {
-        label: "Delete",
+        label: t("common.delete"),
         onClick: handleDelete,
         variant: "destructive" as const,
       },
     ],
-    [router, handleDelete],
+    [router, handleDelete, t]
   );
 
   // ── State branches ──────────────────────────────────────────────────
   const isEmptyState =
-    !isLoading && !isError && data && data.items.length === 0 && !search && industry === "all";
+    !isLoading &&
+    !isError &&
+    data &&
+    data.items.length === 0 &&
+    !search &&
+    industry === "all";
 
   return (
     <div className="space-y-6">
-      {/* ── Page header ─────────────────────────────────────────────── */}
       <PageHeader
         breadcrumbs={[
-          { label: "Dashboard", href: "/" },
-          { label: "Companies" },
+          { label: t("nav.dashboard"), href: "/" },
+          { label: t("companies.title") },
         ]}
-        title="Companies"
+        title={t("companies.title")}
         description={
-          data ? `${data.total} total companies` : "Manage your companies"
+          data
+            ? t("companies.description", { count: data.total })
+            : t("companies.noDescription")
         }
         actions={
           <Button onClick={() => setFormOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
-            New Company
+            {t("companies.newCompany")}
           </Button>
         }
       />
 
-      {/* ── Search + Industry filter ─────────────────────────────────── */}
       <div className="flex gap-4 items-center">
         <SearchInput
-          placeholder="Search companies by name or industry..."
+          placeholder={t("companies.searchPlaceholder")}
           value={search}
           onChange={handleSearchChange}
           className="flex-1 max-w-md"
         />
         <Select value={industry} onValueChange={handleIndustryChange}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="All Industries" />
+            <SelectValue placeholder={t("companies.allIndustries")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Industries</SelectItem>
+            <SelectItem value="all">{t("companies.allIndustries")}</SelectItem>
             {industries.map((ind) => (
               <SelectItem key={ind} value={ind}>
                 {ind}
@@ -207,34 +221,31 @@ export default function CompaniesPage() {
         </Select>
       </div>
 
-      {/* ── Error state ──────────────────────────────────────────────── */}
       {isError && (
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-6 text-center">
           <p className="text-sm font-medium text-destructive">
-            Failed to load companies
+            {t("companies.loadError")}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
             {error instanceof Error
               ? error.message
-              : "An unexpected error occurred"}
+              : t("contacts.loadErrorDetail")}
           </p>
         </div>
       )}
 
-      {/* ── Empty state (no companies, no active filters) ────────────── */}
       {isEmptyState && (
         <EmptyState
           icon={Building2}
-          title="No companies yet"
-          description="Create your first company to start tracking relationships, deals, and contacts."
+          title={t("companies.noCompanies")}
+          description={t("companies.noCompaniesDesc")}
           action={{
-            label: "Add Company",
+            label: t("companies.addCompany"),
             onClick: () => setFormOpen(true),
           }}
         />
       )}
 
-      {/* ── Data table ───────────────────────────────────────────────── */}
       {!isError && !isEmptyState && (
         <>
           <DataTable
@@ -245,12 +256,12 @@ export default function CompaniesPage() {
             rowActions={rowActions}
           />
 
-          {/* ── Pagination ─────────────────────────────────────────── */}
           {data && data.total > limit && (
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
-                Showing {page * limit + 1}–
-                {Math.min((page + 1) * limit, data.total)} of {data.total}
+                {t("common.showing")} {page * limit + 1}–
+                {Math.min((page + 1) * limit, data.total)} {t("common.of")}{" "}
+                {data.total}
               </p>
               <div className="flex gap-2">
                 <Button
@@ -259,7 +270,7 @@ export default function CompaniesPage() {
                   disabled={page === 0}
                   onClick={() => setPage((p) => p - 1)}
                 >
-                  Previous
+                  {t("common.previous")}
                 </Button>
                 <Button
                   variant="outline"
@@ -267,7 +278,7 @@ export default function CompaniesPage() {
                   disabled={(page + 1) * limit >= data.total}
                   onClick={() => setPage((p) => p + 1)}
                 >
-                  Next
+                  {t("common.next")}
                 </Button>
               </div>
             </div>
@@ -275,7 +286,6 @@ export default function CompaniesPage() {
         </>
       )}
 
-      {/* ── Create form dialog ───────────────────────────────────────── */}
       <CompanyForm
         open={formOpen}
         onOpenChange={setFormOpen}

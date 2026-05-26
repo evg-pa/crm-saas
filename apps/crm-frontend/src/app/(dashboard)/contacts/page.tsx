@@ -12,6 +12,8 @@ import {
   DataTable,
   EmptyState,
 } from "@/components/shared";
+import { useTranslation } from "@/lib/i18n";
+import { useLocale } from "@/lib/i18n/use-locale";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Users } from "lucide-react";
@@ -20,58 +22,10 @@ import { formatDate } from "@/lib/utils";
 import type { Contact } from "@/types";
 import type { ContactFormValues } from "@/lib/validators/contact";
 
-// ── Column definitions ──────────────────────────────────────────────────
-// Static column defs use TanStack Table accessors so sorting works
-// via DataTable's built-in click-to-sort header behaviour.
-const CONTACT_COLUMNS: ColumnDef<Contact>[] = [
-  {
-    accessorFn: (row) => `${row.first_name} ${row.last_name}`,
-    id: "name",
-    header: "Name",
-    cell: ({ row }) => (
-      <span className="font-medium">
-        {row.original.first_name} {row.original.last_name}
-      </span>
-    ),
-  },
-  {
-    accessorKey: "email",
-    header: "Email",
-    cell: ({ getValue }) => {
-      const email = getValue<Contact["email"]>();
-      return <span className="text-muted-foreground">{email ?? "—"}</span>;
-    },
-  },
-  {
-    accessorKey: "title",
-    header: "Title",
-    cell: ({ getValue }) => {
-      const title = getValue<Contact["title"]>();
-      return title ? <Badge variant="secondary">{title}</Badge> : "—";
-    },
-  },
-  {
-    id: "company",
-    header: "Company",
-    cell: ({ row }) => (
-      <span className="text-muted-foreground">
-        <CompanyNameCell companyId={row.original.company_id} />
-      </span>
-    ),
-  },
-  {
-    accessorKey: "created_at",
-    header: "Created",
-    cell: ({ getValue }) => (
-      <span className="text-muted-foreground text-sm">
-        {formatDate(getValue<Contact["created_at"]>())}
-      </span>
-    ),
-  },
-];
-
 export default function ContactsPage() {
   const router = useRouter();
+  const { t } = useTranslation();
+  const { locale } = useLocale();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [formOpen, setFormOpen] = useState(false);
@@ -86,94 +40,159 @@ export default function ContactsPage() {
   const createContact = useCreateContact();
   const deleteContact = useDeleteContact();
 
-  const handleCreate = (values: ContactFormValues) => {
-    createContact.mutate(values, {
-      onSuccess: (data) => {
-        toast.success(`Contact "${data.first_name} ${data.last_name}" created`);
-        setFormOpen(false);
-      },
-      onError: (err) => {
-        toast.error(
-          err instanceof Error ? err.message : "Failed to create contact"
-        );
-      },
-    });
-  };
+  const handleCreate = useCallback(
+    (values: ContactFormValues) => {
+      createContact.mutate(values, {
+        onSuccess: (data) => {
+          toast.success(
+            t("contacts.contactCreated", {
+              name: `${data.first_name} ${data.last_name}`,
+            })
+          );
+          setFormOpen(false);
+        },
+        onError: (err) => {
+          toast.error(
+            err instanceof Error ? err.message : t("contacts.createError")
+          );
+        },
+      });
+    },
+    [createContact, t]
+  );
 
-  const handleDelete = (contact: Contact) => {
-    deleteContact.mutate(contact.id, {
-      onSuccess: () =>
-        toast.success(
-          `Contact "${contact.first_name} ${contact.last_name}" deleted`
-        ),
-      onError: (err) =>
-        toast.error(
-          err instanceof Error ? err.message : "Failed to delete contact"
-        ),
-    });
-  };
+  const handleDelete = useCallback(
+    (contact: Contact) => {
+      deleteContact.mutate(contact.id, {
+        onSuccess: () =>
+          toast.success(
+            t("contacts.contactDeleted", {
+              name: `${contact.first_name} ${contact.last_name}`,
+            })
+          ),
+        onError: (err) =>
+          toast.error(
+            err instanceof Error ? err.message : t("contacts.deleteError")
+          ),
+      });
+    },
+    [deleteContact, t]
+  );
 
-  // SearchInput fires onChange after built-in 300 ms debounce.
   const handleSearchChange = useCallback((value: string) => {
     setSearch(value);
     setPage(0);
   }, []);
 
-  // ── Empty state (shown inside DataTable when data.items is empty) ────
+  // ── Column definitions (sortable) ────────────────────────────────────
+  const CONTACT_COLUMNS: ColumnDef<Contact>[] = useMemo(
+    () => [
+      {
+        accessorFn: (row) => `${row.first_name} ${row.last_name}`,
+        id: "name",
+        header: t("contacts.name"),
+        cell: ({ row }) => (
+          <span className="font-medium">
+            {row.original.first_name} {row.original.last_name}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "email",
+        header: t("contacts.email"),
+        cell: ({ getValue }) => {
+          const email = getValue<Contact["email"]>();
+          return (
+            <span className="text-muted-foreground">{email ?? t("common.none")}</span>
+          );
+        },
+      },
+      {
+        accessorKey: "title",
+        header: t("contacts.title_field"),
+        cell: ({ getValue }) => {
+          const title = getValue<Contact["title"]>();
+          return title ? (
+            <Badge variant="secondary">{title}</Badge>
+          ) : (
+            t("common.none")
+          );
+        },
+      },
+      {
+        id: "company",
+        header: t("contacts.company"),
+        cell: ({ row }) => (
+          <span className="text-muted-foreground">
+            <CompanyNameCell companyId={row.original.company_id} />
+          </span>
+        ),
+      },
+      {
+        accessorKey: "created_at",
+        header: t("contacts.created"),
+        cell: ({ getValue }) => (
+          <span className="text-muted-foreground text-sm">
+            {formatDate(getValue<Contact["created_at"]>(), locale)}
+          </span>
+        ),
+      },
+    ],
+    [t, locale]
+  );
+
   const emptyState = useMemo(
     () => (
       <EmptyState
         icon={Users}
-        title="No contacts yet"
-        description="Create your first contact to get started."
+        title={t("contacts.noContacts")}
+        description={t("contacts.noContactsDesc")}
         action={{
-          label: "Add Contact",
+          label: t("contacts.addContact"),
           onClick: () => setFormOpen(true),
         }}
       />
     ),
-    []
+    [t]
   );
 
   return (
     <div className="space-y-6">
-      {/* Page Header — APP-19 §8.2.1 */}
       <PageHeader
-        title="Contacts"
+        title={t("contacts.title")}
         description={
-          data ? `${data.total} total contacts` : "Manage your contacts"
+          data
+            ? t("contacts.description", { count: data.total })
+            : t("contacts.noDescription")
         }
         actions={
           <Button onClick={() => setFormOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
-            Add Contact
+            {t("contacts.addContact")}
           </Button>
         }
       />
 
-      {/* Search — APP-19 §8.2.7 (300 ms debounce built in) */}
       <SearchInput
-        placeholder="Search contacts by name or email..."
+        placeholder={t("contacts.searchPlaceholder")}
         value={search}
         onChange={handleSearchChange}
         className="max-w-md"
       />
 
-      {/* Error state — kept at page level */}
       {isError && (
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-6 text-center">
           <p className="text-sm text-destructive font-medium">
-            Failed to load contacts
+            {t("contacts.loadError")}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
             {error instanceof Error
               ? error.message
-              : "An unexpected error occurred"}
+              : t("contacts.loadErrorDetail")}
           </p>
         </div>
       )}
 
-      {/* Data Table + Pagination — APP-19 §8.2.8 */}
       {!isError && (
         <>
           <DataTable
@@ -183,12 +202,12 @@ export default function ContactsPage() {
             onRowClick={(contact) => router.push(`/contacts/${contact.id}`)}
             rowActions={[
               {
-                label: "Edit",
+                label: t("common.edit"),
                 onClick: (contact) =>
                   router.push(`/contacts/${contact.id}`),
               },
               {
-                label: "Delete",
+                label: t("common.delete"),
                 onClick: handleDelete,
                 variant: "destructive",
               },
@@ -196,12 +215,12 @@ export default function ContactsPage() {
             emptyState={emptyState}
           />
 
-          {/* Pagination controls */}
           {data && data.total > limit && (
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
-                Showing {page * limit + 1}–
-                {Math.min((page + 1) * limit, data.total)} of {data.total}
+                {t("common.showing")} {page * limit + 1}–
+                {Math.min((page + 1) * limit, data.total)} {t("common.of")}{" "}
+                {data.total}
               </p>
               <div className="flex gap-2">
                 <Button
@@ -210,7 +229,7 @@ export default function ContactsPage() {
                   disabled={page === 0}
                   onClick={() => setPage((p) => p - 1)}
                 >
-                  Previous
+                  {t("common.previous")}
                 </Button>
                 <Button
                   variant="outline"
@@ -218,7 +237,7 @@ export default function ContactsPage() {
                   disabled={(page + 1) * limit >= data.total}
                   onClick={() => setPage((p) => p + 1)}
                 >
-                  Next
+                  {t("common.next")}
                 </Button>
               </div>
             </div>
@@ -226,7 +245,6 @@ export default function ContactsPage() {
         </>
       )}
 
-      {/* Create Form Dialog */}
       <ContactForm
         open={formOpen}
         onOpenChange={setFormOpen}
@@ -236,4 +254,3 @@ export default function ContactsPage() {
     </div>
   );
 }
-

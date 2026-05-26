@@ -1,14 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useDeals, useCreateDeal, useDeleteDeal } from "@/lib/hooks/use-deals";
 import { useContact } from "@/lib/hooks/use-contacts";
 import { CompanyNameCell } from "@/components/shared/company-name-cell";
 import { DealForm } from "@/features/deals/components/deal-form";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -16,26 +14,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, MoreHorizontal, Pencil, Trash2, Loader2 } from "lucide-react";
+import { Plus, Handshake } from "lucide-react";
 import { toast } from "sonner";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { DEAL_STAGES } from "@/types";
+import type { ColumnDef } from "@tanstack/react-table";
+import type { Deal } from "@/types";
 import type { DealFormValues } from "@/lib/validators/deal";
+import { useTranslation } from "@/lib/i18n";
+import { useLocale } from "@/lib/i18n/use-locale";
+import {
+  PageHeader,
+  SearchInput,
+  DataTable,
+  EmptyState,
+} from "@/components/shared";
 
 const stageColors: Record<string, string> = {
   new: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
@@ -46,13 +40,17 @@ const stageColors: Record<string, string> = {
   closed_lost: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
 };
 
+const stageLabel = (s: string) =>
+  s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+
 export default function DealsPage() {
   const router = useRouter();
+  const { t } = useTranslation();
+  const { locale, currency } = useLocale();
   const [search, setSearch] = useState("");
   const [stage, setStage] = useState<string>("all");
   const [page, setPage] = useState(0);
   const [formOpen, setFormOpen] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const limit = 20;
   const { data, isLoading, isError, error } = useDeals({
@@ -65,62 +63,154 @@ export default function DealsPage() {
   const createDeal = useCreateDeal();
   const deleteDeal = useDeleteDeal();
 
-  const handleCreate = (values: DealFormValues) => {
-    createDeal.mutate(values, {
-      onSuccess: (data) => {
-        toast.success(`Deal "${data.name}" created`);
-        setFormOpen(false);
+  const handleCreate = useCallback(
+    (values: DealFormValues) => {
+      createDeal.mutate(values, {
+        onSuccess: (data) => {
+          toast.success(
+            t("deals.dealCreated", { name: data.name })
+          );
+          setFormOpen(false);
+        },
+        onError: (err) =>
+          toast.error(
+            err instanceof Error ? err.message : t("deals.createError")
+          ),
+      });
+    },
+    [createDeal, t]
+  );
+
+  const handleDelete = useCallback(
+    (deal: Deal) => {
+      deleteDeal.mutate(deal.id, {
+        onSuccess: () =>
+          toast.success(
+            t("deals.dealDeleted", { name: deal.name })
+          ),
+        onError: (err) =>
+          toast.error(
+            err instanceof Error ? err.message : t("deals.deleteError")
+          ),
+      });
+    },
+    [deleteDeal, t]
+  );
+
+  const handleSearchChange = useCallback((value: string) => {
+    setSearch(value);
+    setPage(0);
+  }, []);
+
+  // ── Column definitions (sortable) ───────────────────────────────────
+  const DEAL_COLUMNS: ColumnDef<Deal>[] = useMemo(
+    () => [
+      {
+        accessorKey: "name",
+        header: t("deals.name"),
+        cell: ({ row }) => (
+          <span className="font-medium">{row.original.name}</span>
+        ),
       },
-      onError: (err) =>
-        toast.error(
-          err instanceof Error ? err.message : "Failed to create deal"
+      {
+        accessorKey: "amount",
+        header: t("deals.amount"),
+        cell: ({ getValue }) => (
+          <span className="text-muted-foreground">
+            {formatCurrency(
+              getValue<Deal["amount"]>(),
+              locale,
+              currency
+            )}
+          </span>
         ),
-    });
-  };
-
-  const handleDelete = (id: string) => {
-    setDeletingId(id);
-    deleteDeal.mutate(id, {
-      onSuccess: () => toast.success("Deal deleted"),
-      onError: (err) =>
-        toast.error(
-          err instanceof Error ? err.message : "Failed to delete deal"
+      },
+      {
+        accessorKey: "stage",
+        header: t("deals.stage"),
+        cell: ({ getValue }) => {
+          const s = getValue<Deal["stage"]>();
+          const stageKey = `dealStages.${s}` as const;
+          return (
+            <Badge className={stageColors[s] ?? ""} variant="outline">
+              {t(stageKey) !== stageKey ? t(stageKey) : stageLabel(s)}
+            </Badge>
+          );
+        },
+      },
+      {
+        id: "contact",
+        header: t("deals.contact"),
+        cell: ({ row }) => (
+          <span className="text-muted-foreground">
+            <ContactNameCell contactId={row.original.contact_id} />
+          </span>
         ),
-      onSettled: () => setDeletingId(null),
-    });
-  };
+      },
+      {
+        id: "company",
+        header: t("deals.company"),
+        cell: ({ row }) => (
+          <span className="text-muted-foreground">
+            <CompanyNameCell companyId={row.original.company_id} />
+          </span>
+        ),
+      },
+      {
+        accessorKey: "expected_close_date",
+        header: t("deals.closeDate"),
+        cell: ({ getValue }) => (
+          <span className="text-muted-foreground text-sm">
+            {formatDate(
+              getValue<Deal["expected_close_date"]>(),
+              locale
+            )}
+          </span>
+        ),
+      },
+    ],
+    [t, locale, currency]
+  );
 
-  const stageLabel = (s: string) =>
-    s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  const emptyState = useMemo(
+    () => (
+      <EmptyState
+        icon={Handshake}
+        title={t("deals.noDeals")}
+        description={t("deals.noDealsDesc")}
+        action={{
+          label: t("deals.addDeal"),
+          onClick: () => setFormOpen(true),
+        }}
+      />
+    ),
+    [t]
+  );
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Deals</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {data ? `${data.total} total deals` : "Manage your deals and pipeline"}
-          </p>
-        </div>
-        <Button onClick={() => setFormOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          New Deal
-        </Button>
-      </div>
+      <PageHeader
+        title={t("deals.title")}
+        description={
+          data
+            ? t("deals.description", { count: data.total })
+            : t("deals.noDescription")
+        }
+        actions={
+          <Button onClick={() => setFormOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            {t("deals.newDeal")}
+          </Button>
+        }
+      />
 
       <div className="flex gap-4 items-center">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search deals by name..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(0);
-            }}
-            className="pl-9"
-          />
-        </div>
+        <SearchInput
+          placeholder={t("deals.searchPlaceholder")}
+          value={search}
+          onChange={handleSearchChange}
+          className="flex-1 max-w-md"
+        />
         <Select
           value={stage}
           onValueChange={(v) => {
@@ -129,128 +219,61 @@ export default function DealsPage() {
           }}
         >
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="All Stages" />
+            <SelectValue placeholder={t("deals.allStages")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Stages</SelectItem>
-            {DEAL_STAGES.map((s) => (
-              <SelectItem key={s} value={s}>
-                {stageLabel(s)}
-              </SelectItem>
-            ))}
+            <SelectItem value="all">{t("deals.allStages")}</SelectItem>
+            {DEAL_STAGES.map((s) => {
+              const stageKey = `dealStages.${s}`;
+              return (
+                <SelectItem key={s} value={s}>
+                  {t(stageKey) !== stageKey ? t(stageKey) : stageLabel(s)}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
       </div>
 
-      {isLoading ? (
-        <div className="space-y-2">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full" />
-          ))}
-        </div>
-      ) : isError ? (
+      {isError && (
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-6 text-center">
-          <p className="text-sm text-destructive font-medium">Failed to load deals</p>
+          <p className="text-sm text-destructive font-medium">
+            {t("deals.loadError")}
+          </p>
           <p className="text-xs text-muted-foreground mt-1">
-            {error instanceof Error ? error.message : "An unexpected error occurred"}
+            {error instanceof Error
+              ? error.message
+              : t("contacts.loadErrorDetail")}
           </p>
         </div>
-      ) : (
+      )}
+
+      {!isError && (
         <>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Stage</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Company</TableHead>
-                  <TableHead>Close Date</TableHead>
-                  <TableHead className="w-[50px]" />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data && data.items.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
-                      No deals found.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  data?.items.map((deal) => (
-                    <TableRow
-                      key={deal.id}
-                      className="cursor-pointer"
-                      onClick={() => router.push(`/deals/${deal.id}`)}
-                    >
-                      <TableCell className="font-medium">{deal.name}</TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {formatCurrency(deal.amount)}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          className={stageColors[deal.stage] ?? ""}
-                          variant="outline"
-                        >
-                          {stageLabel(deal.stage)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        <ContactNameCell contactId={deal.contact_id} />
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        <CompanyNameCell companyId={deal.company_id} />
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {formatDate(deal.expected_close_date)}
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                router.push(`/deals/${deal.id}`);
-                              }}
-                            >
-                              <Pencil className="mr-2 h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="text-destructive"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDelete(deal.id);
-                              }}
-                              disabled={deletingId === deal.id}
-                            >
-                              {deletingId === deal.id ? (
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              ) : (
-                                <Trash2 className="mr-2 h-4 w-4" />
-                              )}
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
+          <DataTable
+            columns={DEAL_COLUMNS}
+            data={data?.items ?? []}
+            isLoading={isLoading}
+            onRowClick={(deal) => router.push(`/deals/${deal.id}`)}
+            rowActions={[
+              {
+                label: t("common.edit"),
+                onClick: (deal) => router.push(`/deals/${deal.id}`),
+              },
+              {
+                label: t("common.delete"),
+                onClick: handleDelete,
+                variant: "destructive",
+              },
+            ]}
+            emptyState={emptyState}
+          />
 
           {data && data.total > limit && (
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
-                Showing {page * limit + 1}–{Math.min((page + 1) * limit, data.total)} of{" "}
+                {t("common.showing")} {page * limit + 1}–
+                {Math.min((page + 1) * limit, data.total)} {t("common.of")}{" "}
                 {data.total}
               </p>
               <div className="flex gap-2">
@@ -260,7 +283,7 @@ export default function DealsPage() {
                   disabled={page === 0}
                   onClick={() => setPage((p) => p - 1)}
                 >
-                  Previous
+                  {t("common.previous")}
                 </Button>
                 <Button
                   variant="outline"
@@ -268,7 +291,7 @@ export default function DealsPage() {
                   disabled={(page + 1) * limit >= data.total}
                   onClick={() => setPage((p) => p + 1)}
                 >
-                  Next
+                  {t("common.next")}
                 </Button>
               </div>
             </div>
@@ -288,9 +311,13 @@ export default function DealsPage() {
 
 /** Fetches and displays a contact name from a contact ID. */
 function ContactNameCell({ contactId }: { contactId: string | null }) {
+  const { t } = useTranslation();
   const { data: contact } = useContact(contactId ?? "");
-  if (!contactId) return <>—</>;
+  if (!contactId) return <>{t("common.none")}</>;
   if (!contact) return <span className="text-muted-foreground/50">…</span>;
-  return <>{contact.first_name} {contact.last_name}</>;
+  return (
+    <>
+      {contact.first_name} {contact.last_name}
+    </>
+  );
 }
-

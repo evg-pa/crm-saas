@@ -42,8 +42,8 @@ export function DealForm({
   isSubmitting = false,
 }: DealFormProps) {
   const isEditing = !!deal;
-  const { data: contactsData } = useContacts({ limit: 200 });
-  const { data: companiesData } = useCompanies({ limit: 200 });
+  const { data: contactsData } = useContacts({ limit: 100 });
+  const { data: companiesData } = useCompanies({ limit: 100 });
 
   const {
     register,

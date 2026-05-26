@@ -1,3 +1,4 @@
+import { LanguageProvider } from "@/lib/i18n/language-provider";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -6,7 +7,7 @@ import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({
   variable: "--font-inter",
-  subsets: ["latin"],
+  subsets: ["latin", "cyrillic"],
 });
 
 export const metadata: Metadata = {
@@ -22,7 +23,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
-        <Providers>{children}</Providers>
+        <LanguageProvider>
+          <Providers>{children}</Providers>
+        </LanguageProvider>
         <Toaster />
       </body>
     </html>

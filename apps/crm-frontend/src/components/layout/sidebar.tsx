@@ -17,26 +17,28 @@ import {
 
 import { cn } from "@/lib/utils";
 import { useSidebarStore } from "@/lib/stores/sidebar-store";
+import { useTranslation } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 
 interface NavItem {
-  label: string;
+  labelKey: string;
   href: string;
   icon: LucideIcon;
 }
 
-const navItems: NavItem[] = [
-  { label: "Dashboard", href: "/", icon: LayoutDashboard },
-  { label: "Contacts", href: "/contacts", icon: Users },
-  { label: "Companies", href: "/companies", icon: Building2 },
-  { label: "Deals", href: "/deals", icon: Handshake },
-  { label: "Activities", href: "/activities", icon: Activity },
-  { label: "Settings", href: "/settings", icon: Settings },
-];
-
 export function Sidebar() {
   const pathname = usePathname();
   const { isCollapsed, toggle } = useSidebarStore();
+  const { t } = useTranslation();
+
+  const navItems: NavItem[] = [
+    { labelKey: "nav.dashboard", href: "/", icon: LayoutDashboard },
+    { labelKey: "nav.contacts", href: "/contacts", icon: Users },
+    { labelKey: "nav.companies", href: "/companies", icon: Building2 },
+    { labelKey: "nav.deals", href: "/deals", icon: Handshake },
+    { labelKey: "nav.activities", href: "/activities", icon: Activity },
+    { labelKey: "nav.settings", href: "/settings", icon: Settings },
+  ];
 
   return (
     <aside
@@ -71,10 +73,10 @@ export function Sidebar() {
                   ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                   : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
               )}
-              title={isCollapsed ? item.label : undefined}
+              title={isCollapsed ? t(item.labelKey) : undefined}
             >
               <item.icon className="h-5 w-5 shrink-0" />
-              {!isCollapsed && <span>{item.label}</span>}
+              {!isCollapsed && <span>{t(item.labelKey)}</span>}
             </Link>
           );
         })}

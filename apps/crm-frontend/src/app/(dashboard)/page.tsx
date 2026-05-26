@@ -4,6 +4,8 @@ import { useContacts } from "@/lib/hooks/use-contacts";
 import { useCompanies } from "@/lib/hooks/use-companies";
 import { useDeals } from "@/lib/hooks/use-deals";
 import { useActivities } from "@/lib/hooks/use-activities";
+import { useTranslation } from "@/lib/i18n";
+import { useLocale } from "@/lib/i18n/use-locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +20,9 @@ import {
 import { formatDate } from "@/lib/utils";
 
 export default function DashboardPage() {
+  const { t } = useTranslation();
+  const { locale } = useLocale();
+
   // Fetch totals with minimal payload (limit: 1 just to get metadata)
   const { data: contactsData, isLoading: contactsLoading } = useContacts({ limit: 1 });
   const { data: companiesData, isLoading: companiesLoading } = useCompanies({ limit: 1 });
@@ -26,25 +31,22 @@ export default function DashboardPage() {
   // Fetch 5 most recent activities
   const { data: activitiesData, isLoading: activitiesLoading } = useActivities({ limit: 5 });
 
-  // Use metadata directly — these are counts from the server
-  const dealsTotal = dealsData?.total;
-
   const kpis = [
     {
-      label: "Total Contacts",
+      label: t("dashboard.totalContacts"),
       value: contactsData?.total,
       icon: Users,
       loading: contactsLoading,
     },
     {
-      label: "Total Companies",
+      label: t("dashboard.totalCompanies"),
       value: companiesData?.total,
       icon: Building2,
       loading: companiesLoading,
     },
     {
-      label: "Total Deals",
-      value: dealsTotal,
+      label: t("dashboard.totalDeals"),
+      value: dealsData?.total,
       icon: Handshake,
       loading: dealsLoading,
     },
@@ -53,9 +55,11 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+        <h1 className="text-2xl font-bold tracking-tight">
+          {t("dashboard.title")}
+        </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Overview of your CRM at a glance.
+          {t("dashboard.description")}
         </p>
       </div>
 
@@ -85,21 +89,21 @@ export default function DashboardPage() {
       {/* Quick Links */}
       <div className="grid gap-4 md:grid-cols-3">
         <QuickLinkCard
-          title="Contacts"
+          title={t("nav.contacts")}
           description="Manage people and their details"
           href="/contacts"
           count={contactsData?.total}
           loading={contactsLoading}
         />
         <QuickLinkCard
-          title="Companies"
+          title={t("nav.companies")}
           description="Organizations you work with"
           href="/companies"
           count={companiesData?.total}
           loading={companiesLoading}
         />
         <QuickLinkCard
-          title="Deals"
+          title={t("nav.deals")}
           description="Track opportunities and pipeline"
           href="/deals"
           count={dealsData?.total}
@@ -110,12 +114,14 @@ export default function DashboardPage() {
       {/* Recent Activity */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-base">Recent Activity</CardTitle>
+          <CardTitle className="text-base">
+            {t("dashboard.recentActivities")}
+          </CardTitle>
           <Link
             href="/activities"
             className="text-sm text-muted-foreground hover:text-primary transition-colors"
           >
-            View all
+            {t("common.all")}
           </Link>
         </CardHeader>
         <CardContent>
@@ -142,7 +148,7 @@ export default function DashboardPage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{act.subject}</p>
                       <p className="text-xs text-muted-foreground">
-                        {act.activity_type} &middot; {formatDate(act.occurred_at)}
+                        {act.activity_type} &middot; {formatDate(act.occurred_at, locale)}
                       </p>
                     </div>
                   </div>
@@ -152,7 +158,7 @@ export default function DashboardPage() {
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
-              No recent activity. Activities will appear here as your team logs calls, meetings, and notes.
+              {t("dashboard.noData")}
             </p>
           )}
         </CardContent>

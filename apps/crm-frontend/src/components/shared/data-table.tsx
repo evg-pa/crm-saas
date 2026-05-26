@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 import {
   Table,
   TableBody,
@@ -71,6 +72,7 @@ export function DataTable<TData, TValue>({
   rowActions,
   emptyState,
 }: DataTableProps<TData, TValue>) {
+  const { t } = useTranslation();
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -85,14 +87,14 @@ export function DataTable<TData, TValue>({
           (table.getIsSomePageRowsSelected() && "indeterminate")
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all rows"
+        aria-label={t("forms.selectAll")}
       />
     ),
     cell: ({ row }) => (
       <Checkbox
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label={`Select row ${row.index + 1}`}
+        aria-label={t("forms.selectRow", { row: row.index + 1 })}
       />
     ),
     enableSorting: false,
@@ -106,7 +108,7 @@ export function DataTable<TData, TValue>({
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" className="h-8 w-8">
             <MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">Open row actions</span>
+            <span className="sr-only">{t("forms.openRowActions")}</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
@@ -248,7 +250,7 @@ export function DataTable<TData, TValue>({
               >
                 {emptyState || (
                   <p className="text-sm text-muted-foreground">
-                    No results found.
+                    {t("common.noResults")}
                   </p>
                 )}
               </TableCell>

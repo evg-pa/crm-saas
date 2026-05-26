@@ -40,7 +40,7 @@ export function ContactForm({
   isSubmitting = false,
 }: ContactFormProps) {
   const isEditing = !!contact;
-  const { data: companiesData } = useCompanies({ limit: 200 });
+  const { data: companiesData } = useCompanies({ limit: 100 });
 
   const {
     register,
