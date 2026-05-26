@@ -1,0 +1,17 @@
+node_modules/
+.git/
+.next/
+dist/
+.venv/
+.terraform/
+*.log
+.env
+.env.local
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+coverage/
+.nyc_output/
+pgdata/
+redisdata/

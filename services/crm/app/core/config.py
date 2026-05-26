@@ -34,8 +34,14 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 30
 
+    # Redis
+    redis_url: str = "redis://localhost:6379/0"
+
     # CORS
     cors_origins: list[str] = ["*"]
+
+    # Logging
+    log_format: str = "text"  # "text" or "json"
 
     # Server
     host: str = "0.0.0.0"

@@ -4,12 +4,14 @@ CRM Backend — FastAPI application entry point.
 Starts the uvicorn server and registers all route modules.
 """
 
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
+from app.core.logging import setup_logging
 from app.routes import (
     activities,
     companies,
@@ -19,13 +21,23 @@ from app.routes import (
     organizations,
 )
 
+logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application startup/shutdown events."""
     from app.core.database import engine
 
+    setup_logging(
+        level="DEBUG" if settings.debug else "INFO",
+        json_format=settings.log_format == "json",
+    )
+    logger.info(
+        "Starting %s v%s", settings.app_name, settings.app_version
+    )
     yield
+    logger.info("Shutting down %s", settings.app_name)
     await engine.dispose()
 
 

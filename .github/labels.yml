@@ -1,0 +1,62 @@
+# GitHub Labels for CRM SaaS
+
+# Standard labels applied to issues and PRs.
+
+# Type labels
+- name: bug
+  color: d73a4a
+  description: Something isn't working
+- name: enhancement
+  color: a2eeef
+  description: New feature or request
+- name: documentation
+  color: 0075ca
+  description: Documentation improvements
+- name: refactor
+  color: 9b59b6
+  description: Code restructuring without functional changes
+
+# Priority labels
+- name: critical
+  color: b60205
+  description: Must fix immediately
+- name: high
+  color: ff6b6b
+  description: High priority
+- name: medium
+  color: fbca04
+  description: Medium priority
+- name: low
+  color: 0e8a16
+  description: Low priority
+
+# Workflow labels
+- name: triage
+  color: ededed
+  description: Needs triage
+- name: good first issue
+  color: 7057ff
+  description: Good for newcomers
+- name: help wanted
+  color: 008672
+  description: Extra attention needed
+- name: blocked
+  color: 000000
+  description: Blocked by another issue
+
+# Area labels
+- name: backend
+  color: 1d76db
+  description: Backend / API
+- name: frontend
+  color: 5319e7
+  description: Frontend / UI
+- name: docker
+  color: 384d54
+  description: Docker / infrastructure
+- name: ci
+  color: bfdadc
+  description: CI/CD pipeline
+- name: security
+  color: ee0701
+  description: Security-related
