@@ -70,7 +70,7 @@ describe("ContactsPage", () => {
 
     renderWithProviders(<ContactsPage />);
 
-    // Skeleton components have animate-pulse class
+    // DataTable renders Skeleton components with h-4 class
     const skeletons = document.querySelectorAll(".animate-pulse");
     expect(skeletons.length).toBeGreaterThanOrEqual(3);
   });
@@ -106,7 +106,12 @@ describe("ContactsPage", () => {
     renderWithProviders(<ContactsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText("No contacts found.")).toBeInTheDocument();
+      // EmptyState title (§8.2.4)
+      expect(screen.getByText("No contacts yet")).toBeInTheDocument();
+      // EmptyState description
+      expect(
+        screen.getByText("Create your first contact to get started.")
+      ).toBeInTheDocument();
     });
   });
 
@@ -175,7 +180,9 @@ describe("ContactsPage", () => {
     });
 
     renderWithProviders(<ContactsPage />);
-    expect(screen.getByText("Add Contact")).toBeInTheDocument();
+    // PageHeader actions slot + EmptyState CTA both render "Add Contact"
+    const buttons = screen.getAllByText("Add Contact");
+    expect(buttons.length).toBeGreaterThanOrEqual(1);
   });
 
   // ── DIALOG OPENS ─────────────────────────────────────────────────────────
@@ -192,7 +199,9 @@ describe("ContactsPage", () => {
     const user = userEvent.setup();
     renderWithProviders(<ContactsPage />);
 
-    await user.click(screen.getByText("Add Contact"));
+    // Click the header button (first match in DOM, has Plus icon)
+    const addButtons = screen.getAllByText("Add Contact");
+    await user.click(addButtons[0]!);
 
     await waitFor(() => {
       expect(screen.getByText("New Contact")).toBeInTheDocument();
