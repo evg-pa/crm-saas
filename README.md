@@ -84,7 +84,7 @@ All services run in Docker containers orchestrated by Docker Compose. The Next.j
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/app-company/crm-saas.git
+git clone  https://github.com/evg-pa/crm-saas.git
 cd crm-saas
 
 # 2. Configure environment
