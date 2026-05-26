@@ -1,12 +1,21 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useCompanies, useCreateCompany, useDeleteCompany } from "@/lib/hooks/use-companies";
+import {
+  useCompanies,
+  useCreateCompany,
+  useDeleteCompany,
+} from "@/lib/hooks/use-companies";
 import { CompanyForm } from "@/features/companies/components/company-form";
+import {
+  PageHeader,
+  SearchInput,
+  DataTable,
+  EmptyState,
+} from "@/components/shared";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -14,24 +23,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
-import { Plus, Search, MoreHorizontal, Pencil, Trash2, Loader2 } from "lucide-react";
+import type { ColumnDef } from "@tanstack/react-table";
+import { Plus, Building2 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import type { CompanyFormValues } from "@/lib/validators/company";
+import type { Company } from "@/types";
 
 export default function CompaniesPage() {
   const router = useRouter();
@@ -39,7 +35,6 @@ export default function CompaniesPage() {
   const [industry, setIndustry] = useState<string>("all");
   const [page, setPage] = useState(0);
   const [formOpen, setFormOpen] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const limit = 20;
   const { data, isLoading, isError, error } = useCompanies({
@@ -49,7 +44,7 @@ export default function CompaniesPage() {
     limit,
   });
 
-  // Extract unique industries from the loaded items for the filter dropdown.
+  // Extract unique industries from loaded items for the filter dropdown.
   const industries = useMemo(() => {
     const all = data?.items.map((c) => c.industry).filter(Boolean) as string[];
     return [...new Set(all)].sort();
@@ -58,54 +53,132 @@ export default function CompaniesPage() {
   const createCompany = useCreateCompany();
   const deleteCompany = useDeleteCompany();
 
-  const handleCreate = (values: CompanyFormValues) => {
-    createCompany.mutate(values, {
-      onSuccess: () => setFormOpen(false),
-    });
-  };
+  const handleSearchChange = useCallback((value: string) => {
+    setSearch(value);
+    setPage(0);
+  }, []);
 
-  const handleDelete = (id: string) => {
-    setDeletingId(id);
-    deleteCompany.mutate(id, {
-      onSettled: () => setDeletingId(null),
-    });
-  };
+  const handleIndustryChange = useCallback((value: string) => {
+    setIndustry(value);
+    setPage(0);
+  }, []);
+
+  const handleCreate = useCallback(
+    (values: CompanyFormValues) => {
+      createCompany.mutate(values, {
+        onSuccess: () => setFormOpen(false),
+      });
+    },
+    [createCompany],
+  );
+
+  const handleDelete = useCallback(
+    (company: Company) => {
+      deleteCompany.mutate(company.id);
+    },
+    [deleteCompany],
+  );
+
+  // ── Column definitions for DataTable ────────────────────────────────
+  const columns: ColumnDef<Company>[] = useMemo(
+    () => [
+      {
+        accessorKey: "name",
+        header: "Name",
+        cell: ({ row }) => (
+          <span className="font-medium">{row.original.name}</span>
+        ),
+      },
+      {
+        accessorKey: "industry",
+        header: "Industry",
+        cell: ({ row }) =>
+          row.original.industry ? (
+            <Badge variant="secondary">{row.original.industry}</Badge>
+          ) : (
+            <span className="text-muted-foreground">—</span>
+          ),
+      },
+      {
+        accessorKey: "size",
+        header: "Size",
+        cell: ({ row }) => (
+          <span className="text-muted-foreground">
+            {row.original.size?.toLocaleString() ?? "—"}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "website",
+        header: "Website",
+        cell: ({ row }) => (
+          <span className="block max-w-[200px] truncate text-muted-foreground">
+            {row.original.website ?? "—"}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "created_at",
+        header: "Created",
+        cell: ({ row }) => (
+          <span className="text-sm text-muted-foreground">
+            {formatDate(row.original.created_at)}
+          </span>
+        ),
+      },
+    ],
+    [],
+  );
+
+  const rowActions = useMemo(
+    () => [
+      {
+        label: "Edit",
+        onClick: (company: Company) =>
+          router.push(`/companies/${company.id}`),
+      },
+      {
+        label: "Delete",
+        onClick: handleDelete,
+        variant: "destructive" as const,
+      },
+    ],
+    [router, handleDelete],
+  );
+
+  // ── State branches ──────────────────────────────────────────────────
+  const isEmptyState =
+    !isLoading && !isError && data && data.items.length === 0 && !search && industry === "all";
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Companies</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {data ? `${data.total} total companies` : "Manage your companies"}
-          </p>
-        </div>
-        <Button onClick={() => setFormOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          New Company
-        </Button>
-      </div>
+      {/* ── Page header ─────────────────────────────────────────────── */}
+      <PageHeader
+        breadcrumbs={[
+          { label: "Dashboard", href: "/" },
+          { label: "Companies" },
+        ]}
+        title="Companies"
+        description={
+          data ? `${data.total} total companies` : "Manage your companies"
+        }
+        actions={
+          <Button onClick={() => setFormOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            New Company
+          </Button>
+        }
+      />
 
+      {/* ── Search + Industry filter ─────────────────────────────────── */}
       <div className="flex gap-4 items-center">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search companies by name or industry..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(0);
-            }}
-            className="pl-9"
-          />
-        </div>
-        <Select
-          value={industry}
-          onValueChange={(v) => {
-            setIndustry(v);
-            setPage(0);
-          }}
-        >
+        <SearchInput
+          placeholder="Search companies by name or industry..."
+          value={search}
+          onChange={handleSearchChange}
+          className="flex-1 max-w-md"
+        />
+        <Select value={industry} onValueChange={handleIndustryChange}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="All Industries" />
           </SelectTrigger>
@@ -120,111 +193,50 @@ export default function CompaniesPage() {
         </Select>
       </div>
 
-      {isLoading ? (
-        <div className="space-y-2">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full" />
-          ))}
-        </div>
-      ) : isError ? (
+      {/* ── Error state ──────────────────────────────────────────────── */}
+      {isError && (
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-6 text-center">
-          <p className="text-sm text-destructive font-medium">Failed to load companies</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            {error instanceof Error ? error.message : "An unexpected error occurred"}
+          <p className="text-sm font-medium text-destructive">
+            Failed to load companies
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {error instanceof Error
+              ? error.message
+              : "An unexpected error occurred"}
           </p>
         </div>
-      ) : (
-        <>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Industry</TableHead>
-                  <TableHead>Size</TableHead>
-                  <TableHead>Website</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="w-[50px]" />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data && data.items.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
-                      No companies found.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  data?.items.map((company) => (
-                    <TableRow
-                      key={company.id}
-                      className="cursor-pointer"
-                      onClick={() => router.push(`/companies/${company.id}`)}
-                    >
-                      <TableCell className="font-medium">{company.name}</TableCell>
-                      <TableCell>
-                        {company.industry ? (
-                          <Badge variant="secondary">{company.industry}</Badge>
-                        ) : (
-                          "—"
-                        )}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {company.size?.toLocaleString() ?? "—"}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground max-w-[200px] truncate">
-                        {company.website ?? "—"}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {formatDate(company.created_at)}
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                router.push(`/companies/${company.id}`);
-                              }}
-                            >
-                              <Pencil className="mr-2 h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="text-destructive"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDelete(company.id);
-                              }}
-                              disabled={deletingId === company.id}
-                            >
-                              {deletingId === company.id ? (
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              ) : (
-                                <Trash2 className="mr-2 h-4 w-4" />
-                              )}
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
+      )}
 
+      {/* ── Empty state (no companies, no active filters) ────────────── */}
+      {isEmptyState && (
+        <EmptyState
+          icon={Building2}
+          title="No companies yet"
+          description="Create your first company to start tracking relationships, deals, and contacts."
+          action={{
+            label: "Add Company",
+            onClick: () => setFormOpen(true),
+          }}
+        />
+      )}
+
+      {/* ── Data table ───────────────────────────────────────────────── */}
+      {!isError && !isEmptyState && (
+        <>
+          <DataTable
+            columns={columns}
+            data={data?.items ?? []}
+            isLoading={isLoading}
+            onRowClick={(company) => router.push(`/companies/${company.id}`)}
+            rowActions={rowActions}
+          />
+
+          {/* ── Pagination ─────────────────────────────────────────── */}
           {data && data.total > limit && (
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
-                Showing {page * limit + 1}–{Math.min((page + 1) * limit, data.total)} of{" "}
-                {data.total}
+                Showing {page * limit + 1}–
+                {Math.min((page + 1) * limit, data.total)} of {data.total}
               </p>
               <div className="flex gap-2">
                 <Button
@@ -249,6 +261,7 @@ export default function CompaniesPage() {
         </>
       )}
 
+      {/* ── Create form dialog ───────────────────────────────────────── */}
       <CompanyForm
         open={formOpen}
         onOpenChange={setFormOpen}
