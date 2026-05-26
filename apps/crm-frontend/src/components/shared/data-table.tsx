@@ -188,38 +188,61 @@ export function DataTable<TData, TValue>({
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
+              {headerGroup.headers.map((header) => {
+                const canSort = header.column.getCanSort();
+                const sortDir = header.column.getIsSorted();
+                const ariaSort =
+                  sortDir === "asc"
+                    ? "ascending"
+                    : sortDir === "desc"
+                      ? "descending"
+                      : "none";
+                return (
                 <TableHead
                   key={header.id}
+                  aria-sort={canSort ? (ariaSort as React.AriaAttributes["aria-sort"]) : undefined}
                   className={cn(
                     "h-10 bg-muted/50 text-xs font-medium text-muted-foreground uppercase tracking-wider",
-                    header.column.getCanSort() && "cursor-pointer select-none"
+                    canSort && "cursor-pointer select-none"
                   )}
                   onClick={
-                    header.column.getCanSort()
+                    canSort
                       ? header.column.getToggleSortingHandler()
                       : undefined
                   }
+                  onKeyDown={
+                    canSort
+                      ? (e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            header.column.toggleSorting();
+                          }
+                        }
+                      : undefined
+                  }
+                  tabIndex={canSort ? 0 : undefined}
+
                 >
                   <div className="flex items-center gap-1">
                     {flexRender(
                       header.column.columnDef.header,
                       header.getContext()
                     )}
-                    {header.column.getCanSort() && (
+                    {canSort && (
                       <span className="ml-1">
-                        {header.column.getIsSorted() === "asc" ? (
+                        {sortDir === "asc" ? (
                           <ChevronUp className="h-3.5 w-3.5" />
-                        ) : header.column.getIsSorted() === "desc" ? (
+                        ) : sortDir === "desc" ? (
                           <ChevronDown className="h-3.5 w-3.5" />
                         ) : (
-                          <ChevronsUpDown className="h-3.5 w-3.5 text-muted-foreground/40" />
+                          <ChevronsUpDown className="h-3.5 w-3.5 text-muted-foreground/60" />
                         )}
                       </span>
                     )}
                   </div>
                 </TableHead>
-              ))}
+                );
+              })}
             </TableRow>
           ))}
         </TableHeader>

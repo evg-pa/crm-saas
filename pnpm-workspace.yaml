@@ -3,4 +3,5 @@ packages:
   - 'apps/*'
   - 'tools/*'
 allowBuilds:
+  chromedriver: true
   sharp: true

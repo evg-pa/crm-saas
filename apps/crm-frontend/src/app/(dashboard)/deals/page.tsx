@@ -218,7 +218,7 @@ export default function DealsPage() {
             setPage(0);
           }}
         >
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-[180px]" aria-label="Filter by stage">
             <SelectValue placeholder={t("deals.allStages")} />
           </SelectTrigger>
           <SelectContent>

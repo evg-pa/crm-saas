@@ -143,7 +143,7 @@ export default function ActivitiesPage() {
       },
       {
         accessorKey: "description",
-        header: t("activities.description"),
+        header: t("activities.descField"),
         cell: ({ getValue }) => {
           const desc = getValue<ActivityType["description"]>();
           return (

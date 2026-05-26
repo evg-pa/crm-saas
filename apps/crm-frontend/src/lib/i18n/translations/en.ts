@@ -38,6 +38,7 @@ const en = {
     showing: "Showing",
     of: "of",
     all: "All",
+    viewAll: "View all",
     none: "—",
     actions: "Actions",
     clear: "Clear",
@@ -59,6 +60,7 @@ const en = {
     recentActivities: "Recent Activities",
     recentDeals: "Recent Deals",
     noData: "No data available",
+    noRecentActivity: "No recent activity. Activities will appear here as your team logs calls, meetings, and notes.",
   },
 
   // ── Contacts ────────────────────────────────────────────────────

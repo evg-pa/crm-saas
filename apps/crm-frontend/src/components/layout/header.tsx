@@ -37,8 +37,8 @@ export function Header() {
   const title = t(titleKey);
 
   const languages: { value: Language; label: string }[] = [
-    { value: "en", label: "English" },
-    { value: "ru", label: "Русский" },
+    { value: "en", label: t("settings.english") },
+    { value: "ru", label: t("settings.russian") },
   ];
 
   return (

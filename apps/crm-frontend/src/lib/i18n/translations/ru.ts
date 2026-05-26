@@ -29,6 +29,7 @@ const ru: Translations = {
     showing: "Показано",
     of: "из",
     all: "Все",
+    viewAll: "Смотреть все",
     none: "—",
     actions: "Действия",
     clear: "Очистить",
@@ -50,6 +51,7 @@ const ru: Translations = {
     recentActivities: "Последние активности",
     recentDeals: "Последние сделки",
     noData: "Нет данных",
+    noRecentActivity: "Нет недавней активности. Здесь будут отображаться звонки, встречи и заметки вашей команды.",
   },
 
   // ── Contacts ────────────────────────────────────────────────────

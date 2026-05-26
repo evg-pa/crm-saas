@@ -51,6 +51,11 @@ package-lock.json
 # TypeScript
 *.tsbuildinfo
 
+# QA debug artifacts
+qa-debug*.mjs
+visual-qa*.mjs
+visual-qa-output/
+
 # Misc
 .cache/
 .tmp/

@@ -121,7 +121,7 @@ export default function DashboardPage() {
             href="/activities"
             className="text-sm text-muted-foreground hover:text-primary transition-colors"
           >
-            {t("common.all")}
+            {t("common.viewAll")}
           </Link>
         </CardHeader>
         <CardContent>
@@ -158,7 +158,7 @@ export default function DashboardPage() {
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
-              {t("dashboard.noData")}
+              {t("dashboard.noRecentActivity")}
             </p>
           )}
         </CardContent>
