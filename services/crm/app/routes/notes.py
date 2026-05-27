@@ -44,7 +44,7 @@ async def list_notes(
         organization_id=organization_id,
         q=q,
         filters={"contact_id": contact_id},
-        **pagination
+        **pagination,
     )
     return {
         "total": total,

@@ -33,9 +33,7 @@ async def lifespan(app: FastAPI):
         level="DEBUG" if settings.debug else "INFO",
         json_format=settings.log_format == "json",
     )
-    logger.info(
-        "Starting %s v%s", settings.app_name, settings.app_version
-    )
+    logger.info("Starting %s v%s", settings.app_name, settings.app_version)
     yield
     logger.info("Shutting down %s", settings.app_name)
     await engine.dispose()

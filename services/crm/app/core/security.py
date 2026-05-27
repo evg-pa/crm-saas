@@ -30,8 +30,7 @@ def create_access_token(
     """Create a signed JWT access token."""
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + (
-        expires_delta
-        or timedelta(minutes=settings.jwt_access_token_expire_minutes)
+        expires_delta or timedelta(minutes=settings.jwt_access_token_expire_minutes)
     )
     to_encode.update({"exp": expire})
     return jwt.encode(

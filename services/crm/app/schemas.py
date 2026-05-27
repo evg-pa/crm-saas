@@ -47,7 +47,9 @@ class OrganizationUpdate(BaseModel):
     """Body for PATCH /organizations/{id}. All fields optional."""
 
     name: str | None = Field(default=None, min_length=1, max_length=255)
-    slug: str | None = Field(default=None, min_length=1, max_length=100, pattern=r"^[a-z0-9-]+$")
+    slug: str | None = Field(
+        default=None, min_length=1, max_length=100, pattern=r"^[a-z0-9-]+$"
+    )
 
 
 class OrganizationResponse(OrganizationBase, TimestampMixin):

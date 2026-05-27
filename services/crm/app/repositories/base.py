@@ -47,10 +47,7 @@ class BaseRepository(Generic[T]):
         filters: dict[str, Any] | None = None,
     ) -> tuple[list[T], int]:
         """List records for an organization with pagination, search, and filters."""
-        query = (
-            self._base_query()
-            .where(self.model.organization_id == organization_id)
-        )
+        query = self._base_query().where(self.model.organization_id == organization_id)
 
         # Apply text search across searchable fields (case-insensitive partial match)
         if q:
@@ -61,6 +58,7 @@ class BaseRepository(Generic[T]):
                     search_clauses.append(col.ilike(f"%{q}%"))
             if search_clauses:
                 from sqlalchemy import or_
+
                 query = query.where(or_(*search_clauses))
 
         # Apply explicit field filters
@@ -88,6 +86,7 @@ class BaseRepository(Generic[T]):
                     search_clauses.append(col.ilike(f"%{q}%"))
             if search_clauses:
                 from sqlalchemy import or_
+
                 count_query = count_query.where(or_(*search_clauses))
         if filters:
             for field_name, value in filters.items():
@@ -100,9 +99,7 @@ class BaseRepository(Generic[T]):
         total = await self.session.scalar(count_query)
         return list(result.scalars().all()), total or 0
 
-    async def get_by_id(
-        self, id_: uuid.UUID, organization_id: uuid.UUID
-    ) -> T | None:
+    async def get_by_id(self, id_: uuid.UUID, organization_id: uuid.UUID) -> T | None:
         """Get a single record by ID, scoped to organization."""
         result = await self.session.execute(
             self._base_query().where(

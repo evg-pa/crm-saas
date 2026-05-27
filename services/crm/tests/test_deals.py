@@ -62,12 +62,8 @@ async def test_list_deals(client):
     """GET /deals — list deals."""
     org_id = await _create_org(client)
 
-    await client.post(
-        DEALS_URL, json={"organization_id": org_id, "name": "Deal Alpha"}
-    )
-    await client.post(
-        DEALS_URL, json={"organization_id": org_id, "name": "Deal Beta"}
-    )
+    await client.post(DEALS_URL, json={"organization_id": org_id, "name": "Deal Alpha"})
+    await client.post(DEALS_URL, json={"organization_id": org_id, "name": "Deal Beta"})
 
     resp = await client.get(DEALS_URL, params={"organization_id": org_id})
     assert resp.status_code == 200, resp.text
@@ -180,9 +176,7 @@ async def test_delete_deal(client):
 async def test_create_deal_missing_name(client):
     """POST /deals — missing required name."""
     org_id = await _create_org(client)
-    resp = await client.post(
-        DEALS_URL, json={"organization_id": org_id}
-    )
+    resp = await client.post(DEALS_URL, json={"organization_id": org_id})
     assert resp.status_code == 422, resp.text
 
 

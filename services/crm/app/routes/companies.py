@@ -41,7 +41,10 @@ async def list_companies(
 ) -> dict:
     """List companies for the given organization with optional search and filter."""
     items, total = await _repo(db).list(
-        organization_id=organization_id, q=q, filters={"industry": industry}, **pagination
+        organization_id=organization_id,
+        q=q,
+        filters={"industry": industry},
+        **pagination,
     )
     return {
         "total": total,

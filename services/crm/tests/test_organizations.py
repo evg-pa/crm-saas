@@ -43,9 +43,7 @@ async def test_list_organizations(client):
 @pytest.mark.asyncio
 async def test_get_organization(client):
     """GET /organizations/{id} — get an organization by ID."""
-    create_resp = await client.post(
-        ORG_URL, json={"name": "GetMe", "slug": "get-me"}
-    )
+    create_resp = await client.post(ORG_URL, json={"name": "GetMe", "slug": "get-me"})
     org_id = create_resp.json()["id"]
 
     resp = await client.get(f"{ORG_URL}/{org_id}")
@@ -64,9 +62,7 @@ async def test_update_organization(client):
     )
     org_id = create_resp.json()["id"]
 
-    resp = await client.patch(
-        f"{ORG_URL}/{org_id}", json={"name": "NewName"}
-    )
+    resp = await client.patch(f"{ORG_URL}/{org_id}", json={"name": "NewName"})
     assert resp.status_code == 200, resp.text
     data = resp.json()
     assert data["name"] == "NewName"
@@ -109,9 +105,7 @@ async def test_create_organization_empty_name(client):
 @pytest.mark.asyncio
 async def test_create_organization_invalid_slug(client):
     """POST /organizations — slug doesn't match pattern."""
-    resp = await client.post(
-        ORG_URL, json={"name": "Bad Slug", "slug": "BAD SLUG!!"}
-    )
+    resp = await client.post(ORG_URL, json={"name": "Bad Slug", "slug": "BAD SLUG!!"})
     assert resp.status_code == 422, resp.text
 
 
@@ -143,9 +137,7 @@ async def test_get_organization_not_found(client):
 async def test_update_organization_not_found(client):
     """PATCH /organizations/{id} — non-existent org."""
     fake_id = str(uuid.uuid4())
-    resp = await client.patch(
-        f"{ORG_URL}/{fake_id}", json={"name": "Ghost"}
-    )
+    resp = await client.patch(f"{ORG_URL}/{fake_id}", json={"name": "Ghost"})
     assert resp.status_code == 404, resp.text
 
 

@@ -29,7 +29,9 @@ def _repo(db: AsyncSession) -> OrganizationRepository:
     return OrganizationRepository(db)
 
 
-@router.post("", response_model=OrganizationResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "", response_model=OrganizationResponse, status_code=status.HTTP_201_CREATED
+)
 async def create_organization(
     body: OrganizationCreate, db: AsyncSession = Depends(get_db)
 ) -> OrganizationResponse:

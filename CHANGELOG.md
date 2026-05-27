@@ -60,4 +60,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - CHANGELOG.md
   - MIT License
 
-[0.1.0]: https://github.com/app-company/crm-saas/releases/tag/v0.1.0
+[0.1.0]: https://github.com/evg-pa/crm-saas/releases/tag/v0.1.0

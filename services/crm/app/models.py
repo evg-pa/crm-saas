@@ -96,7 +96,9 @@ class Contact(Base):
     phone: Mapped[str | None] = mapped_column(String(50), nullable=True)
     title: Mapped[str | None] = mapped_column(String(200), nullable=True)
     company_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("companies.id", ondelete="SET NULL"), nullable=True
+        UUID(as_uuid=True),
+        ForeignKey("companies.id", ondelete="SET NULL"),
+        nullable=True,
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), default=utcnow
@@ -185,7 +187,9 @@ class Deal(Base):
         String(50), nullable=False, default="new", index=True
     )
     contact_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("contacts.id", ondelete="SET NULL"), nullable=True
+        UUID(as_uuid=True),
+        ForeignKey("contacts.id", ondelete="SET NULL"),
+        nullable=True,
     )
     company_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
@@ -231,13 +235,13 @@ class Activity(Base):
         nullable=False,
         index=True,
     )
-    activity_type: Mapped[str] = mapped_column(
-        String(50), nullable=False, index=True
-    )
+    activity_type: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
     subject: Mapped[str] = mapped_column(String(500), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     contact_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("contacts.id", ondelete="SET NULL"), nullable=True
+        UUID(as_uuid=True),
+        ForeignKey("contacts.id", ondelete="SET NULL"),
+        nullable=True,
     )
     deal_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("deals.id", ondelete="SET NULL"), nullable=True

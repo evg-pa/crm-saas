@@ -10,7 +10,7 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Enable corepack for pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@11.2.2 --activate
 
 # Copy workspace config and lockfile
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json tsconfig.base.json .npmrc ./

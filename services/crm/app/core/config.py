@@ -22,9 +22,7 @@ class Settings(BaseSettings):
     debug: bool = False
 
     # Database
-    database_url: str = (
-        "postgresql+asyncpg://crm_user:crm_pass@localhost:5432/crm_db"
-    )
+    database_url: str = "postgresql+asyncpg://crm_user:crm_pass@localhost:5432/crm_db"
     database_url_sync: str = (
         "postgresql+psycopg2://crm_user:crm_pass@localhost:5432/crm_db"
     )

@@ -82,9 +82,7 @@ async def update_contact(
     contact = await _repo(db).get_by_id(contact_id, organization_id)
     if contact is None:
         raise HTTPException(status_code=404, detail="Contact not found")
-    updated = await _repo(db).update(
-        contact, **body.model_dump(exclude_unset=True)
-    )
+    updated = await _repo(db).update(contact, **body.model_dump(exclude_unset=True))
     return ContactResponse.model_validate(updated)
 
 

@@ -46,7 +46,7 @@ async def list_deals(
         organization_id=organization_id,
         q=q,
         filters={"stage": stage, "contact_id": contact_id, "company_id": company_id},
-        **pagination
+        **pagination,
     )
     return {
         "total": total,

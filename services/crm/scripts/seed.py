@@ -10,7 +10,6 @@ Requires a running PostgreSQL database with tables already created (alembic upgr
 import asyncio
 import uuid
 from sqlalchemy import text
-from app.core.config import settings
 from app.core.database import async_session_factory
 
 DEMO_ORG_ID = uuid.UUID("00000000-0000-0000-0000-000000000001")
@@ -39,9 +38,9 @@ async def seed() -> None:
         )
         await session.commit()
         print(f"Created demo organization: {DEMO_ORG_NAME} (id={DEMO_ORG_ID})")
-        print(f"\nTo use in the frontend, set auth store with:")
+        print("\nTo use in the frontend, set auth store with:")
         print(f"  orgId: '{DEMO_ORG_ID}'")
-        print(f"  token: 'demo-token' (any non-empty value works for dev)")
+        print("  token: 'demo-token' (any non-empty value works for dev)")
 
 
 if __name__ == "__main__":

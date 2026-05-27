@@ -27,8 +27,9 @@ class OrganizationRepository(BaseRepository[Organization]):
     async def get_by_id(self, id_: uuid.UUID) -> Organization | None:
         """Override: Organization lookup is not scoped to an org."""
         result = await self.session.execute(
-            select(Organization)
-            .where(Organization.id == id_, Organization.deleted_at.is_(None))
+            select(Organization).where(
+                Organization.id == id_, Organization.deleted_at.is_(None)
+            )
         )
         return result.scalar_one_or_none()
 
@@ -42,9 +43,7 @@ class OrganizationRepository(BaseRepository[Organization]):
             .order_by(Organization.created_at.desc())
         )
         total_query = select(func.count()).select_from(
-            select(Organization)
-            .where(Organization.deleted_at.is_(None))
-            .subquery()
+            select(Organization).where(Organization.deleted_at.is_(None)).subquery()
         )
 
         result = await self.session.execute(query.offset(offset).limit(limit))

@@ -2,7 +2,7 @@
 
 Open-source Customer Relationship Management (CRM) system built with FastAPI and Next.js. Designed for small to medium businesses to manage contacts, companies, deals, and activities.
 
-[![CI](https://github.com/app-company/crm-saas/actions/workflows/ci.yml/badge.svg)](https://github.com/app-company/crm-saas/actions/workflows/ci.yml)
+[![CI](https://github.com/evg-pa/crm-saas/actions/workflows/ci.yml/badge.svg)](https://github.com/evg-pa/crm-saas/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-0.1.0-brightgreen.svg)](CHANGELOG.md)
 
@@ -84,7 +84,7 @@ All services run in Docker containers orchestrated by Docker Compose. The Next.j
 
 ```bash
 # 1. Clone the repository
-git clone  https://github.com/evg-pa/crm-saas.git
+git clone https://github.com/evg-pa/crm-saas.git
 cd crm-saas
 
 # 2. Configure environment

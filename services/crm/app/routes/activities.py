@@ -34,8 +34,12 @@ async def create_activity(
 @router.get("", response_model=PaginatedResponse)
 async def list_activities(
     organization_id: uuid.UUID = Query(..., description="Tenant organization ID"),
-    q: str | None = Query(default=None, description="Search across subject and description"),
-    activity_type: str | None = Query(default=None, description="Filter by activity type"),
+    q: str | None = Query(
+        default=None, description="Search across subject and description"
+    ),
+    activity_type: str | None = Query(
+        default=None, description="Filter by activity type"
+    ),
     contact_id: uuid.UUID | None = Query(default=None, description="Filter by contact"),
     deal_id: uuid.UUID | None = Query(default=None, description="Filter by deal"),
     pagination: dict = Depends(pagination_params),
@@ -45,8 +49,12 @@ async def list_activities(
     items, total = await _repo(db).list(
         organization_id=organization_id,
         q=q,
-        filters={"activity_type": activity_type, "contact_id": contact_id, "deal_id": deal_id},
-        **pagination
+        filters={
+            "activity_type": activity_type,
+            "contact_id": contact_id,
+            "deal_id": deal_id,
+        },
+        **pagination,
     )
     return {
         "total": total,

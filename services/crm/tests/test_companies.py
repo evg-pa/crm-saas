@@ -163,9 +163,7 @@ async def test_delete_company(client):
 async def test_create_company_missing_name(client):
     """POST /companies — missing required name."""
     org_id = await _create_org(client)
-    resp = await client.post(
-        COMPANIES_URL, json={"organization_id": org_id}
-    )
+    resp = await client.post(COMPANIES_URL, json={"organization_id": org_id})
     assert resp.status_code == 422, resp.text
 
 
