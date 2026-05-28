@@ -41,7 +41,7 @@ WORKDIR /app
 COPY . .
 
 # Make scripts executable
-RUN chmod +x scripts/entrypoint.sh scripts/seed.py
+RUN chmod -R a+rX /app/
 
 # Use non-root user
 USER app

@@ -24,6 +24,10 @@ COPY apps/crm-frontend ./apps/crm-frontend
 # Install all dependencies (including devDependencies for build)
 RUN pnpm install --frozen-lockfile
 
+# Accept API_URL build arg (default to backend:8000 for Docker Compose)
+ARG API_URL=http://backend:8000
+ENV API_URL=$API_URL
+
 # Build the frontend (Next.js standalone output)
 RUN pnpm --filter @app/crm-frontend build
 
@@ -38,7 +42,7 @@ RUN addgroup --system --gid 1001 nodejs && \
 
 # Copy standalone output from builder
 COPY --from=builder /app/apps/crm-frontend/.next/standalone ./
-COPY --from=builder /app/apps/crm-frontend/.next/static ./.next/static
+COPY --from=builder /app/apps/crm-frontend/.next/static ./apps/crm-frontend/.next/static
 COPY --from=builder /app/apps/crm-frontend/public ./apps/crm-frontend/public
 
 # Use non-root user
