@@ -40,8 +40,8 @@ WORKDIR /app
 # Copy application code
 COPY . .
 
-# Make scripts executable
-RUN chmod -R a+rX /app/
+# Make scripts executable (explicit +x for entrypoint, +X for others)
+RUN chmod -R a+rX /app/ && chmod +x scripts/entrypoint.sh
 
 # Use non-root user
 USER app
