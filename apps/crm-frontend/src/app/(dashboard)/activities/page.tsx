@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useActivities, useCreateActivity } from "@/lib/hooks/use-activities";
 import { ActivityForm } from "@/features/activities/components/activity-form";
@@ -146,11 +147,12 @@ export default function ActivitiesPage() {
         header: t("activities.descField"),
         cell: ({ getValue }) => {
           const desc = getValue<ActivityType["description"]>();
-          return (
-            <span className="text-muted-foreground max-w-[280px] truncate block">
-              {desc ?? t("common.none")}
-            </span>
-          );
+          if (!desc) {
+            return (
+              <span className="text-muted-foreground">{t("common.none")}</span>
+            );
+          }
+          return <ExpandableDescriptionCell text={desc} />;
         },
       },
       {
@@ -317,6 +319,33 @@ export default function ActivitiesPage() {
         isSubmitting={createActivity.isPending}
       />
     </div>
+  );
+}
+
+/**
+ * A click-to-expand/collapse description cell.
+ * Shows a truncated single line by default; clicking reveals the full text.
+ */
+function ExpandableDescriptionCell({ text }: { text: string }) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <span
+      className={`text-muted-foreground block cursor-pointer ${
+        expanded ? "" : "max-w-[280px] truncate"
+      }`}
+      onClick={() => setExpanded((prev) => !prev)}
+      title={expanded ? "Click to collapse" : "Click to expand"}
+    >
+      <span className="inline-flex items-center gap-0.5">
+        {expanded ? (
+          <ChevronDown className="h-3 w-3 shrink-0" />
+        ) : (
+          <ChevronRight className="h-3 w-3 shrink-0" />
+        )}
+        {text}
+      </span>
+    </span>
   );
 }
 

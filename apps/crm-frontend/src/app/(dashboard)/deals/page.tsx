@@ -46,7 +46,7 @@ const stageLabel = (s: string) =>
 export default function DealsPage() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { locale, currency } = useLocale();
+  const { locale } = useLocale();
   const [search, setSearch] = useState("");
   const [stage, setStage] = useState<string>("all");
   const [page, setPage] = useState(0);
@@ -119,8 +119,7 @@ export default function DealsPage() {
           <span className="text-muted-foreground">
             {formatCurrency(
               getValue<Deal["amount"]>(),
-              locale,
-              currency
+              locale
             )}
           </span>
         ),
@@ -169,7 +168,7 @@ export default function DealsPage() {
         ),
       },
     ],
-    [t, locale, currency]
+    [t, locale]
   );
 
   const emptyState = useMemo(
