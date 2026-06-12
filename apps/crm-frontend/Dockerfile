@@ -12,6 +12,9 @@ WORKDIR /app
 # Enable corepack for pnpm
 RUN corepack enable && corepack prepare pnpm@11.2.2 --activate
 
+# Persist pnpm store across builds via BuildKit cache mount
+ENV PNPM_STORE_PATH=/pnpm/store
+
 # Copy workspace config and lockfile
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json tsconfig.base.json .npmrc ./
 
@@ -21,8 +24,10 @@ COPY packages ./packages
 # Copy frontend app
 COPY apps/crm-frontend ./apps/crm-frontend
 
-# Install all dependencies (including devDependencies for build)
-RUN pnpm install --frozen-lockfile
+# Install all dependencies with BuildKit cache for the pnpm store
+# --prefer-offline avoids re-downloading cached packages on rebuilds
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
+    pnpm install --frozen-lockfile --prefer-offline
 
 # Accept API_URL build arg (default to backend:8000 for Docker Compose)
 ARG API_URL=http://backend:8000
