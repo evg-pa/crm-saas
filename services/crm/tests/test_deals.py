@@ -8,24 +8,13 @@ import pytest
 DEALS_URL = "/api/v1/deals"
 
 
-async def _create_org(client):
-    resp = await client.post(
-        "/api/v1/organizations",
-        json={"name": "DealTestOrg", "slug": "deal-test-org"},
-    )
-    return resp.json()["id"]
-
-
 # ── Happy Path ──────────────────────────────────────────────────────────────
 
 
 @pytest.mark.asyncio
-async def test_create_deal(client):
+async def test_create_deal(client, test_org_id):
     """POST /deals — create a new deal with minimal fields."""
-    org_id = await _create_org(client)
-
     payload = {
-        "organization_id": org_id,
         "name": "Big Sale",
     }
     resp = await client.post(DEALS_URL, json=payload)
@@ -33,18 +22,14 @@ async def test_create_deal(client):
     data = resp.json()
     assert data["name"] == "Big Sale"
     assert data["stage"] == "new"  # default
-    assert data["organization_id"] == org_id
     assert "id" in data
     assert "created_at" in data
 
 
 @pytest.mark.asyncio
-async def test_create_deal_full(client):
+async def test_create_deal_full(client, test_org_id):
     """POST /deals — create a deal with all fields."""
-    org_id = await _create_org(client)
-
     payload = {
-        "organization_id": org_id,
         "name": "Enterprise Deal",
         "amount": 50000,
         "stage": "negotiation",
@@ -58,14 +43,12 @@ async def test_create_deal_full(client):
 
 
 @pytest.mark.asyncio
-async def test_list_deals(client):
+async def test_list_deals(client, test_org_id):
     """GET /deals — list deals."""
-    org_id = await _create_org(client)
+    await client.post(DEALS_URL, json={"name": "Deal Alpha"})
+    await client.post(DEALS_URL, json={"name": "Deal Beta"})
 
-    await client.post(DEALS_URL, json={"organization_id": org_id, "name": "Deal Alpha"})
-    await client.post(DEALS_URL, json={"organization_id": org_id, "name": "Deal Beta"})
-
-    resp = await client.get(DEALS_URL, params={"organization_id": org_id})
+    resp = await client.get(DEALS_URL)
     assert resp.status_code == 200, resp.text
     data = resp.json()
     assert data["total"] >= 2
@@ -73,14 +56,11 @@ async def test_list_deals(client):
 
 
 @pytest.mark.asyncio
-async def test_list_deals_filter_by_stage(client):
+async def test_list_deals_filter_by_stage(client, test_org_id):
     """GET /deals — filter by stage."""
-    org_id = await _create_org(client)
-
     await client.post(
         DEALS_URL,
         json={
-            "organization_id": org_id,
             "name": "Prospect Deal",
             "stage": "new",
         },
@@ -88,7 +68,6 @@ async def test_list_deals_filter_by_stage(client):
     await client.post(
         DEALS_URL,
         json={
-            "organization_id": org_id,
             "name": "Closing Deal",
             "stage": "closed-won",
         },
@@ -96,7 +75,7 @@ async def test_list_deals_filter_by_stage(client):
 
     resp = await client.get(
         DEALS_URL,
-        params={"organization_id": org_id, "stage": "closed-won"},
+        params={"stage": "closed-won"},
     )
     assert resp.status_code == 200, resp.text
     data = resp.json()
@@ -105,38 +84,30 @@ async def test_list_deals_filter_by_stage(client):
 
 
 @pytest.mark.asyncio
-async def test_get_deal(client):
+async def test_get_deal(client, test_org_id):
     """GET /deals/{id} — get a deal by ID."""
-    org_id = await _create_org(client)
-
     create_resp = await client.post(
-        DEALS_URL, json={"organization_id": org_id, "name": "Target Deal"}
+        DEALS_URL, json={"name": "Target Deal"}
     )
     deal_id = create_resp.json()["id"]
 
-    resp = await client.get(
-        f"{DEALS_URL}/{deal_id}",
-        params={"organization_id": org_id},
-    )
+    resp = await client.get(f"{DEALS_URL}/{deal_id}")
     assert resp.status_code == 200, resp.text
     assert resp.json()["id"] == deal_id
     assert resp.json()["name"] == "Target Deal"
 
 
 @pytest.mark.asyncio
-async def test_update_deal(client):
+async def test_update_deal(client, test_org_id):
     """PATCH /deals/{id} — update a deal."""
-    org_id = await _create_org(client)
-
     create_resp = await client.post(
         DEALS_URL,
-        json={"organization_id": org_id, "name": "Old Deal", "stage": "new"},
+        json={"name": "Old Deal", "stage": "new"},
     )
     deal_id = create_resp.json()["id"]
 
     resp = await client.patch(
         f"{DEALS_URL}/{deal_id}",
-        params={"organization_id": org_id},
         json={"stage": "negotiation", "amount": 10000},
     )
     assert resp.status_code == 200, resp.text
@@ -147,25 +118,17 @@ async def test_update_deal(client):
 
 
 @pytest.mark.asyncio
-async def test_delete_deal(client):
+async def test_delete_deal(client, test_org_id):
     """DELETE /deals/{id} — soft-delete a deal."""
-    org_id = await _create_org(client)
-
     create_resp = await client.post(
-        DEALS_URL, json={"organization_id": org_id, "name": "Delete Deal"}
+        DEALS_URL, json={"name": "Delete Deal"}
     )
     deal_id = create_resp.json()["id"]
 
-    resp = await client.delete(
-        f"{DEALS_URL}/{deal_id}",
-        params={"organization_id": org_id},
-    )
+    resp = await client.delete(f"{DEALS_URL}/{deal_id}")
     assert resp.status_code == 204, resp.text
 
-    get_resp = await client.get(
-        f"{DEALS_URL}/{deal_id}",
-        params={"organization_id": org_id},
-    )
+    get_resp = await client.get(f"{DEALS_URL}/{deal_id}")
     assert get_resp.status_code == 404
 
 
@@ -173,47 +136,42 @@ async def test_delete_deal(client):
 
 
 @pytest.mark.asyncio
-async def test_create_deal_missing_name(client):
+async def test_create_deal_missing_name(client, test_org_id):
     """POST /deals — missing required name."""
-    org_id = await _create_org(client)
-    resp = await client.post(DEALS_URL, json={"organization_id": org_id})
+    resp = await client.post(DEALS_URL, json={})
     assert resp.status_code == 422, resp.text
 
 
 @pytest.mark.asyncio
-async def test_create_deal_empty_name(client):
+async def test_create_deal_empty_name(client, test_org_id):
     """POST /deals — empty name."""
-    org_id = await _create_org(client)
     resp = await client.post(
         DEALS_URL,
-        json={"organization_id": org_id, "name": ""},
+        json={"name": ""},
     )
     assert resp.status_code == 422, resp.text
 
 
 @pytest.mark.asyncio
-async def test_create_deal_negative_amount(client):
+async def test_create_deal_negative_amount(client, test_org_id):
     """POST /deals — negative deal amount."""
-    org_id = await _create_org(client)
     resp = await client.post(
         DEALS_URL,
-        json={"organization_id": org_id, "name": "BadDeal", "amount": -500},
+        json={"name": "BadDeal", "amount": -500},
     )
     assert resp.status_code == 422, resp.text
 
 
 @pytest.mark.asyncio
-async def test_update_deal_negative_amount(client):
+async def test_update_deal_negative_amount(client, test_org_id):
     """PATCH /deals/{id} — update with negative amount."""
-    org_id = await _create_org(client)
     create_resp = await client.post(
-        DEALS_URL, json={"organization_id": org_id, "name": "ValidDeal"}
+        DEALS_URL, json={"name": "ValidDeal"}
     )
     deal_id = create_resp.json()["id"]
 
     resp = await client.patch(
         f"{DEALS_URL}/{deal_id}",
-        params={"organization_id": org_id},
         json={"amount": -1},
     )
     assert resp.status_code == 422, resp.text
@@ -223,38 +181,28 @@ async def test_update_deal_negative_amount(client):
 
 
 @pytest.mark.asyncio
-async def test_get_deal_not_found(client):
+async def test_get_deal_not_found(client, test_org_id):
     """GET /deals/{id} — non-existent deal."""
-    org_id = await _create_org(client)
     fake_id = str(uuid.uuid4())
-    resp = await client.get(
-        f"{DEALS_URL}/{fake_id}",
-        params={"organization_id": org_id},
-    )
+    resp = await client.get(f"{DEALS_URL}/{fake_id}")
     assert resp.status_code == 404, resp.text
     assert resp.json()["detail"] == "Deal not found"
 
 
 @pytest.mark.asyncio
-async def test_update_deal_not_found(client):
+async def test_update_deal_not_found(client, test_org_id):
     """PATCH /deals/{id} — non-existent deal."""
-    org_id = await _create_org(client)
     fake_id = str(uuid.uuid4())
     resp = await client.patch(
         f"{DEALS_URL}/{fake_id}",
-        params={"organization_id": org_id},
         json={"stage": "closed-won"},
     )
     assert resp.status_code == 404, resp.text
 
 
 @pytest.mark.asyncio
-async def test_delete_deal_not_found(client):
+async def test_delete_deal_not_found(client, test_org_id):
     """DELETE /deals/{id} — non-existent deal."""
-    org_id = await _create_org(client)
     fake_id = str(uuid.uuid4())
-    resp = await client.delete(
-        f"{DEALS_URL}/{fake_id}",
-        params={"organization_id": org_id},
-    )
+    resp = await client.delete(f"{DEALS_URL}/{fake_id}")
     assert resp.status_code == 404, resp.text

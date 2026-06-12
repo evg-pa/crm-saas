@@ -8,24 +8,13 @@ import pytest
 COMPANIES_URL = "/api/v1/companies"
 
 
-async def _create_org(client):
-    resp = await client.post(
-        "/api/v1/organizations",
-        json={"name": "CompanyTestOrg", "slug": "company-test-org"},
-    )
-    return resp.json()["id"]
-
-
 # ── Happy Path ──────────────────────────────────────────────────────────────
 
 
 @pytest.mark.asyncio
-async def test_create_company(client):
+async def test_create_company(client, test_org_id):
     """POST /companies — create a new company."""
-    org_id = await _create_org(client)
-
     payload = {
-        "organization_id": org_id,
         "name": "Acme Inc",
         "website": "https://acme.example.com",
         "industry": "Technology",
@@ -40,26 +29,24 @@ async def test_create_company(client):
     assert data["industry"] == "Technology"
     assert data["size"] == 500
     assert data["address"] == "123 Main St"
-    assert data["organization_id"] == org_id
+    assert data["organization_id"] == test_org_id
     assert "id" in data
     assert "created_at" in data
 
 
 @pytest.mark.asyncio
-async def test_list_companies(client):
+async def test_list_companies(client, test_org_id):
     """GET /companies — list companies."""
-    org_id = await _create_org(client)
-
     await client.post(
         COMPANIES_URL,
-        json={"organization_id": org_id, "name": "Alpha Inc", "industry": "Tech"},
+        json={"name": "Alpha Inc", "industry": "Tech"},
     )
     await client.post(
         COMPANIES_URL,
-        json={"organization_id": org_id, "name": "Beta LLC", "industry": "Finance"},
+        json={"name": "Beta LLC", "industry": "Finance"},
     )
 
-    resp = await client.get(COMPANIES_URL, params={"organization_id": org_id})
+    resp = await client.get(COMPANIES_URL)
     assert resp.status_code == 200, resp.text
     data = resp.json()
     assert data["total"] >= 2
@@ -67,22 +54,20 @@ async def test_list_companies(client):
 
 
 @pytest.mark.asyncio
-async def test_list_companies_filter_by_industry(client):
+async def test_list_companies_filter_by_industry(client, test_org_id):
     """GET /companies — filter by industry."""
-    org_id = await _create_org(client)
-
     await client.post(
         COMPANIES_URL,
-        json={"organization_id": org_id, "name": "DevShop", "industry": "Tech"},
+        json={"name": "DevShop", "industry": "Tech"},
     )
     await client.post(
         COMPANIES_URL,
-        json={"organization_id": org_id, "name": "BankCo", "industry": "Finance"},
+        json={"name": "BankCo", "industry": "Finance"},
     )
 
     resp = await client.get(
         COMPANIES_URL,
-        params={"organization_id": org_id, "industry": "Tech"},
+        params={"industry": "Tech"},
     )
     assert resp.status_code == 200, resp.text
     data = resp.json()
@@ -91,39 +76,31 @@ async def test_list_companies_filter_by_industry(client):
 
 
 @pytest.mark.asyncio
-async def test_get_company(client):
+async def test_get_company(client, test_org_id):
     """GET /companies/{id} — get a company by ID."""
-    org_id = await _create_org(client)
-
     create_resp = await client.post(
         COMPANIES_URL,
-        json={"organization_id": org_id, "name": "Target Corp"},
+        json={"name": "Target Corp"},
     )
     company_id = create_resp.json()["id"]
 
-    resp = await client.get(
-        f"{COMPANIES_URL}/{company_id}",
-        params={"organization_id": org_id},
-    )
+    resp = await client.get(f"{COMPANIES_URL}/{company_id}")
     assert resp.status_code == 200, resp.text
     assert resp.json()["id"] == company_id
     assert resp.json()["name"] == "Target Corp"
 
 
 @pytest.mark.asyncio
-async def test_update_company(client):
+async def test_update_company(client, test_org_id):
     """PATCH /companies/{id} — update a company."""
-    org_id = await _create_org(client)
-
     create_resp = await client.post(
         COMPANIES_URL,
-        json={"organization_id": org_id, "name": "OldName Inc"},
+        json={"name": "OldName Inc"},
     )
     company_id = create_resp.json()["id"]
 
     resp = await client.patch(
         f"{COMPANIES_URL}/{company_id}",
-        params={"organization_id": org_id},
         json={"name": "NewName Inc", "size": 1000},
     )
     assert resp.status_code == 200, resp.text
@@ -133,26 +110,18 @@ async def test_update_company(client):
 
 
 @pytest.mark.asyncio
-async def test_delete_company(client):
+async def test_delete_company(client, test_org_id):
     """DELETE /companies/{id} — soft-delete a company."""
-    org_id = await _create_org(client)
-
     create_resp = await client.post(
         COMPANIES_URL,
-        json={"organization_id": org_id, "name": "DeleteMe Corp"},
+        json={"name": "DeleteMe Corp"},
     )
     company_id = create_resp.json()["id"]
 
-    resp = await client.delete(
-        f"{COMPANIES_URL}/{company_id}",
-        params={"organization_id": org_id},
-    )
+    resp = await client.delete(f"{COMPANIES_URL}/{company_id}")
     assert resp.status_code == 204, resp.text
 
-    get_resp = await client.get(
-        f"{COMPANIES_URL}/{company_id}",
-        params={"organization_id": org_id},
-    )
+    get_resp = await client.get(f"{COMPANIES_URL}/{company_id}")
     assert get_resp.status_code == 404
 
 
@@ -160,48 +129,40 @@ async def test_delete_company(client):
 
 
 @pytest.mark.asyncio
-async def test_create_company_missing_name(client):
+async def test_create_company_missing_name(client, test_org_id):
     """POST /companies — missing required name."""
-    org_id = await _create_org(client)
-    resp = await client.post(COMPANIES_URL, json={"organization_id": org_id})
+    resp = await client.post(COMPANIES_URL, json={})
     assert resp.status_code == 422, resp.text
 
 
 @pytest.mark.asyncio
-async def test_create_company_empty_name(client):
+async def test_create_company_empty_name(client, test_org_id):
     """POST /companies — empty name."""
-    org_id = await _create_org(client)
-    resp = await client.post(
-        COMPANIES_URL,
-        json={"organization_id": org_id, "name": ""},
-    )
+    resp = await client.post(COMPANIES_URL, json={"name": ""})
     assert resp.status_code == 422, resp.text
 
 
 @pytest.mark.asyncio
-async def test_create_company_negative_size(client):
+async def test_create_company_negative_size(client, test_org_id):
     """POST /companies — negative company size."""
-    org_id = await _create_org(client)
     resp = await client.post(
         COMPANIES_URL,
-        json={"organization_id": org_id, "name": "BadSize", "size": -1},
+        json={"name": "BadSize", "size": -1},
     )
     assert resp.status_code == 422, resp.text
 
 
 @pytest.mark.asyncio
-async def test_update_company_empty_name(client):
+async def test_update_company_empty_name(client, test_org_id):
     """PATCH /companies/{id} — update with empty name."""
-    org_id = await _create_org(client)
     create_resp = await client.post(
         COMPANIES_URL,
-        json={"organization_id": org_id, "name": "ValidCo"},
+        json={"name": "ValidCo"},
     )
     company_id = create_resp.json()["id"]
 
     resp = await client.patch(
         f"{COMPANIES_URL}/{company_id}",
-        params={"organization_id": org_id},
         json={"name": ""},
     )
     assert resp.status_code == 422, resp.text
@@ -211,38 +172,28 @@ async def test_update_company_empty_name(client):
 
 
 @pytest.mark.asyncio
-async def test_get_company_not_found(client):
+async def test_get_company_not_found(client, test_org_id):
     """GET /companies/{id} — non-existent company."""
-    org_id = await _create_org(client)
     fake_id = str(uuid.uuid4())
-    resp = await client.get(
-        f"{COMPANIES_URL}/{fake_id}",
-        params={"organization_id": org_id},
-    )
+    resp = await client.get(f"{COMPANIES_URL}/{fake_id}")
     assert resp.status_code == 404, resp.text
     assert resp.json()["detail"] == "Company not found"
 
 
 @pytest.mark.asyncio
-async def test_update_company_not_found(client):
+async def test_update_company_not_found(client, test_org_id):
     """PATCH /companies/{id} — non-existent company."""
-    org_id = await _create_org(client)
     fake_id = str(uuid.uuid4())
     resp = await client.patch(
         f"{COMPANIES_URL}/{fake_id}",
-        params={"organization_id": org_id},
         json={"name": "Ghost"},
     )
     assert resp.status_code == 404, resp.text
 
 
 @pytest.mark.asyncio
-async def test_delete_company_not_found(client):
+async def test_delete_company_not_found(client, test_org_id):
     """DELETE /companies/{id} — non-existent company."""
-    org_id = await _create_org(client)
     fake_id = str(uuid.uuid4())
-    resp = await client.delete(
-        f"{COMPANIES_URL}/{fake_id}",
-        params={"organization_id": org_id},
-    )
+    resp = await client.delete(f"{COMPANIES_URL}/{fake_id}")
     assert resp.status_code == 404, resp.text

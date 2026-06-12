@@ -9,19 +9,10 @@ NOTES_URL = "/api/v1/notes"
 CONTACTS_URL = "/api/v1/contacts"
 
 
-async def _create_org(client):
-    resp = await client.post(
-        "/api/v1/organizations",
-        json={"name": "NoteTestOrg", "slug": "note-test-org"},
-    )
-    return resp.json()["id"]
-
-
-async def _create_contact(client, org_id: str) -> str:
+async def _create_contact(client) -> str:
     resp = await client.post(
         CONTACTS_URL,
         json={
-            "organization_id": org_id,
             "first_name": "Note",
             "last_name": "Target",
             "email": f"note-target-{uuid.uuid4().hex[:8]}@example.com",
@@ -34,13 +25,11 @@ async def _create_contact(client, org_id: str) -> str:
 
 
 @pytest.mark.asyncio
-async def test_create_note(client):
+async def test_create_note(client, test_org_id):
     """POST /notes — create a new note."""
-    org_id = await _create_org(client)
-    contact_id = await _create_contact(client, org_id)
+    contact_id = await _create_contact(client)
 
     payload = {
-        "organization_id": org_id,
         "contact_id": contact_id,
         "content": "Follow up on the proposal next week.",
     }
@@ -48,7 +37,7 @@ async def test_create_note(client):
     assert resp.status_code == 201, resp.text
     data = resp.json()
     assert data["content"] == "Follow up on the proposal next week."
-    assert data["organization_id"] == org_id
+    assert data["organization_id"] == test_org_id
     assert data["contact_id"] == contact_id
     assert "id" in data
     assert "created_at" in data
@@ -56,15 +45,13 @@ async def test_create_note(client):
 
 
 @pytest.mark.asyncio
-async def test_list_notes(client):
+async def test_list_notes(client, test_org_id):
     """GET /notes — list notes."""
-    org_id = await _create_org(client)
-    contact_id = await _create_contact(client, org_id)
+    contact_id = await _create_contact(client)
 
     await client.post(
         NOTES_URL,
         json={
-            "organization_id": org_id,
             "contact_id": contact_id,
             "content": "Note one",
         },
@@ -72,13 +59,12 @@ async def test_list_notes(client):
     await client.post(
         NOTES_URL,
         json={
-            "organization_id": org_id,
             "contact_id": contact_id,
             "content": "Note two",
         },
     )
 
-    resp = await client.get(NOTES_URL, params={"organization_id": org_id})
+    resp = await client.get(NOTES_URL)
     assert resp.status_code == 200, resp.text
     data = resp.json()
     assert data["total"] >= 2
@@ -86,16 +72,14 @@ async def test_list_notes(client):
 
 
 @pytest.mark.asyncio
-async def test_list_notes_filter_by_contact(client):
+async def test_list_notes_filter_by_contact(client, test_org_id):
     """GET /notes — filter by contact_id."""
-    org_id = await _create_org(client)
-    contact_a = await _create_contact(client, org_id)
-    contact_b = await _create_contact(client, org_id)
+    contact_a = await _create_contact(client)
+    contact_b = await _create_contact(client)
 
     await client.post(
         NOTES_URL,
         json={
-            "organization_id": org_id,
             "contact_id": contact_a,
             "content": "Note for A",
         },
@@ -103,14 +87,13 @@ async def test_list_notes_filter_by_contact(client):
     await client.post(
         NOTES_URL,
         json={
-            "organization_id": org_id,
             "contact_id": contact_b,
             "content": "Note for B",
         },
     )
 
     resp = await client.get(
-        NOTES_URL, params={"organization_id": org_id, "contact_id": contact_a}
+        NOTES_URL, params={"contact_id": contact_a}
     )
     assert resp.status_code == 200, resp.text
     data = resp.json()
@@ -119,25 +102,20 @@ async def test_list_notes_filter_by_contact(client):
 
 
 @pytest.mark.asyncio
-async def test_get_note(client):
+async def test_get_note(client, test_org_id):
     """GET /notes/{id} — get a note by ID."""
-    org_id = await _create_org(client)
-    contact_id = await _create_contact(client, org_id)
+    contact_id = await _create_contact(client)
 
     create_resp = await client.post(
         NOTES_URL,
         json={
-            "organization_id": org_id,
             "contact_id": contact_id,
             "content": "Target note content",
         },
     )
     note_id = create_resp.json()["id"]
 
-    resp = await client.get(
-        f"{NOTES_URL}/{note_id}",
-        params={"organization_id": org_id},
-    )
+    resp = await client.get(f"{NOTES_URL}/{note_id}")
     assert resp.status_code == 200, resp.text
     assert resp.json()["id"] == note_id
     assert resp.json()["content"] == "Target note content"
@@ -145,15 +123,13 @@ async def test_get_note(client):
 
 
 @pytest.mark.asyncio
-async def test_update_note(client):
+async def test_update_note(client, test_org_id):
     """PATCH /notes/{id} — update a note."""
-    org_id = await _create_org(client)
-    contact_id = await _create_contact(client, org_id)
+    contact_id = await _create_contact(client)
 
     create_resp = await client.post(
         NOTES_URL,
         json={
-            "organization_id": org_id,
             "contact_id": contact_id,
             "content": "Old content",
         },
@@ -162,7 +138,6 @@ async def test_update_note(client):
 
     resp = await client.patch(
         f"{NOTES_URL}/{note_id}",
-        params={"organization_id": org_id},
         json={"content": "Updated content with more detail"},
     )
     assert resp.status_code == 200, resp.text
@@ -171,31 +146,23 @@ async def test_update_note(client):
 
 
 @pytest.mark.asyncio
-async def test_delete_note(client):
+async def test_delete_note(client, test_org_id):
     """DELETE /notes/{id} — soft-delete a note."""
-    org_id = await _create_org(client)
-    contact_id = await _create_contact(client, org_id)
+    contact_id = await _create_contact(client)
 
     create_resp = await client.post(
         NOTES_URL,
         json={
-            "organization_id": org_id,
             "contact_id": contact_id,
             "content": "Delete me",
         },
     )
     note_id = create_resp.json()["id"]
 
-    resp = await client.delete(
-        f"{NOTES_URL}/{note_id}",
-        params={"organization_id": org_id},
-    )
+    resp = await client.delete(f"{NOTES_URL}/{note_id}")
     assert resp.status_code == 204, resp.text
 
-    get_resp = await client.get(
-        f"{NOTES_URL}/{note_id}",
-        params={"organization_id": org_id},
-    )
+    get_resp = await client.get(f"{NOTES_URL}/{note_id}")
     assert get_resp.status_code == 404
 
 
@@ -203,28 +170,25 @@ async def test_delete_note(client):
 
 
 @pytest.mark.asyncio
-async def test_create_note_missing_content(client):
+async def test_create_note_missing_content(client, test_org_id):
     """POST /notes — missing required content."""
-    org_id = await _create_org(client)
-    contact_id = await _create_contact(client, org_id)
+    contact_id = await _create_contact(client)
 
     resp = await client.post(
         NOTES_URL,
-        json={"organization_id": org_id, "contact_id": contact_id},
+        json={"contact_id": contact_id},
     )
     assert resp.status_code == 422, resp.text
 
 
 @pytest.mark.asyncio
-async def test_create_note_empty_content(client):
+async def test_create_note_empty_content(client, test_org_id):
     """POST /notes — empty content."""
-    org_id = await _create_org(client)
-    contact_id = await _create_contact(client, org_id)
+    contact_id = await _create_contact(client)
 
     resp = await client.post(
         NOTES_URL,
         json={
-            "organization_id": org_id,
             "contact_id": contact_id,
             "content": "",
         },
@@ -233,27 +197,23 @@ async def test_create_note_empty_content(client):
 
 
 @pytest.mark.asyncio
-async def test_create_note_missing_contact(client):
+async def test_create_note_missing_contact(client, test_org_id):
     """POST /notes — missing contact_id."""
-    org_id = await _create_org(client)
-
     resp = await client.post(
         NOTES_URL,
-        json={"organization_id": org_id, "content": "No contact"},
+        json={"content": "No contact"},
     )
     assert resp.status_code == 422, resp.text
 
 
 @pytest.mark.asyncio
-async def test_update_note_empty_content(client):
+async def test_update_note_empty_content(client, test_org_id):
     """PATCH /notes/{id} — update with empty content."""
-    org_id = await _create_org(client)
-    contact_id = await _create_contact(client, org_id)
+    contact_id = await _create_contact(client)
 
     create_resp = await client.post(
         NOTES_URL,
         json={
-            "organization_id": org_id,
             "contact_id": contact_id,
             "content": "Valid content",
         },
@@ -262,7 +222,6 @@ async def test_update_note_empty_content(client):
 
     resp = await client.patch(
         f"{NOTES_URL}/{note_id}",
-        params={"organization_id": org_id},
         json={"content": ""},
     )
     assert resp.status_code == 422, resp.text
@@ -272,40 +231,30 @@ async def test_update_note_empty_content(client):
 
 
 @pytest.mark.asyncio
-async def test_get_note_not_found(client):
+async def test_get_note_not_found(client, test_org_id):
     """GET /notes/{id} — non-existent note."""
-    org_id = await _create_org(client)
     fake_id = str(uuid.uuid4())
-    resp = await client.get(
-        f"{NOTES_URL}/{fake_id}",
-        params={"organization_id": org_id},
-    )
+    resp = await client.get(f"{NOTES_URL}/{fake_id}")
     assert resp.status_code == 404, resp.text
     assert resp.json()["detail"] == "Note not found"
 
 
 @pytest.mark.asyncio
-async def test_update_note_not_found(client):
+async def test_update_note_not_found(client, test_org_id):
     """PATCH /notes/{id} — non-existent note."""
-    org_id = await _create_org(client)
     fake_id = str(uuid.uuid4())
     resp = await client.patch(
         f"{NOTES_URL}/{fake_id}",
-        params={"organization_id": org_id},
         json={"content": "Ghost"},
     )
     assert resp.status_code == 404, resp.text
 
 
 @pytest.mark.asyncio
-async def test_delete_note_not_found(client):
+async def test_delete_note_not_found(client, test_org_id):
     """DELETE /notes/{id} — non-existent note."""
-    org_id = await _create_org(client)
     fake_id = str(uuid.uuid4())
-    resp = await client.delete(
-        f"{NOTES_URL}/{fake_id}",
-        params={"organization_id": org_id},
-    )
+    resp = await client.delete(f"{NOTES_URL}/{fake_id}")
     assert resp.status_code == 404, resp.text
 
 
@@ -313,17 +262,15 @@ async def test_delete_note_not_found(client):
 
 
 @pytest.mark.asyncio
-async def test_notes_pagination(client):
+async def test_notes_pagination(client, test_org_id):
     """GET /notes — pagination respects offset/limit."""
-    org_id = await _create_org(client)
-    contact_id = await _create_contact(client, org_id)
+    contact_id = await _create_contact(client)
 
     # Create 5 notes
     for i in range(5):
         await client.post(
             NOTES_URL,
             json={
-                "organization_id": org_id,
                 "contact_id": contact_id,
                 "content": f"Note {i}",
             },
@@ -331,7 +278,7 @@ async def test_notes_pagination(client):
 
     resp = await client.get(
         NOTES_URL,
-        params={"organization_id": org_id, "offset": 2, "limit": 2},
+        params={"offset": 2, "limit": 2},
     )
     assert resp.status_code == 200, resp.text
     data = resp.json()
