@@ -13,7 +13,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.core.dependencies import pagination_params
+from app.core.dependencies import get_current_user, pagination_params
+from app.models import User
 from app.repositories.repos import OrganizationRepository
 from app.schemas import (
     OrganizationCreate,
@@ -33,7 +34,8 @@ def _repo(db: AsyncSession) -> OrganizationRepository:
     "", response_model=OrganizationResponse, status_code=status.HTTP_201_CREATED
 )
 async def create_organization(
-    body: OrganizationCreate, db: AsyncSession = Depends(get_db)
+    body: OrganizationCreate, db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> OrganizationResponse:
     """Create a new organization (tenant)."""
     org = await _repo(db).create(**body.model_dump())
@@ -44,6 +46,7 @@ async def create_organization(
 async def list_organizations(
     pagination: dict = Depends(pagination_params),
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> dict:
     """List all organizations."""
     items, total = await _repo(db).list_all(**pagination)
@@ -57,7 +60,8 @@ async def list_organizations(
 
 @router.get("/{org_id}", response_model=OrganizationResponse)
 async def get_organization(
-    org_id: uuid.UUID, db: AsyncSession = Depends(get_db)
+    org_id: uuid.UUID, db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> OrganizationResponse:
     """Get an organization by ID."""
     org = await _repo(db).get_by_id(org_id)
@@ -71,6 +75,7 @@ async def update_organization(
     org_id: uuid.UUID,
     body: OrganizationUpdate,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> OrganizationResponse:
     """Update an organization."""
     org = await _repo(db).get_by_id(org_id)
@@ -82,7 +87,8 @@ async def update_organization(
 
 @router.delete("/{org_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_organization(
-    org_id: uuid.UUID, db: AsyncSession = Depends(get_db)
+    org_id: uuid.UUID, db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> None:
     """Soft-delete an organization."""
     org = await _repo(db).get_by_id(org_id)

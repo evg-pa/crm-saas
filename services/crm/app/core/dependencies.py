@@ -1,6 +1,6 @@
 """Reusable FastAPI dependencies.
 
-Provides database session and pagination helpers.
+Provides database session, pagination helpers, and auth dependency.
 """
 
 from typing import Annotated
@@ -9,6 +9,7 @@ from fastapi import Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
+from app.core.security import get_current_user  # noqa: F401
 
 DbSession = Annotated[AsyncSession, Depends(get_db)]
 

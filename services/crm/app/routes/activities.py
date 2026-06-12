@@ -6,7 +6,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.core.dependencies import pagination_params
+from app.core.dependencies import get_current_user, pagination_params
+from app.models import User
 from app.repositories.repos import ActivityRepository
 from app.schemas import (
     ActivityCreate,
@@ -24,16 +25,18 @@ def _repo(db: AsyncSession) -> ActivityRepository:
 
 @router.post("", response_model=ActivityResponse, status_code=status.HTTP_201_CREATED)
 async def create_activity(
-    body: ActivityCreate, db: AsyncSession = Depends(get_db)
+    body: ActivityCreate, db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> ActivityResponse:
     """Create a new activity."""
-    activity = await _repo(db).create(**body.model_dump())
+    data = body.model_dump()
+    data["organization_id"] = current_user.organization_id
+    activity = await _repo(db).create(**data)
     return ActivityResponse.model_validate(activity)
 
 
 @router.get("", response_model=PaginatedResponse)
 async def list_activities(
-    organization_id: uuid.UUID = Query(..., description="Tenant organization ID"),
     q: str | None = Query(
         default=None, description="Search across subject and description"
     ),
@@ -44,10 +47,11 @@ async def list_activities(
     deal_id: uuid.UUID | None = Query(default=None, description="Filter by deal"),
     pagination: dict = Depends(pagination_params),
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> dict:
-    """List activities for the given organization with optional search and filters."""
+    """List activities for the authenticated user's organization with optional search and filters."""
     items, total = await _repo(db).list(
-        organization_id=organization_id,
+        organization_id=current_user.organization_id,
         q=q,
         filters={
             "activity_type": activity_type,
@@ -67,11 +71,11 @@ async def list_activities(
 @router.get("/{activity_id}", response_model=ActivityResponse)
 async def get_activity(
     activity_id: uuid.UUID,
-    organization_id: uuid.UUID = Query(..., description="Tenant organization ID"),
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> ActivityResponse:
     """Get an activity by ID."""
-    activity = await _repo(db).get_by_id(activity_id, organization_id)
+    activity = await _repo(db).get_by_id(activity_id, current_user.organization_id)
     if activity is None:
         raise HTTPException(status_code=404, detail="Activity not found")
     return ActivityResponse.model_validate(activity)
@@ -81,11 +85,11 @@ async def get_activity(
 async def update_activity(
     activity_id: uuid.UUID,
     body: ActivityUpdate,
-    organization_id: uuid.UUID = Query(..., description="Tenant organization ID"),
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> ActivityResponse:
     """Update an activity."""
-    activity = await _repo(db).get_by_id(activity_id, organization_id)
+    activity = await _repo(db).get_by_id(activity_id, current_user.organization_id)
     if activity is None:
         raise HTTPException(status_code=404, detail="Activity not found")
     updated = await _repo(db).update(activity, **body.model_dump(exclude_unset=True))
@@ -95,11 +99,11 @@ async def update_activity(
 @router.delete("/{activity_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_activity(
     activity_id: uuid.UUID,
-    organization_id: uuid.UUID = Query(..., description="Tenant organization ID"),
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> None:
     """Soft-delete an activity."""
-    activity = await _repo(db).get_by_id(activity_id, organization_id)
+    activity = await _repo(db).get_by_id(activity_id, current_user.organization_id)
     if activity is None:
         raise HTTPException(status_code=404, detail="Activity not found")
     await _repo(db).delete(activity)

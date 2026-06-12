@@ -14,6 +14,7 @@ from app.core.config import settings
 from app.core.logging import setup_logging
 from app.routes import (
     activities,
+    auth,
     companies,
     contacts,
     deals,
@@ -59,6 +60,7 @@ app.add_middleware(
 )
 
 # Register routers with API version prefix
+app.include_router(auth.router, prefix="/api/v1/auth")
 app.include_router(organizations.router, prefix="/api/v1/organizations")
 app.include_router(contacts.router, prefix="/api/v1/contacts")
 app.include_router(companies.router, prefix="/api/v1/companies")

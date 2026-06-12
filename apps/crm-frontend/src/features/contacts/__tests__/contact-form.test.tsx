@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderWithProviders, setFakeAuth, resetFakeAuth } from "@/test/test-utils";
@@ -9,13 +9,14 @@ vi.mock("@/lib/hooks/use-companies", () => ({ useCompanies }));
 
 import { ContactForm } from "@/features/contacts/components/contact-form";
 import type { ContactFormValues } from "@/lib/validators/contact";
+import type { Contact } from "@/types";
 
-// ── Helpers ────────────────────────────────────────────────────────────────
 const defaultProps = {
   open: true,
   onOpenChange: vi.fn(),
   onSubmit: vi.fn(),
   isSubmitting: false,
+  contact: null as Contact | null,
 };
 
 function renderForm(overrides: Partial<typeof defaultProps> = {}) {
