@@ -122,7 +122,7 @@ class ContactBase(BaseModel):
 class ContactCreate(ContactBase):
     """Body for POST /contacts."""
 
-    organization_id: uuid.UUID
+    organization_id: uuid.UUID | None = None
 
 
 class ContactUpdate(BaseModel):
@@ -161,7 +161,7 @@ class CompanyBase(BaseModel):
 class CompanyCreate(CompanyBase):
     """Body for POST /companies."""
 
-    organization_id: uuid.UUID
+    organization_id: uuid.UUID | None = None
 
 
 class CompanyUpdate(BaseModel):
@@ -200,7 +200,7 @@ class DealBase(BaseModel):
 class DealCreate(DealBase):
     """Body for POST /deals."""
 
-    organization_id: uuid.UUID
+    organization_id: uuid.UUID | None = None
 
 
 class DealUpdate(BaseModel):
@@ -240,7 +240,7 @@ class ActivityBase(BaseModel):
 class ActivityCreate(ActivityBase):
     """Body for POST /activities."""
 
-    organization_id: uuid.UUID
+    organization_id: uuid.UUID | None = None
 
 
 class ActivityUpdate(BaseModel):
@@ -275,7 +275,7 @@ class NoteBase(BaseModel):
 class NoteCreate(NoteBase):
     """Body for POST /notes."""
 
-    organization_id: uuid.UUID
+    organization_id: uuid.UUID | None = None
     contact_id: uuid.UUID
 
 
