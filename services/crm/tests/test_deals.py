@@ -86,9 +86,7 @@ async def test_list_deals_filter_by_stage(client, test_org_id):
 @pytest.mark.asyncio
 async def test_get_deal(client, test_org_id):
     """GET /deals/{id} — get a deal by ID."""
-    create_resp = await client.post(
-        DEALS_URL, json={"name": "Target Deal"}
-    )
+    create_resp = await client.post(DEALS_URL, json={"name": "Target Deal"})
     deal_id = create_resp.json()["id"]
 
     resp = await client.get(f"{DEALS_URL}/{deal_id}")
@@ -120,9 +118,7 @@ async def test_update_deal(client, test_org_id):
 @pytest.mark.asyncio
 async def test_delete_deal(client, test_org_id):
     """DELETE /deals/{id} — soft-delete a deal."""
-    create_resp = await client.post(
-        DEALS_URL, json={"name": "Delete Deal"}
-    )
+    create_resp = await client.post(DEALS_URL, json={"name": "Delete Deal"})
     deal_id = create_resp.json()["id"]
 
     resp = await client.delete(f"{DEALS_URL}/{deal_id}")
@@ -165,9 +161,7 @@ async def test_create_deal_negative_amount(client, test_org_id):
 @pytest.mark.asyncio
 async def test_update_deal_negative_amount(client, test_org_id):
     """PATCH /deals/{id} — update with negative amount."""
-    create_resp = await client.post(
-        DEALS_URL, json={"name": "ValidDeal"}
-    )
+    create_resp = await client.post(DEALS_URL, json={"name": "ValidDeal"})
     deal_id = create_resp.json()["id"]
 
     resp = await client.patch(

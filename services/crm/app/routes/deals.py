@@ -25,7 +25,8 @@ def _repo(db: AsyncSession) -> DealRepository:
 
 @router.post("", response_model=DealResponse, status_code=status.HTTP_201_CREATED)
 async def create_deal(
-    body: DealCreate, db: AsyncSession = Depends(get_db),
+    body: DealCreate,
+    db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> DealResponse:
     """Create a new deal."""

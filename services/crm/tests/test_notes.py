@@ -92,9 +92,7 @@ async def test_list_notes_filter_by_contact(client, test_org_id):
         },
     )
 
-    resp = await client.get(
-        NOTES_URL, params={"contact_id": contact_a}
-    )
+    resp = await client.get(NOTES_URL, params={"contact_id": contact_a})
     assert resp.status_code == 200, resp.text
     data = resp.json()
     assert data["total"] == 1

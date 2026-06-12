@@ -25,7 +25,8 @@ def _repo(db: AsyncSession) -> ActivityRepository:
 
 @router.post("", response_model=ActivityResponse, status_code=status.HTTP_201_CREATED)
 async def create_activity(
-    body: ActivityCreate, db: AsyncSession = Depends(get_db),
+    body: ActivityCreate,
+    db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> ActivityResponse:
     """Create a new activity."""

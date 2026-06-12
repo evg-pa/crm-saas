@@ -2,8 +2,6 @@
 
 import pytest
 
-from app.core.security import create_verification_token
-
 
 AUTH_URL = "/api/v1/auth"
 

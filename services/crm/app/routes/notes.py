@@ -25,7 +25,8 @@ def _repo(db: AsyncSession) -> NoteRepository:
 
 @router.post("", response_model=NoteResponse, status_code=status.HTTP_201_CREATED)
 async def create_note(
-    body: NoteCreate, db: AsyncSession = Depends(get_db),
+    body: NoteCreate,
+    db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> NoteResponse:
     """Create a new note."""

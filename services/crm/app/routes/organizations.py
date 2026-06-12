@@ -34,7 +34,8 @@ def _repo(db: AsyncSession) -> OrganizationRepository:
     "", response_model=OrganizationResponse, status_code=status.HTTP_201_CREATED
 )
 async def create_organization(
-    body: OrganizationCreate, db: AsyncSession = Depends(get_db),
+    body: OrganizationCreate,
+    db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> OrganizationResponse:
     """Create a new organization (tenant)."""
@@ -60,7 +61,8 @@ async def list_organizations(
 
 @router.get("/{org_id}", response_model=OrganizationResponse)
 async def get_organization(
-    org_id: uuid.UUID, db: AsyncSession = Depends(get_db),
+    org_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> OrganizationResponse:
     """Get an organization by ID."""
@@ -87,7 +89,8 @@ async def update_organization(
 
 @router.delete("/{org_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_organization(
-    org_id: uuid.UUID, db: AsyncSession = Depends(get_db),
+    org_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> None:
     """Soft-delete an organization."""

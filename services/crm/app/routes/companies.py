@@ -25,7 +25,8 @@ def _repo(db: AsyncSession) -> CompanyRepository:
 
 @router.post("", response_model=CompanyResponse, status_code=status.HTTP_201_CREATED)
 async def create_company(
-    body: CompanyCreate, db: AsyncSession = Depends(get_db),
+    body: CompanyCreate,
+    db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> CompanyResponse:
     """Create a new company."""
