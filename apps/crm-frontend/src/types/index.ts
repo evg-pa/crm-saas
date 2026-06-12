@@ -29,7 +29,7 @@ export interface Contact {
 }
 
 export interface ContactCreate {
-  organization_id: UUID;
+  organization_id?: UUID;
   first_name: string;
   last_name: string;
   email?: string | null;
@@ -62,7 +62,7 @@ export interface Company {
 }
 
 export interface CompanyCreate {
-  organization_id: UUID;
+  organization_id?: UUID;
   name: string;
   website?: string | null;
   industry?: string | null;
@@ -111,7 +111,7 @@ export interface Deal {
 }
 
 export interface DealCreate {
-  organization_id: UUID;
+  organization_id?: UUID;
   name: string;
   amount?: number | null;
   stage?: string;
@@ -145,7 +145,7 @@ export interface Activity {
 }
 
 export interface ActivityCreate {
-  organization_id: UUID;
+  organization_id?: UUID;
   activity_type: string;
   subject: string;
   description?: string | null;
@@ -175,7 +175,7 @@ export interface Note {
 }
 
 export interface NoteCreate {
-  organization_id: UUID;
+  organization_id?: UUID;
   contact_id: UUID;
   content: string;
 }

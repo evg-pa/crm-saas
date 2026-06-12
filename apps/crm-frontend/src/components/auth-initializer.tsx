@@ -2,23 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/lib/stores/auth-store";
-import * as organizationsApi from "@/lib/api/organizations";
+import * as authApi from "@/lib/api/auth";
 
 /**
- * AuthInitializer — auto-populates the auth store with the first available
- * organization on app load when no org is already selected.
+ * AuthInitializer — auto-registers a dev user and gets a real JWT token
+ * on first app load. Falls back to login if the user already exists.
  *
- * This is needed because the CRM app runs without a full login flow in
- * development/demo mode. Without an organization_id, all entity CRUD
- * mutations fail with a 422 validation error.
+ * Without this, the CRM runs with null token → all CRUD calls 401 → nothing works.
  */
 export function AuthInitializer({ children }: { children: React.ReactNode }) {
-  const orgId = useAuthStore((s) => s.orgId);
+  const token = useAuthStore((s) => s.token);
   const setAuth = useAuthStore((s) => s.setAuth);
-  const [initialized, setInitialized] = useState(!!orgId);
+  const [initialized, setInitialized] = useState(!!token);
 
   useEffect(() => {
-    if (orgId) {
+    if (token) {
       setInitialized(true);
       return;
     }
@@ -26,16 +24,37 @@ export function AuthInitializer({ children }: { children: React.ReactNode }) {
     let cancelled = false;
 
     async function init() {
+      const payload = {
+        email: "dev@crm.local",
+        password: "devpass123",
+        full_name: "Dev User",
+        organization_name: "Dev Org",
+        organization_slug: "dev-org",
+      };
+
       try {
-        const result = await organizationsApi.listOrganizations();
-        if (cancelled) return;
-        const firstOrg = result.items[0];
-        if (firstOrg) {
-          // Use a demo token for development — the backend doesn't validate JWT yet
-          setAuth("demo-token", firstOrg.id);
+        // Try registering fresh
+        const result = await authApi.register(payload);
+        if (!cancelled) {
+          setAuth(result.access_token, result.organization_id);
         }
-      } catch {
-        // If the backend is unreachable, don't block the UI
+      } catch (regErr: any) {
+        if (cancelled) return;
+        // 409 = user already exists, try logging in
+        if (regErr?.response?.status === 409) {
+          try {
+            const result = await authApi.login({
+              email: payload.email,
+              password: payload.password,
+            });
+            if (!cancelled) {
+              setAuth(result.access_token, result.organization_id);
+            }
+          } catch {
+            // Backend unreachable — don't block the UI
+          }
+        }
+        // Other errors (network, etc.) — don't block UI
       } finally {
         if (!cancelled) setInitialized(true);
       }
@@ -46,10 +65,8 @@ export function AuthInitializer({ children }: { children: React.ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [orgId, setAuth]);
+  }, [token, setAuth]);
 
-  // Don't render children until initialization is complete to prevent
-  // mutations from firing with a null orgId.
   if (!initialized) return null;
 
   return <>{children}</>;
