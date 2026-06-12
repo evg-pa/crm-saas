@@ -36,7 +36,7 @@ export function AuthInitializer({ children }: { children: React.ReactNode }) {
         // Try registering fresh
         const result = await authApi.register(payload);
         if (!cancelled) {
-          setAuth(result.access_token, result.organization_id);
+          setAuth(result.access_token, result.organization_id, result.user);
         }
       } catch (regErr: any) {
         if (cancelled) return;
@@ -48,7 +48,7 @@ export function AuthInitializer({ children }: { children: React.ReactNode }) {
               password: payload.password,
             });
             if (!cancelled) {
-              setAuth(result.access_token, result.organization_id);
+              setAuth(result.access_token, result.organization_id, result.user);
             }
           } catch {
             // Backend unreachable — don't block the UI

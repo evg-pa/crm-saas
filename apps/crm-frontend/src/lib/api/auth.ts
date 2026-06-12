@@ -13,10 +13,18 @@ export interface LoginPayload {
   password: string;
 }
 
+export interface UserInfo {
+  id: string;
+  email: string;
+  full_name: string | null;
+  is_active: boolean;
+}
+
 export interface TokenResponse {
   access_token: string;
   token_type: string;
   organization_id: string;
+  user: UserInfo;
 }
 
 /**
