@@ -1,35 +1,33 @@
-"""Data access layer — generic CRUD repository.
+"""Generic async CRUD repository.
 
-Provides reusable async CRUD operations that enforce tenant isolation
-by filtering on organization_id for all business entities.
+Provides a typed, reusable BaseRepository[T] with soft-delete support,
+multi-tenant org scoping, text search, and field-level filtering.
 """
 
 import uuid
 from typing import Any, Generic, TypeVar
 
-from sqlalchemy import select, func
+from sqlalchemy import Select, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.sql import Select
 
-from app.models import Base as ModelBase
-
-T = TypeVar("T", bound=ModelBase)
+T = TypeVar("T")
 
 
 class BaseRepository(Generic[T]):
-    """Generic async CRUD repository with tenant-aware querying.
+    """Typed CRUD repository for SQLAlchemy ORM models.
 
-    Subclasses must set `model` to the SQLAlchemy model class.
+    All list/get operations are automatically scoped to an organization_id
+    and exclude soft-deleted records.
     """
 
-    model: type[T]
+    model: type[T]  # type: ignore[assignment]
 
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    def _base_query(self) -> Select:
+    def _base_query(self) -> Select:  # type: ignore[type-var]
         """Return a base select query excluding soft-deleted records."""
-        return select(self.model).where(self.model.deleted_at.is_(None))
+        return select(self.model).where(self.model.deleted_at.is_(None))  # type: ignore[attr-defined]
 
     def _searchable_fields(self) -> list[str]:
         """Return list of column names to search via the `q` parameter.
@@ -47,7 +45,7 @@ class BaseRepository(Generic[T]):
         filters: dict[str, Any] | None = None,
     ) -> tuple[list[T], int]:
         """List records for an organization with pagination, search, and filters."""
-        query = self._base_query().where(self.model.organization_id == organization_id)
+        query = self._base_query().where(self.model.organization_id == organization_id)  # type: ignore[attr-defined]
 
         # Apply text search across searchable fields (case-insensitive partial match)
         if q:
@@ -69,14 +67,14 @@ class BaseRepository(Generic[T]):
                     if col is not None:
                         query = query.where(col == value)
 
-        query = query.order_by(self.model.created_at.desc())
+        query = query.order_by(self.model.created_at.desc())  # type: ignore[attr-defined]
 
         # Build a matching count query from the same base
         count_query = (
             select(func.count())
             .select_from(self.model)
-            .where(self.model.organization_id == organization_id)
-            .where(self.model.deleted_at.is_(None))
+            .where(self.model.organization_id == organization_id)  # type: ignore[attr-defined]
+            .where(self.model.deleted_at.is_(None))  # type: ignore[attr-defined]
         )
         if q:
             search_clauses = []
@@ -103,8 +101,8 @@ class BaseRepository(Generic[T]):
         """Get a single record by ID, scoped to organization."""
         result = await self.session.execute(
             self._base_query().where(
-                self.model.id == id_,
-                self.model.organization_id == organization_id,
+                self.model.id == id_,  # type: ignore[attr-defined]
+                self.model.organization_id == organization_id,  # type: ignore[attr-defined]
             )
         )
         return result.scalar_one_or_none()
@@ -130,6 +128,6 @@ class BaseRepository(Generic[T]):
         """Soft-delete a record by setting deleted_at."""
         from app.models import utcnow
 
-        instance.deleted_at = utcnow()
+        instance.deleted_at = utcnow()  # type: ignore[attr-defined]
         await self.session.flush()
         return instance

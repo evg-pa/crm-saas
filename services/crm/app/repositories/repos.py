@@ -24,7 +24,7 @@ class OrganizationRepository(BaseRepository[Organization]):
 
     model = Organization
 
-    async def get_by_id(self, id_: uuid.UUID) -> Organization | None:
+    async def get_by_id(self, id_: uuid.UUID) -> Organization | None:  # type: ignore[override]
         """Override: Organization lookup is not scoped to an org."""
         result = await self.session.execute(
             select(Organization).where(

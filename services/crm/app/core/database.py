@@ -3,6 +3,8 @@
 Provides async SQLAlchemy 2.0 engine configured for PostgreSQL via asyncpg.
 """
 
+from typing import AsyncGenerator
+
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
@@ -26,7 +28,7 @@ class Base(DeclarativeBase):
     """Base class for all ORM models."""
 
 
-async def get_db() -> AsyncSession:
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """FastAPI dependency that yields an async database session.
 
     Commits on success, rolls back on exception.
