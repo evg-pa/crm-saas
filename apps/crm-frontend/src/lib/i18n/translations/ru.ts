@@ -197,6 +197,10 @@ const ru: Translations = {
     userDeleted: 'Пользователь "{name}" удалён',
     userUpdated: 'Пользователь "{name}" обновлён',
     deleteError: "Не удалось удалить пользователя",
+    cannotDeleteSelf: "Нельзя удалить собственный аккаунт.",
+    deleteConfirmTitle: "Удалить пользователя?",
+    deleteConfirmDesc: "Это действие нельзя отменить. Аккаунт пользователя {name} будет навсегда деактивирован.",
+    userUpdatedError: "Не удалось обновить пользователя. Попробуйте снова.",
     updateError: "Не удалось обновить пользователя",
     loadError: "Не удалось загрузить пользователей",
     loadErrorDetail: "Произошла непредвиденная ошибка",
@@ -209,6 +213,10 @@ const ru: Translations = {
       admin: "Админ",
       manager: "Менеджер",
       member: "Участник",
+    },
+    rbac: {
+      adminOnly: "Только админ",
+      noPermission: "У вас нет прав для выполнения этого действия",
     },
   },
 
@@ -242,6 +250,13 @@ const ru: Translations = {
     user: "Пользователь CRM",
   },
 
+  // ── RBAC ───────────────────────────────────────────────────────
+  rbac: {
+    accessDenied: "Доступ запрещён",
+    accessDeniedDesc: "У вас недостаточно прав для доступа к этой странице.",
+    insufficientRole: "Недостаточная роль",
+  },
+
   // ── Auth / Login ────────────────────────────────────────────────
   auth: {
     loginTitle: "Добро пожаловать в CRM",
@@ -269,6 +284,17 @@ const ru: Translations = {
     requestNewLink: "Запросить новую ссылку",
     signInWithNewPassword: "Войти с новым паролем",
     backToLogin: "Вернуться ко входу",
+    emailNotVerified: "Ваш email ещё не подтверждён.",
+    resendVerification: "Отправить повторно",
+    resendVerificationLoading: "Отправка...",
+    resendVerificationSuccess: "Ссылка для подтверждения отправлена на ваш email.",
+    resendVerificationError: "Не удалось отправить письмо. Попробуйте ещё раз.",
+    verifyEmailTitle: "Email подтверждён",
+    verifyEmailSubtitle: "Ваш email успешно подтверждён",
+    verifyEmailSuccess: "Ваш email подтверждён. Теперь вы можете войти в систему.",
+    verifyEmailInvalidToken: "Недействительная или отсутствующая ссылка для подтверждения. Запросите новую.",
+    verifyEmailExpiredToken: "Недействительная или истёкшая ссылка для подтверждения. Запросите новую.",
+    verifyEmailSignIn: "Войти",
   },
 
   // ── Deal Stages ─────────────────────────────────────────────────

@@ -106,6 +106,18 @@ class UserUpdate(BaseModel):
     is_active: bool | None = None
 
 
+class SendVerificationRequest(BaseModel):
+    """Body for POST /auth/send-verification."""
+
+    email: str = Field(..., max_length=255)
+
+
+class VerifyEmailRequest(BaseModel):
+    """Body for POST /auth/verify-email."""
+
+    token: str
+
+
 class MessageResponse(BaseModel):
     """Generic message response."""
 

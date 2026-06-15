@@ -1,4 +1,5 @@
 import apiClient from "./client";
+import type { UserRole } from "@/types";
 
 export interface RegisterPayload {
   email: string;
@@ -17,6 +18,7 @@ export interface UserInfo {
   id: string;
   email: string;
   full_name: string | null;
+  role: UserRole;
   is_active: boolean;
 }
 
@@ -85,6 +87,50 @@ export async function resetPassword(
 ): Promise<ResetPasswordResponse> {
   const { data } = await apiClient.post<ResetPasswordResponse>(
     "/auth/reset-password",
+    payload
+  );
+  return data;
+}
+
+export interface SendVerificationPayload {
+  email: string;
+}
+
+export interface SendVerificationResponse {
+  message: string;
+}
+
+/**
+ * Request an email verification link. Does not reveal whether the email exists.
+ * POST /api/v1/auth/send-verification
+ */
+export async function sendVerificationEmail(
+  payload: SendVerificationPayload
+): Promise<SendVerificationResponse> {
+  const { data } = await apiClient.post<SendVerificationResponse>(
+    "/auth/send-verification",
+    payload
+  );
+  return data;
+}
+
+export interface VerifyEmailPayload {
+  token: string;
+}
+
+export interface VerifyEmailResponse {
+  message: string;
+}
+
+/**
+ * Verify email using a token from the verification email.
+ * POST /api/v1/auth/verify-email
+ */
+export async function verifyEmail(
+  payload: VerifyEmailPayload
+): Promise<VerifyEmailResponse> {
+  const { data } = await apiClient.post<VerifyEmailResponse>(
+    "/auth/verify-email",
     payload
   );
   return data;

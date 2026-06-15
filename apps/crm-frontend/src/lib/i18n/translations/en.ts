@@ -206,6 +206,10 @@ const en = {
     userDeleted: 'User "{name}" deleted',
     userUpdated: 'User "{name}" updated',
     deleteError: "Failed to delete user",
+    cannotDeleteSelf: "You cannot delete your own account.",
+    deleteConfirmTitle: "Delete user?",
+    deleteConfirmDesc: "This action cannot be undone. The user account for {name} will be permanently deactivated.",
+    userUpdatedError: "Failed to update user. Please try again.",
     updateError: "Failed to update user",
     loadError: "Failed to load users",
     loadErrorDetail: "An unexpected error occurred",
@@ -218,6 +222,10 @@ const en = {
       admin: "Admin",
       manager: "Manager",
       member: "Member",
+    },
+    rbac: {
+      adminOnly: "Admin only",
+      noPermission: "You do not have permission to perform this action",
     },
   },
 
@@ -251,6 +259,13 @@ const en = {
     user: "CRM User",
   },
 
+  // ── RBAC ───────────────────────────────────────────────────────
+  rbac: {
+    accessDenied: "Access denied",
+    accessDeniedDesc: "You do not have the required permissions to access this page.",
+    insufficientRole: "Insufficient role",
+  },
+
   // ── Auth / Login ────────────────────────────────────────────────
   auth: {
     loginTitle: "Welcome to CRM",
@@ -278,6 +293,17 @@ const en = {
     requestNewLink: "Request a new reset link",
     signInWithNewPassword: "Sign in with new password",
     backToLogin: "Back to sign in",
+    emailNotVerified: "Your email is not yet verified.",
+    resendVerification: "Resend verification email",
+    resendVerificationLoading: "Sending...",
+    resendVerificationSuccess: "A verification link has been sent to your email.",
+    resendVerificationError: "Failed to send verification email. Please try again.",
+    verifyEmailTitle: "Email verified",
+    verifyEmailSubtitle: "Your email has been verified successfully",
+    verifyEmailSuccess: "Your email has been verified. You can now sign in to your account.",
+    verifyEmailInvalidToken: "Invalid or missing verification token. Please request a new verification link.",
+    verifyEmailExpiredToken: "Invalid or expired verification token. Please request a new one.",
+    verifyEmailSignIn: "Sign in",
   },
 
   // ── Deal Stages ─────────────────────────────────────────────────

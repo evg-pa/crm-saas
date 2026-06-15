@@ -20,8 +20,10 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.core.security import (
     create_access_token,
+    create_email_verification_token,
     create_password_reset_token,
     create_refresh_token,
+    decode_email_verification_token,
     decode_password_reset_token,
     decode_refresh_token,
     hash_password,
@@ -33,10 +35,12 @@ from app.schemas import (
     MessageResponse,
     RefreshTokenRequest,
     ResetPasswordRequest,
+    SendVerificationRequest,
     TokenResponse,
     UserCreate,
     UserLogin,
     UserResponse,
+    VerifyEmailRequest,
 )
 
 logger = logging.getLogger(__name__)
@@ -131,6 +135,13 @@ async def login(body: UserLogin, db: AsyncSession = Depends(get_db)) -> dict:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="User account is inactive",
+        )
+
+    # Optionally require email verification before login (config-driven)
+    if settings.require_email_verification and not user.email_verified:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Email not verified. Please check your inbox for a verification link.",
         )
 
     access_token = create_access_token(data={"sub": str(user.id)})

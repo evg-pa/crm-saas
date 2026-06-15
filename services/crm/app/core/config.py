@@ -42,6 +42,9 @@ class Settings(BaseSettings):
     # Logging
     log_format: str = "text"  # "text" or "json"
 
+    # Email verification
+    require_email_verification: bool = False
+
     # Server
     host: str = "0.0.0.0"
     port: int = 8000

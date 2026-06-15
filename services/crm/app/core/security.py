@@ -85,6 +85,9 @@ def decode_refresh_token(token: str) -> dict:
 PASSWORD_RESET_PURPOSE = "password_reset"
 PASSWORD_RESET_EXPIRE_MINUTES = 15
 
+EMAIL_VERIFY_PURPOSE = "email_verify"
+EMAIL_VERIFY_EXPIRE_HOURS = 24
+
 
 def decode_access_token(token: str) -> dict:
     """Decode and validate a JWT access token."""
@@ -117,6 +120,32 @@ def decode_password_reset_token(token: str) -> dict:
     """Decode and validate a password-reset JWT. Raises on expiry/signature error."""
     payload = decode_access_token(token)
     if payload.get("purpose") != PASSWORD_RESET_PURPOSE:
+        raise jwt.InvalidTokenError("Token has wrong purpose")
+    return payload
+
+
+def create_email_verification_token(user_id: str) -> str:
+    """Create a JWT for email verification (24h expiry).
+
+    Includes an ``iat`` (issued-at) claim so the verify-email endpoint
+    can detect reused tokens by comparing against the user's
+    ``email_verified_at`` timestamp.
+    """
+    now = datetime.now(timezone.utc)
+    return create_access_token(
+        data={
+            "sub": user_id,
+            "purpose": EMAIL_VERIFY_PURPOSE,
+            "iat": now,
+        },
+        expires_delta=timedelta(hours=EMAIL_VERIFY_EXPIRE_HOURS),
+    )
+
+
+def decode_email_verification_token(token: str) -> dict:
+    """Decode and validate an email-verification JWT. Raises on expiry/signature error."""
+    payload = decode_access_token(token)
+    if payload.get("purpose") != EMAIL_VERIFY_PURPOSE:
         raise jwt.InvalidTokenError("Token has wrong purpose")
     return payload
 
