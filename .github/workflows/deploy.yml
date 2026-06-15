@@ -98,6 +98,6 @@ jobs:
           key: ${{ secrets.STAGING_SSH_KEY }}
           script: |
             cd /opt/crm-saas
-            docker compose pull
-            docker compose up -d --remove-orphans
-            docker compose ps
+            docker compose -f docker-compose.yml -f docker/docker-compose.staging.yml pull
+            docker compose -f docker-compose.yml -f docker/docker-compose.staging.yml up -d --remove-orphans
+            docker compose -f docker-compose.yml -f docker/docker-compose.staging.yml ps

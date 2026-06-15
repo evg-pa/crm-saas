@@ -1,0 +1,99 @@
+# =============================================================================
+# Staging Override — docker-compose.staging.yml
+# =============================================================================
+# Overrides the root docker-compose.yml for staging deployments.
+#
+# Usage:
+#   ln -sf docker/docker-compose.staging.yml docker-compose.override.yml
+#   docker compose up -d
+#
+#   Or with explicit files:
+#   docker compose -f docker-compose.yml -f docker/docker-compose.staging.yml up -d
+#
+#   docker compose -f docker-compose.yml -f docker/docker-compose.staging.yml down
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL — staging overrides (tighter limits, restart policy)
+  # ---------------------------------------------------------------------------
+  db:
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.5"
+          memory: 256M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-crm_user} -d ${POSTGRES_DB:-crm_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------
+  # Redis — staging overrides (tighter limits, restart policy)
+  # ---------------------------------------------------------------------------
+  redis:
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  # ---------------------------------------------------------------------------
+  # Backend — staging overrides (limits, env, health checks, restart policy)
+  # ---------------------------------------------------------------------------
+  backend:
+    restart: always
+    environment:
+      LOG_FORMAT: json
+      JWT_ACCESS_TOKEN_EXPIRE_MINUTES: "60"
+      DEBUG: "false"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.5"
+          memory: 256M
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\""]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  # ---------------------------------------------------------------------------
+  # Frontend — staging overrides (limits, health checks, restart policy)
+  # ---------------------------------------------------------------------------
+  frontend:
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
