@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { noteSchema, type NoteFormValues } from "@/lib/validators/note";
@@ -38,10 +39,17 @@ export function NoteForm({
     defaultValues: { content: "" },
   });
 
-  const handleFormSubmit = (values: NoteFormValues) => {
-    onSubmit(values);
+  const handleFormSubmit = async (values: NoteFormValues) => {
+    await onSubmit(values);
     reset();
   };
+
+  // Reset form whenever the dialog opens so stale values are cleared
+  useEffect(() => {
+    if (open) {
+      reset();
+    }
+  }, [open, reset]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

@@ -68,7 +68,11 @@ export default function ContactDetailPage() {
   };
 
   const handleDeleteNote = (noteId: string) => {
-    deleteNote.mutate(noteId);
+    deleteNote.mutate(noteId, {
+      onError: (error) => {
+        console.error("Failed to delete note:", error);
+      },
+    });
   };
 
   if (isLoading) {
@@ -211,6 +215,7 @@ export default function ContactDetailPage() {
                   <Button
                     variant="ghost"
                     size="icon"
+                    aria-label="Delete note"
                     className="ml-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={() => handleDeleteNote(note.id)}
                     disabled={deleteNote.isPending}
