@@ -219,7 +219,7 @@ async def refresh(
             User.deleted_at.is_(None),
         )
     )
-    user = result.scalar_one_or_none()
+    user: User | None = result.scalar_one_or_none()
     if user is None or not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
