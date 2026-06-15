@@ -213,13 +213,13 @@ async def refresh(
         )
 
     # Look up the user
-    result = await db.execute(
+    user_result = await db.execute(
         select(User).where(
             User.id == stored_token.user_id,
             User.deleted_at.is_(None),
         )
     )
-    user: User | None = result.scalar_one_or_none()
+    user = user_result.scalar_one_or_none()
     if user is None or not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
