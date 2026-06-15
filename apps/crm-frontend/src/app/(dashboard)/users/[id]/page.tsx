@@ -68,11 +68,11 @@ export default function UserDetailPage() {
       {
         onSuccess: () => {
           setFormOpen(false);
-          toast.success(t("users.userUpdated", { name: user?.full_name ?? user?.email }));
+          toast.success(t("users.userUpdated", { name: user?.full_name ?? user?.email ?? "" }));
         },
         onError: (err) => {
           toast.error(
-            err instanceof Error ? err.message : t("users.updateError")
+            err instanceof Error ? err.message ?? t("users.updateError") : t("users.updateError")
           );
         },
       }
@@ -82,12 +82,12 @@ export default function UserDetailPage() {
   const handleDelete = () => {
     deleteUser.mutate(id, {
       onSuccess: () => {
-        toast.success(t("users.userDeleted", { name: user?.full_name ?? user?.email }));
+        toast.success(t("users.userDeleted", { name: user?.full_name ?? user?.email ?? "" }));
         router.push("/users");
       },
       onError: (err) => {
         toast.error(
-          err instanceof Error ? err.message : t("users.deleteError")
+          err instanceof Error ? err.message ?? t("users.deleteError") : t("users.deleteError")
         );
         setDeleteDialogOpen(false);
       },

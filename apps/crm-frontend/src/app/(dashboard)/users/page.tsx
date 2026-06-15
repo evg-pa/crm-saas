@@ -71,7 +71,7 @@ export default function UsersPage() {
       },
       onError: (err) => {
         toast.error(
-          err instanceof Error ? err.message : t("users.deleteError")
+          err instanceof Error ? err.message ?? t("users.deleteError") : t("users.deleteError")
         );
         setDeleteTarget(null);
       },
