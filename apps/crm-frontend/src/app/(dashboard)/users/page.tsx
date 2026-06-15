@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useUsers, useDeleteUser } from "@/lib/hooks/use-users";
 import { useAuthStore } from "@/lib/stores/auth-store";
-import { useHasRole } from "@/components/auth/role-guard";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import {
   PageHeader,
@@ -43,22 +42,8 @@ export default function UsersPage() {
   const router = useRouter();
   const { t } = useTranslation();
   const { locale } = useLocale();
-  const isAdmin = useHasRole(["admin"]);
-  const token = useAuthStore((s) => s.token);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
-
-  // Redirect non-admin users away from this page
-  useEffect(() => {
-    if (token && !isAdmin) {
-      router.replace("/");
-    }
-  }, [token, isAdmin, router]);
-
-  // If not admin, show nothing while redirecting
-  if (!isAdmin) {
-    return null;
-  }
 
   const limit = 20;
   const { data, isLoading, isError, error } = useUsers({

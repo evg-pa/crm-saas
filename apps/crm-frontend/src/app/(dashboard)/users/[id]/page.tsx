@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useUser, useUpdateUser, useDeleteUser } from "@/lib/hooks/use-users";
 import { useAuthStore } from "@/lib/stores/auth-store";
-import { useHasRole } from "@/components/auth/role-guard";
 import { UserForm } from "@/features/users/components/user-form";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Button } from "@/components/ui/button";
@@ -49,8 +48,9 @@ export default function UserDetailPage() {
   const { t } = useTranslation();
 
   const currentUserId = useAuthStore((s) => s.user?.id);
-  const isAdmin = useHasRole(["admin"]);
-  const token = useAuthStore((s) => s.token);
+  // This page is already guarded by layout RoleGuard, but we still
+  // need isAdmin to control the UserForm role selector visibility.
+  const isAdmin = useAuthStore((s) => s.user?.role === "admin");
 
   const [formOpen, setFormOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -61,18 +61,6 @@ export default function UserDetailPage() {
   const deleteUser = useDeleteUser();
 
   const isSelf = currentUserId === id;
-
-  // Redirect non-admin users away from this page
-  useEffect(() => {
-    if (token && !isAdmin) {
-      router.replace("/");
-    }
-  }, [token, isAdmin, router]);
-
-  // If not admin, show nothing while redirecting
-  if (!isAdmin) {
-    return null;
-  }
 
   const handleUpdate = (values: UserUpdateFormValues) => {
     updateUser.mutate(

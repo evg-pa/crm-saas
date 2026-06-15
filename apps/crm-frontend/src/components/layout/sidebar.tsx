@@ -35,22 +35,16 @@ export function Sidebar() {
 
   const isAdmin = useHasRole("admin");
 
-  const allNavItems: NavItem[] = [
+  const navItems: NavItem[] = [
     { labelKey: "nav.dashboard", href: "/", icon: LayoutDashboard },
     { labelKey: "nav.contacts", href: "/contacts", icon: Users },
     { labelKey: "nav.companies", href: "/companies", icon: Building2 },
     { labelKey: "nav.deals", href: "/deals", icon: Handshake },
     { labelKey: "nav.activities", href: "/activities", icon: Activity },
-    { labelKey: "nav.users", href: "/users", icon: UserCog, adminOnly: true },
+    // Users page is admin-only
+    ...(isAdmin ? [{ labelKey: "nav.users" as const, href: "/users", icon: UserCog }] : []),
     { labelKey: "nav.settings", href: "/settings", icon: Settings },
   ];
-
-  const navItems = allNavItems.filter((item) => {
-    if ("adminOnly" in item && (item as { adminOnly?: boolean }).adminOnly) {
-      return isAdmin;
-    }
-    return true;
-  });
 
   return (
     <aside

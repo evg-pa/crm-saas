@@ -15,7 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
-  const { orgId } = useAuthStore();
+  const { orgId, user } = useAuthStore();
   const { data: organization, isLoading: orgLoading, isError: orgError } =
     useCurrentOrganization();
   const [mounted, setMounted] = useState(false);
@@ -233,7 +233,7 @@ export default function SettingsPage() {
                 <p className="font-medium">{t("settings.user")}</p>
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary" className="text-xs">
-                    {t("settings.member")}
+                    {user?.role ? t(`users.roles.${user.role}`) : t("settings.member")}
                   </Badge>
                   <span className="text-xs text-muted-foreground">
                     {t("settings.activeSession")}
