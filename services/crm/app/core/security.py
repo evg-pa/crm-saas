@@ -59,9 +59,19 @@ def decode_access_token(token: str) -> dict:
 
 
 def create_password_reset_token(user_id: str) -> str:
-    """Create a short-lived JWT for password reset (15 min expiry)."""
+    """Create a short-lived JWT for password reset (15 min expiry).
+
+    Includes an ``iat`` (issued-at) claim so the reset-password endpoint
+    can detect reused tokens by comparing against the user's
+    ``password_changed_at`` timestamp.
+    """
+    now = datetime.now(timezone.utc)
     return create_access_token(
-        data={"sub": user_id, "purpose": PASSWORD_RESET_PURPOSE},
+        data={
+            "sub": user_id,
+            "purpose": PASSWORD_RESET_PURPOSE,
+            "iat": now,
+        },
         expires_delta=timedelta(minutes=PASSWORD_RESET_EXPIRE_MINUTES),
     )
 

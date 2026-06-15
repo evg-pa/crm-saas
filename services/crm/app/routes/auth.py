@@ -136,13 +136,17 @@ async def forgot_password(
 ) -> dict:
     """Request a password reset token. Always returns 200 to prevent email enumeration."""
     result = await db.execute(
-        select(User).where(User.email == body.email, User.deleted_at.is_(None))
+        select(User).where(
+            User.email == body.email,
+            User.deleted_at.is_(None),
+            User.is_active == True,
+        )
     )
     user = result.scalar_one_or_none()
 
     if user is not None:
         token = create_password_reset_token(str(user.id))
-        logger.warning("[PASSWORD RESET] user_id=%s token=%s", user.id, token)
+        logger.info("Password reset token generated for user_id=%s", user.id)
 
     return {"message": "If the email exists, a password reset link has been sent"}
 
@@ -193,10 +197,12 @@ async def reset_password(
 
     # Enforce single-use: if password was changed AFTER the token was issued, reject
     token_iat = payload.get("iat")
-    if token_iat is not None and user.password_changed_at is not None:
+    if token_iat is not None:
         token_issued_at = datetime.fromtimestamp(token_iat, tz=timezone.utc)
+        # Treat NULL password_changed_at (never reset) as epoch — always before any token
+        pw_changed_raw = user.password_changed_at if user.password_changed_at is not None else datetime(1970, 1, 1, tzinfo=timezone.utc)
         # SQLite stores naive datetimes; attach UTC before comparison
-        pw_changed = user.password_changed_at.replace(tzinfo=timezone.utc)
+        pw_changed = pw_changed_raw.replace(tzinfo=timezone.utc)
         if pw_changed > token_issued_at:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
