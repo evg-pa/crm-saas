@@ -38,6 +38,7 @@ class UserCreate(BaseModel):
     email: str = Field(..., max_length=255)
     password: str = Field(..., min_length=8, max_length=128)
     full_name: str | None = Field(default=None, max_length=255)
+    role: str = Field(default="admin", max_length=20)
     organization_name: str = Field(..., min_length=1, max_length=255)
     organization_slug: str = Field(
         ..., min_length=1, max_length=100, pattern=r"^[a-z0-9-]+$"
@@ -51,6 +52,12 @@ class UserLogin(BaseModel):
     password: str = Field(..., min_length=1)
 
 
+class RefreshTokenRequest(BaseModel):
+    """Body for POST /auth/refresh."""
+
+    refresh_token: str = Field(..., min_length=1)
+
+
 class TokenResponse(BaseModel):
     """JWT token response returned by login and register."""
 
@@ -58,6 +65,7 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
     organization_id: uuid.UUID
     user: "UserResponse"
+    refresh_token: str | None = None
 
 
 class UserResponse(BaseModel):
@@ -69,6 +77,8 @@ class UserResponse(BaseModel):
     organization_id: uuid.UUID
     email: str
     full_name: str | None
+    role: str
+    email_verified: bool
     is_active: bool
     created_at: datetime
     updated_at: datetime
@@ -122,7 +132,7 @@ class ContactBase(BaseModel):
 class ContactCreate(ContactBase):
     """Body for POST /contacts."""
 
-    organization_id: uuid.UUID | None = None
+    organization_id: uuid.UUID
 
 
 class ContactUpdate(BaseModel):
@@ -161,7 +171,7 @@ class CompanyBase(BaseModel):
 class CompanyCreate(CompanyBase):
     """Body for POST /companies."""
 
-    organization_id: uuid.UUID | None = None
+    organization_id: uuid.UUID
 
 
 class CompanyUpdate(BaseModel):
@@ -200,7 +210,7 @@ class DealBase(BaseModel):
 class DealCreate(DealBase):
     """Body for POST /deals."""
 
-    organization_id: uuid.UUID | None = None
+    organization_id: uuid.UUID
 
 
 class DealUpdate(BaseModel):
@@ -240,7 +250,7 @@ class ActivityBase(BaseModel):
 class ActivityCreate(ActivityBase):
     """Body for POST /activities."""
 
-    organization_id: uuid.UUID | None = None
+    organization_id: uuid.UUID
 
 
 class ActivityUpdate(BaseModel):
@@ -275,7 +285,7 @@ class NoteBase(BaseModel):
 class NoteCreate(NoteBase):
     """Body for POST /notes."""
 
-    organization_id: uuid.UUID | None = None
+    organization_id: uuid.UUID
     contact_id: uuid.UUID
 
 

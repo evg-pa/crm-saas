@@ -97,6 +97,12 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
     full_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
+    role: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="admin", server_default="admin"
+    )
+    email_verified: Mapped[bool] = mapped_column(
+        default=False, nullable=False, server_default="0"
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), default=utcnow
     )
@@ -112,6 +118,44 @@ class User(Base):
 
     # Relationships
     organization: Mapped["Organization"] = relationship(back_populates="users")
+    refresh_tokens: Mapped[list["RefreshToken"]] = relationship(
+        back_populates="user", lazy="selectin"
+    )
+
+
+class RefreshToken(Base):
+    """Stored refresh token for JWT token rotation.
+
+    Each refresh token is single-use — after it's consumed, a new one is issued.
+    Tokens are identified by JWT jti claim stored in token_jti.
+    """
+
+    __tablename__ = "refresh_tokens"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=new_uuid
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    token_jti: Mapped[str] = mapped_column(
+        String(255), unique=True, nullable=False, index=True
+    )
+    expires_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
+    used_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, default=None
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), default=utcnow
+    )
+
+    # Relationships
+    user: Mapped["User"] = relationship(back_populates="refresh_tokens")
 
 
 class Contact(Base):

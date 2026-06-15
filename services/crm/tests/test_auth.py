@@ -9,10 +9,6 @@ backend features are committed.
 
 import pytest
 
-pytestmark = pytest.mark.xfail(
-    reason="Auth features (roles, email_verified, password-reset) only in Docker, not in committed code"
-)
-
 AUTH_URL = "/api/v1/auth"
 
 
@@ -376,4 +372,171 @@ async def test_reset_password_weak_new_password(client, caplog):
         f"{AUTH_URL}/reset-password",
         json={"token": token, "new_password": "1234567"},
     )
+    assert resp.status_code == 422, resp.text
+
+
+# ── Refresh tokens returned by register/login ──────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_register_returns_refresh_token(client):
+    """POST /auth/register — returns a refresh_token alongside the access token."""
+    payload = {
+        "email": "refresh-reg@example.com",
+        "password": "securepass123",
+        "full_name": "Refresh Reg",
+        "organization_name": "Refresh Reg Org",
+        "organization_slug": "refresh-reg-org",
+    }
+    resp = await client.post(f"{AUTH_URL}/register", json=payload)
+    assert resp.status_code == 201, resp.text
+    data = resp.json()
+    assert "refresh_token" in data
+    assert isinstance(data["refresh_token"], str)
+    assert len(data["refresh_token"]) > 0
+
+
+@pytest.mark.asyncio
+async def test_login_returns_refresh_token(client):
+    """POST /auth/login — returns a refresh_token alongside the access token."""
+    payload = {
+        "email": "refresh-login@example.com",
+        "password": "securepass123",
+        "full_name": "Refresh Login",
+        "organization_name": "Refresh Login Org",
+        "organization_slug": "refresh-login-org",
+    }
+    await client.post(f"{AUTH_URL}/register", json=payload)
+    resp = await client.post(
+        f"{AUTH_URL}/login",
+        json={"email": payload["email"], "password": payload["password"]},
+    )
+    assert resp.status_code == 200, resp.text
+    data = resp.json()
+    assert "refresh_token" in data
+    assert isinstance(data["refresh_token"], str)
+    assert len(data["refresh_token"]) > 0
+
+
+# ── Refresh endpoint ───────────────────────────────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_refresh_returns_new_token_pair(client):
+    """POST /auth/refresh — valid refresh token returns new access + refresh pair."""
+    payload = {
+        "email": "refresh-pair@example.com",
+        "password": "securepass123",
+        "full_name": "Refresh Pair",
+        "organization_name": "Refresh Pair Org",
+        "organization_slug": "refresh-pair-org",
+    }
+    reg_resp = await client.post(f"{AUTH_URL}/register", json=payload)
+    assert reg_resp.status_code == 201
+    reg_data = reg_resp.json()
+    refresh_token = reg_data["refresh_token"]
+
+    resp = await client.post(
+        f"{AUTH_URL}/refresh",
+        json={"refresh_token": refresh_token},
+    )
+    assert resp.status_code == 200, resp.text
+    data = resp.json()
+    assert "access_token" in data
+    assert "refresh_token" in data
+    assert data["token_type"] == "bearer"
+    assert data["access_token"] != reg_data["access_token"]
+    assert data["refresh_token"] != refresh_token
+    assert "user" in data
+    assert "organization_id" in data
+
+
+@pytest.mark.asyncio
+async def test_refresh_token_is_single_use(client):
+    """POST /auth/refresh — using the same refresh token twice fails with 401."""
+    payload = {
+        "email": "single-use@example.com",
+        "password": "securepass123",
+        "full_name": "Single Use",
+        "organization_name": "Single Use Org",
+        "organization_slug": "single-use-org",
+    }
+    reg_resp = await client.post(f"{AUTH_URL}/register", json=payload)
+    assert reg_resp.status_code == 201
+    refresh_token = reg_resp.json()["refresh_token"]
+
+    resp1 = await client.post(
+        f"{AUTH_URL}/refresh",
+        json={"refresh_token": refresh_token},
+    )
+    assert resp1.status_code == 200, resp1.text
+
+    resp2 = await client.post(
+        f"{AUTH_URL}/refresh",
+        json={"refresh_token": refresh_token},
+    )
+    assert resp2.status_code == 401, resp2.text
+    assert "already used" in resp2.json()["detail"].lower()
+
+
+@pytest.mark.asyncio
+async def test_refresh_with_invalid_token_fails(client):
+    """POST /auth/refresh — bogus token returns 401."""
+    resp = await client.post(
+        f"{AUTH_URL}/refresh",
+        json={"refresh_token": "this-is-not-a-valid-jwt"},
+    )
+    assert resp.status_code == 401, resp.text
+
+
+@pytest.mark.asyncio
+async def test_refresh_with_access_token_fails(client):
+    """POST /auth/refresh — access token (type=access) cannot be used as refresh token."""
+    payload = {
+        "email": "access-as-refresh@example.com",
+        "password": "securepass123",
+        "full_name": "Access Refresh",
+        "organization_name": "Access Refresh Org",
+        "organization_slug": "access-refresh-org",
+    }
+    reg_resp = await client.post(f"{AUTH_URL}/register", json=payload)
+    assert reg_resp.status_code == 201
+    access_token = reg_resp.json()["access_token"]
+
+    resp = await client.post(
+        f"{AUTH_URL}/refresh",
+        json={"refresh_token": access_token},
+    )
+    assert resp.status_code == 401, resp.text
+
+
+@pytest.mark.asyncio
+async def test_refresh_chain_works(client):
+    """POST /auth/refresh — chained refresh calls work (rotating tokens)."""
+    payload = {
+        "email": "chain@example.com",
+        "password": "securepass123",
+        "full_name": "Chain",
+        "organization_name": "Chain Org",
+        "organization_slug": "chain-org",
+    }
+    reg_resp = await client.post(f"{AUTH_URL}/register", json=payload)
+    assert reg_resp.status_code == 201
+    refresh_token = reg_resp.json()["refresh_token"]
+
+    for i in range(3):
+        resp = await client.post(
+            f"{AUTH_URL}/refresh",
+            json={"refresh_token": refresh_token},
+        )
+        assert resp.status_code == 200, f"Refresh {i} failed: {resp.text}"
+        data = resp.json()
+        assert data["refresh_token"] != refresh_token
+        refresh_token = data["refresh_token"]
+
+
+@pytest.mark.asyncio
+async def test_refresh_token_missing_body(client):
+    """POST /auth/refresh — 422 when refresh_token field is missing."""
+    resp = await client.post(f"{AUTH_URL}/refresh", json={})
     assert resp.status_code == 422, resp.text
