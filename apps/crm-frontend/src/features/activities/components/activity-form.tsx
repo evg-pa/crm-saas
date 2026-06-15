@@ -9,6 +9,7 @@ import {
 } from "@/lib/validators/activity";
 import { useContacts } from "@/lib/hooks/use-contacts";
 import { useDeals } from "@/lib/hooks/use-deals";
+import { useTranslation } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -54,6 +55,7 @@ export function ActivityForm({
   activity,
   isSubmitting = false,
 }: ActivityFormProps) {
+  const { t } = useTranslation();
   const isEditing = !!activity;
 
   const { data: contactsData } = useContacts({ limit: 100 });
@@ -75,7 +77,7 @@ export function ActivityForm({
           description: activity.description,
           contact_id: activity.contact_id,
           deal_id: activity.deal_id,
-          occurred_at: activity.occurred_at.split("T")[0],
+          occurred_at: activity.occurred_at.slice(0, 16),
         }
       : {
           activity_type: "call",
@@ -100,19 +102,19 @@ export function ActivityForm({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? "Edit Activity" : "New Activity"}
+            {isEditing ? t("activities.editActivity") : t("activities.newActivity")}
           </DialogTitle>
           <DialogDescription>
             {isEditing
-              ? "Update the activity details below."
-              : "Log a new activity for a contact or deal."}
+              ? t("activities.editActivityDesc")
+              : t("activities.newActivityDesc")}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
           {/* Activity Type */}
           <div className="space-y-2">
-            <Label htmlFor="activity_type">Type *</Label>
+            <Label htmlFor="activity_type">{t("activities.type")} *</Label>
             <Select
               value={watch("activity_type")}
               onValueChange={(v) =>
@@ -139,10 +141,10 @@ export function ActivityForm({
 
           {/* Subject */}
           <div className="space-y-2">
-            <Label htmlFor="subject">Subject *</Label>
+            <Label htmlFor="subject">{t("activities.subject")} *</Label>
             <Input
               id="subject"
-              placeholder="Discovery call summary"
+              placeholder={t("activities.subjectPlaceholder")}
               {...register("subject")}
             />
             {errors.subject && (
@@ -154,10 +156,10 @@ export function ActivityForm({
 
           {/* Description */}
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t("activities.descField")}</Label>
             <Textarea
               id="description"
-              placeholder="Detailed notes about this activity..."
+              placeholder={t("activities.descPlaceholder")}
               rows={3}
               {...register("description", {
                 setValueAs: (v: string) => (v === "" ? null : v),
@@ -168,7 +170,7 @@ export function ActivityForm({
           {/* Contact & Deal */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="contact_id">Contact</Label>
+              <Label htmlFor="contact_id">{t("activities.contact")}</Label>
               <Select
                 value={selectedContactId ?? "none"}
                 onValueChange={(v) =>
@@ -176,7 +178,7 @@ export function ActivityForm({
                 }
               >
                 <SelectTrigger id="contact_id">
-                  <SelectValue placeholder="Select contact..." />
+                  <SelectValue placeholder={t("activities.selectContact")} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">None</SelectItem>
@@ -189,7 +191,7 @@ export function ActivityForm({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="deal_id">Deal</Label>
+              <Label htmlFor="deal_id">{t("activities.deal")}</Label>
               <Select
                 value={selectedDealId ?? "none"}
                 onValueChange={(v) =>
@@ -197,7 +199,7 @@ export function ActivityForm({
                 }
               >
                 <SelectTrigger id="deal_id">
-                  <SelectValue placeholder="Select deal..." />
+                  <SelectValue placeholder={t("activities.selectDeal")} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">None</SelectItem>
@@ -213,7 +215,7 @@ export function ActivityForm({
 
           {/* Date */}
           <div className="space-y-2">
-            <Label htmlFor="occurred_at">Date *</Label>
+            <Label htmlFor="occurred_at">{t("activities.date")} *</Label>
             <Input
               id="occurred_at"
               type="datetime-local"
@@ -232,14 +234,14 @@ export function ActivityForm({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting
-                ? "Saving..."
+                ? t("common.saving")
                 : isEditing
-                  ? "Save Changes"
-                  : "Create Activity"}
+                  ? t("activities.saveChanges")
+                  : t("activities.createActivity")}
             </Button>
           </DialogFooter>
         </form>

@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useActivities, useCreateActivity } from "@/lib/hooks/use-activities";
+import { useActivities, useCreateActivity, useDeleteActivity } from "@/lib/hooks/use-activities";
 import { ActivityForm } from "@/features/activities/components/activity-form";
 import { useContact } from "@/lib/hooks/use-contacts";
 import { useDeal } from "@/lib/hooks/use-deals";
@@ -71,6 +71,7 @@ export default function ActivitiesPage() {
   });
 
   const createActivity = useCreateActivity();
+  const deleteActivity = useDeleteActivity();
 
   const handleCreate = useCallback(
     (values: ActivityFormValues) => {
@@ -96,6 +97,22 @@ export default function ActivitiesPage() {
       );
     },
     [createActivity, t]
+  );
+
+  const handleDelete = useCallback(
+    (activity: ActivityType) => {
+      deleteActivity.mutate(activity.id, {
+        onSuccess: () =>
+          toast.success(
+            t("activities.activityDeleted", { name: activity.subject })
+          ),
+        onError: (err) =>
+          toast.error(
+            err instanceof Error ? err.message : t("activities.deleteError")
+          ),
+      });
+    },
+    [deleteActivity, t]
   );
 
   const handleSearchChange = useCallback((value: string) => {
@@ -279,6 +296,19 @@ export default function ActivitiesPage() {
             columns={ACTIVITY_COLUMNS}
             data={data?.items ?? []}
             isLoading={isLoading}
+            onRowClick={(activity) => router.push(`/activities/${activity.id}`)}
+            rowActions={[
+              {
+                label: t("common.edit"),
+                onClick: (activity) =>
+                  router.push(`/activities/${activity.id}`),
+              },
+              {
+                label: t("common.delete"),
+                onClick: handleDelete,
+                variant: "destructive",
+              },
+            ]}
             emptyState={emptyState}
           />
 
