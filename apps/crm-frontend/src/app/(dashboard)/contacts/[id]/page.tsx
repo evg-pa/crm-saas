@@ -4,7 +4,9 @@ import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useContact, useUpdateContact, useDeleteContact } from "@/lib/hooks/use-contacts";
 import { useCompany } from "@/lib/hooks/use-companies";
+import { useNotes, useCreateNote, useDeleteNote } from "@/lib/hooks/use-notes";
 import { ContactForm } from "@/features/contacts/components/contact-form";
+import { NoteForm } from "@/features/notes/components/note-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,23 +17,33 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ArrowLeft, MoreHorizontal, Pencil, Trash2, Loader2 } from "lucide-react";
+import { ArrowLeft, MoreHorizontal, Pencil, Trash2, Loader2, Plus } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/use-translation";
 import type { ContactFormValues } from "@/lib/validators/contact";
+import type { NoteFormValues } from "@/lib/validators/note";
 
 export default function ContactDetailPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
 
+  const { t } = useTranslation();
+
   const [formOpen, setFormOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [noteFormOpen, setNoteFormOpen] = useState(false);
 
   const { data: contact, isLoading, isError, error } = useContact(id);
   const { data: company } = useCompany(contact?.company_id ?? "");
+  const { data: notesData, isLoading: notesLoading } = useNotes({
+    contact_id: id,
+  });
 
   const updateContact = useUpdateContact();
   const deleteContact = useDeleteContact();
+  const createNote = useCreateNote();
+  const deleteNote = useDeleteNote();
 
   const handleUpdate = (values: ContactFormValues) => {
     updateContact.mutate(
@@ -46,6 +58,17 @@ export default function ContactDetailPage() {
       onSuccess: () => router.push("/contacts"),
       onSettled: () => setDeleting(false),
     });
+  };
+
+  const handleCreateNote = (values: NoteFormValues) => {
+    createNote.mutate(
+      { contact_id: id, content: values.content },
+      { onSuccess: () => setNoteFormOpen(false) }
+    );
+  };
+
+  const handleDeleteNote = (noteId: string) => {
+    deleteNote.mutate(noteId);
   };
 
   if (isLoading) {
@@ -157,6 +180,54 @@ export default function ContactDetailPage() {
         </div>
       </div>
 
+      {/* Notes Section */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-base">{t("notes.title")}</CardTitle>
+          <Button size="sm" onClick={() => setNoteFormOpen(true)}>
+            <Plus className="mr-1 h-4 w-4" />
+            {t("notes.addNote")}
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {notesLoading ? (
+            <div className="space-y-3">
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full" />
+            </div>
+          ) : notesData && notesData.items.length > 0 ? (
+            <ul className="space-y-3">
+              {notesData.items.map((note) => (
+                <li
+                  key={note.id}
+                  className="group flex items-start justify-between rounded-lg border p-3"
+                >
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <p className="whitespace-pre-wrap text-sm">{note.content}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatDate(note.created_at)}
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="ml-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => handleDeleteNote(note.id)}
+                    disabled={deleteNote.isPending}
+                  >
+                    <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              {t("notes.noNotesDesc")}
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Edit Form Dialog */}
       <ContactForm
         open={formOpen}
@@ -164,6 +235,14 @@ export default function ContactDetailPage() {
         onSubmit={handleUpdate}
         contact={contact}
         isSubmitting={updateContact.isPending}
+      />
+
+      {/* Note Form Dialog */}
+      <NoteForm
+        open={noteFormOpen}
+        onOpenChange={setNoteFormOpen}
+        onSubmit={handleCreateNote}
+        isSubmitting={createNote.isPending}
       />
     </div>
   );
