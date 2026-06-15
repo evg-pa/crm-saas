@@ -1,17 +1,8 @@
 """
 Integration tests for Auth endpoints including role, email_verified, password reset, and email verification.
-
-NOTE: These tests were written by Paperclip agents for backend features (RBAC roles,
-email_verified field, password-reset endpoints) that exist in the live Docker container
-but were never committed to the git repository. All tests are marked xfail until those
-backend features are committed.
 """
 
 import pytest
-
-pytestmark = pytest.mark.xfail(
-    reason="Auth features (roles, email_verified, password-reset) only in Docker, not in committed code"
-)
 
 AUTH_URL = "/api/v1/auth"
 

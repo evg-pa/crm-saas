@@ -6,9 +6,11 @@ Overrides FastAPI's get_db and get_current_user dependencies for test auth.
 """
 
 import asyncio
+import logging
 import uuid
 from typing import AsyncGenerator
 
+import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -24,6 +26,12 @@ TEST_DATABASE_URL = "sqlite+aiosqlite:///file:testdb?mode=memory&cache=shared&ur
 # Each test module gets a unique DB to avoid collisions
 _engine = None
 _session_factory = None
+
+@pytest.fixture(autouse=True)
+def _set_caplog_level(caplog):
+    """Ensure caplog captures INFO-level messages (needed for password-reset logs)."""
+    caplog.set_level(logging.INFO)
+
 
 # Test user credentials — seeded once per session
 TEST_USER_EMAIL = "test@crm.test"

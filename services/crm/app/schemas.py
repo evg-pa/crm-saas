@@ -6,6 +6,7 @@ All response schemas use UUIDs and ISO-format datetimes.
 
 import uuid
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -38,6 +39,7 @@ class UserCreate(BaseModel):
     email: str = Field(..., max_length=255)
     password: str = Field(..., min_length=8, max_length=128)
     full_name: str | None = Field(default=None, max_length=255)
+    role: Literal["admin", "member", "manager"] = Field(default="admin")
     organization_name: str = Field(..., min_length=1, max_length=255)
     organization_slug: str = Field(
         ..., min_length=1, max_length=100, pattern=r"^[a-z0-9-]+$"
@@ -69,9 +71,30 @@ class UserResponse(BaseModel):
     organization_id: uuid.UUID
     email: str
     full_name: str | None
+    role: str
+    email_verified: bool
     is_active: bool
     created_at: datetime
     updated_at: datetime
+
+
+class ForgotPasswordRequest(BaseModel):
+    """Body for POST /auth/forgot-password."""
+
+    email: str = Field(..., max_length=255)
+
+
+class ResetPasswordRequest(BaseModel):
+    """Body for POST /auth/reset-password."""
+
+    token: str
+    new_password: str = Field(..., min_length=8, max_length=128)
+
+
+class MessageResponse(BaseModel):
+    """Generic message response."""
+
+    message: str
 
 
 # ── Organization ────────────────────────────────────────────────────────────

@@ -33,15 +33,20 @@ def create_access_token(
 ) -> str:
     """Create a signed JWT access token."""
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + (
+    now = datetime.now(timezone.utc)
+    expire = now + (
         expires_delta or timedelta(minutes=settings.jwt_access_token_expire_minutes)
     )
-    to_encode.update({"exp": expire})
+    to_encode.update({"iat": now, "exp": expire})
     return jwt.encode(
         to_encode,
         settings.jwt_secret_key,
         algorithm=settings.jwt_algorithm,
     )
+
+
+PASSWORD_RESET_PURPOSE = "password_reset"
+PASSWORD_RESET_EXPIRE_MINUTES = 15
 
 
 def decode_access_token(token: str) -> dict:
@@ -51,6 +56,22 @@ def decode_access_token(token: str) -> dict:
         settings.jwt_secret_key,
         algorithms=[settings.jwt_algorithm],
     )
+
+
+def create_password_reset_token(user_id: str) -> str:
+    """Create a short-lived JWT for password reset (15 min expiry)."""
+    return create_access_token(
+        data={"sub": user_id, "purpose": PASSWORD_RESET_PURPOSE},
+        expires_delta=timedelta(minutes=PASSWORD_RESET_EXPIRE_MINUTES),
+    )
+
+
+def decode_password_reset_token(token: str) -> dict:
+    """Decode and validate a password-reset JWT. Raises on expiry/signature error."""
+    payload = decode_access_token(token)
+    if payload.get("purpose") != PASSWORD_RESET_PURPOSE:
+        raise jwt.InvalidTokenError("Token has wrong purpose")
+    return payload
 
 
 async def get_current_user(
