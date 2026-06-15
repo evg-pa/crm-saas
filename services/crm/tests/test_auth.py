@@ -286,7 +286,6 @@ async def test_reset_password_invalid_token(client):
     assert resp.status_code == 400, resp.text
 
 
-@pytest.mark.xfail(reason="Password-reset JWT missing iat claim — token reuse check skipped")
 @pytest.mark.asyncio
 async def test_reset_password_reused_token_fails(client, caplog):
     """POST /auth/reset-password — tokens are single-use."""
