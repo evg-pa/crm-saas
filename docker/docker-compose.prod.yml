@@ -1,0 +1,164 @@
+# =============================================================================
+# CRM SaaS — Production Docker Compose Override
+# =============================================================================
+# Extends the base docker-compose.yml with production hardening.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker/docker-compose.prod.yml up -d
+#
+# Changes from the base (development) compose:
+#   - Adds nginx as the single reverse-proxy entry point (ports :80/:443)
+#   - All services: restart: always (crash-loop resilience)
+#   - All services: CPU/memory limits + reservations
+#   - All services: JSON log format with rotation
+#   - Backend:  LOG_FORMAT=json, reduced uvicorn workers + log-level
+#   - Postgres:  labeled volume for backup tooling
+#   - Redis:     labeled volume for backup tooling
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # Nginx — HTTPS reverse proxy (single entry point)
+  # ---------------------------------------------------------------------------
+  nginx:
+    build:
+      context: ./docker/nginx
+      dockerfile: Dockerfile.nginx
+    container_name: crm-nginx
+    restart: always
+    ports:
+      - "${NGINX_HTTP_PORT:-80}:80"
+      - "${NGINX_HTTPS_PORT:-443}:443"
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:80/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.1"
+          memory: 64M
+    networks:
+      - crm-network
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL — production-hardened
+  # ---------------------------------------------------------------------------
+  db:
+    restart: always
+    labels:
+      com.crm.backup.target: "true"
+      com.crm.backup.schedule: "daily"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+
+  # ---------------------------------------------------------------------------
+  # Redis — production-hardened
+  # ---------------------------------------------------------------------------
+  redis:
+    restart: always
+    labels:
+      com.crm.backup.target: "true"
+      com.crm.backup.schedule: "daily"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.1"
+          memory: 64M
+
+  # ---------------------------------------------------------------------------
+  # CRM Backend — production-hardened
+  # ---------------------------------------------------------------------------
+  backend:
+    restart: always
+    environment:
+      LOG_FORMAT: json
+      DEBUG: "false"
+    command: >
+      sh -c "
+        alembic upgrade head &&
+        PYTHONPATH=/app python scripts/seed.py &&
+        exec uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers ${UVICORN_WORKERS:-2} --log-level warning
+      "
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+
+  # ---------------------------------------------------------------------------
+  # CRM Frontend — production-hardened
+  # ---------------------------------------------------------------------------
+  frontend:
+    restart: always
+    environment:
+      NODE_ENV: production
+      API_URL: http://backend:8000
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.1"
+          memory: 128M
+
+# ---------------------------------------------------------------------------
+# Volumes — production labels for backup tooling
+# ---------------------------------------------------------------------------
+volumes:
+  pgdata:
+    labels:
+      com.crm.backup.target: "true"
+      com.crm.backup.schedule: "daily"
+  redisdata:
+    labels:
+      com.crm.backup.target: "true"
+      com.crm.backup.schedule: "daily"
