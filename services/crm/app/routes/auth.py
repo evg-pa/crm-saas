@@ -20,10 +20,8 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.core.security import (
     create_access_token,
-    create_email_verification_token,
     create_password_reset_token,
     create_refresh_token,
-    decode_email_verification_token,
     decode_password_reset_token,
     decode_refresh_token,
     hash_password,
@@ -35,12 +33,10 @@ from app.schemas import (
     MessageResponse,
     RefreshTokenRequest,
     ResetPasswordRequest,
-    SendVerificationRequest,
     TokenResponse,
     UserCreate,
     UserLogin,
     UserResponse,
-    VerifyEmailRequest,
 )
 
 logger = logging.getLogger(__name__)
@@ -269,13 +265,13 @@ async def forgot_password(
         select(User).where(
             User.email == body.email,
             User.deleted_at.is_(None),
-            User.is_active == True,
+            User.is_active,
         )
     )
     user = result.scalar_one_or_none()
 
     if user is not None:
-        token = create_password_reset_token(str(user.id))
+        create_password_reset_token(str(user.id))
         logger.info("Password reset token generated for user_id=%s", user.id)
 
     return {"message": "If the email exists, a password reset link has been sent"}
