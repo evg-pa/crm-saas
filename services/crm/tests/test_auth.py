@@ -380,14 +380,21 @@ async def test_login_returns_refresh_token(client):
     # Register first
     resp = await client.post(
         f"{AUTH_URL}/register",
-        json={**_REGISTER_PAYLOAD, "email": "login-refresh@example.com", "organization_slug": "login-refresh-org"},
+        json={
+            **_REGISTER_PAYLOAD,
+            "email": "login-refresh@example.com",
+            "organization_slug": "login-refresh-org",
+        },
     )
     assert resp.status_code == 201
 
     # Login
     resp = await client.post(
         f"{AUTH_URL}/login",
-        json={"email": "login-refresh@example.com", "password": _REGISTER_PAYLOAD["password"]},
+        json={
+            "email": "login-refresh@example.com",
+            "password": _REGISTER_PAYLOAD["password"],
+        },
     )
     assert resp.status_code == 200, resp.text
     data = resp.json()
@@ -428,7 +435,11 @@ async def test_refresh_token_is_single_use(client):
     # Register to get tokens
     resp = await client.post(
         f"{AUTH_URL}/register",
-        json={**_REGISTER_PAYLOAD, "email": "single-use@example.com", "organization_slug": "single-use-org"},
+        json={
+            **_REGISTER_PAYLOAD,
+            "email": "single-use@example.com",
+            "organization_slug": "single-use-org",
+        },
     )
     assert resp.status_code == 201
     refresh_token = resp.json()["refresh_token"]
@@ -465,7 +476,11 @@ async def test_refresh_with_access_token_fails(client):
     # Register to get an access token
     resp = await client.post(
         f"{AUTH_URL}/register",
-        json={**_REGISTER_PAYLOAD, "email": "access-as-refresh@example.com", "organization_slug": "access-as-refresh-org"},
+        json={
+            **_REGISTER_PAYLOAD,
+            "email": "access-as-refresh@example.com",
+            "organization_slug": "access-as-refresh-org",
+        },
     )
     assert resp.status_code == 201
     access_token = resp.json()["access_token"]
@@ -484,7 +499,11 @@ async def test_refresh_chain_works(client):
     # Register to get tokens
     resp = await client.post(
         f"{AUTH_URL}/register",
-        json={**_REGISTER_PAYLOAD, "email": "chain@example.com", "organization_slug": "chain-org"},
+        json={
+            **_REGISTER_PAYLOAD,
+            "email": "chain@example.com",
+            "organization_slug": "chain-org",
+        },
     )
     assert resp.status_code == 201
     refresh_token = resp.json()["refresh_token"]

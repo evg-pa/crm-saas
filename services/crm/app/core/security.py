@@ -57,8 +57,7 @@ def create_refresh_token(
     to_encode = data.copy()
     now = datetime.now(timezone.utc)
     expire = now + (
-        expires_delta
-        or timedelta(minutes=settings.jwt_refresh_token_expire_minutes)
+        expires_delta or timedelta(minutes=settings.jwt_refresh_token_expire_minutes)
     )
     jti = str(uuid.uuid4())
     to_encode.update({"iat": now, "exp": expire, "type": "refresh", "jti": jti})

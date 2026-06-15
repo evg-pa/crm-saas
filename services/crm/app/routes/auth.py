@@ -167,7 +167,9 @@ async def login(body: UserLogin, db: AsyncSession = Depends(get_db)) -> dict:
 
 
 @router.post("/refresh", response_model=TokenResponse)
-async def refresh(body: RefreshTokenRequest, db: AsyncSession = Depends(get_db)) -> dict:
+async def refresh(
+    body: RefreshTokenRequest, db: AsyncSession = Depends(get_db)
+) -> dict:
     """Rotate a refresh token — issue new access + refresh token pair.
 
     The old refresh token is single-use and is invalidated (used_at set).
@@ -328,7 +330,11 @@ async def reset_password(
     if token_iat is not None:
         token_issued_at = datetime.fromtimestamp(token_iat, tz=timezone.utc)
         # Treat NULL password_changed_at (never reset) as epoch — always before any token
-        pw_changed_raw = user.password_changed_at if user.password_changed_at is not None else datetime(1970, 1, 1, tzinfo=timezone.utc)
+        pw_changed_raw = (
+            user.password_changed_at
+            if user.password_changed_at is not None
+            else datetime(1970, 1, 1, tzinfo=timezone.utc)
+        )
         # SQLite stores naive datetimes; attach UTC before comparison
         pw_changed = pw_changed_raw.replace(tzinfo=timezone.utc)
         if pw_changed > token_issued_at:

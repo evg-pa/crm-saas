@@ -27,6 +27,7 @@ TEST_DATABASE_URL = "sqlite+aiosqlite:///file:testdb?mode=memory&cache=shared&ur
 _engine = None
 _session_factory = None
 
+
 @pytest.fixture(autouse=True)
 def _set_caplog_level(caplog):
     """Ensure caplog captures INFO-level messages (needed for password-reset logs)."""

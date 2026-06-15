@@ -51,7 +51,9 @@ def _require_admin(
 
 @router.get("", response_model=PaginatedResponse)
 async def list_users(
-    q: str | None = Query(default=None, description="Search across full_name and email"),
+    q: str | None = Query(
+        default=None, description="Search across full_name and email"
+    ),
     pagination: dict = Depends(pagination_params),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
