@@ -19,6 +19,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useSidebarStore } from "@/lib/stores/sidebar-store";
 import { useTranslation } from "@/lib/i18n";
+import { useHasRole } from "@/components/auth/role-guard";
 import { Button } from "@/components/ui/button";
 
 interface NavItem {
@@ -32,15 +33,24 @@ export function Sidebar() {
   const { isCollapsed, toggle } = useSidebarStore();
   const { t } = useTranslation();
 
-  const navItems: NavItem[] = [
+  const isAdmin = useHasRole("admin");
+
+  const allNavItems: NavItem[] = [
     { labelKey: "nav.dashboard", href: "/", icon: LayoutDashboard },
     { labelKey: "nav.contacts", href: "/contacts", icon: Users },
     { labelKey: "nav.companies", href: "/companies", icon: Building2 },
     { labelKey: "nav.deals", href: "/deals", icon: Handshake },
     { labelKey: "nav.activities", href: "/activities", icon: Activity },
-    { labelKey: "nav.users", href: "/users", icon: UserCog },
+    { labelKey: "nav.users", href: "/users", icon: UserCog, adminOnly: true },
     { labelKey: "nav.settings", href: "/settings", icon: Settings },
   ];
+
+  const navItems = allNavItems.filter((item) => {
+    if ("adminOnly" in item && (item as { adminOnly?: boolean }).adminOnly) {
+      return isAdmin;
+    }
+    return true;
+  });
 
   return (
     <aside

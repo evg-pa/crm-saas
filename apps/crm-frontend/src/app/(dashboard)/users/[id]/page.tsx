@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useUser, useUpdateUser, useDeleteUser } from "@/lib/hooks/use-users";
+import { useAuthStore } from "@/lib/stores/auth-store";
+import { useHasRole } from "@/components/auth/role-guard";
 import { UserForm } from "@/features/users/components/user-form";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +20,7 @@ import {
 import { ArrowLeft, MoreHorizontal, Pencil, Trash2, Loader2, Shield, ShieldCheck, UserRoundCheck } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n";
+import { toast } from "sonner";
 import type { UserRole } from "@/types";
 import type { UserUpdateFormValues } from "@/lib/validators/user";
 
@@ -44,31 +48,61 @@ export default function UserDetailPage() {
 
   const { t } = useTranslation();
 
+  const currentUserId = useAuthStore((s) => s.user?.id);
+  const isAdmin = useHasRole(["admin"]);
+  const token = useAuthStore((s) => s.token);
+
   const [formOpen, setFormOpen] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const { data: user, isLoading, isError, error } = useUser(id);
 
   const updateUser = useUpdateUser();
   const deleteUser = useDeleteUser();
 
+  const isSelf = currentUserId === id;
+
+  // Redirect non-admin users away from this page
+  useEffect(() => {
+    if (token && !isAdmin) {
+      router.replace("/");
+    }
+  }, [token, isAdmin, router]);
+
+  // If not admin, show nothing while redirecting
+  if (!isAdmin) {
+    return null;
+  }
+
   const handleUpdate = (values: UserUpdateFormValues) => {
     updateUser.mutate(
       { id, ...values },
       {
-        onSuccess: () => setFormOpen(false),
+        onSuccess: () => {
+          setFormOpen(false);
+          toast.success(t("users.userUpdated", { name: user?.full_name ?? user?.email }));
+        },
         onError: (err) => {
-          console.error("Failed to update user:", err);
+          toast.error(
+            err instanceof Error ? err.message : t("users.updateError")
+          );
         },
       }
     );
   };
 
   const handleDelete = () => {
-    setDeleting(true);
     deleteUser.mutate(id, {
-      onSuccess: () => router.push("/users"),
-      onSettled: () => setDeleting(false),
+      onSuccess: () => {
+        toast.success(t("users.userDeleted", { name: user?.full_name ?? user?.email }));
+        router.push("/users");
+      },
+      onError: (err) => {
+        toast.error(
+          err instanceof Error ? err.message : t("users.deleteError")
+        );
+        setDeleteDialogOpen(false);
+      },
     });
   };
 
@@ -127,15 +161,15 @@ export default function UserDetailPage() {
             </DropdownMenuItem>
             <DropdownMenuItem
               className="text-destructive"
-              onClick={handleDelete}
-              disabled={deleting}
+              onClick={() => setDeleteDialogOpen(true)}
+              disabled={isSelf || deleteUser.isPending}
             >
-              {deleting ? (
+              {deleteUser.isPending ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
                 <Trash2 className="mr-2 h-4 w-4" />
               )}
-              {t("common.delete")}
+              {isSelf ? t("users.cannotDeleteSelf") : t("common.delete")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -205,6 +239,22 @@ export default function UserDetailPage() {
         onSubmit={handleUpdate}
         user={user}
         isSubmitting={updateUser.isPending}
+        isAdmin={isAdmin}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title={t("users.deleteConfirmTitle")}
+        description={t("users.deleteConfirmDesc", {
+          name: user.full_name ?? user.email,
+        })}
+        confirmLabel={t("common.delete")}
+        cancelLabel={t("common.cancel")}
+        variant="destructive"
+        onConfirm={handleDelete}
+        isLoading={deleteUser.isPending}
       />
     </div>
   );

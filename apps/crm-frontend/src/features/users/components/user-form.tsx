@@ -35,6 +35,7 @@ interface UserFormProps {
   onSubmit: (values: UserUpdateFormValues) => void;
   user: User;
   isSubmitting?: boolean;
+  isAdmin?: boolean;
 }
 
 export function UserForm({
@@ -43,6 +44,7 @@ export function UserForm({
   onSubmit,
   user,
   isSubmitting = false,
+  isAdmin = false,
 }: UserFormProps) {
   const { t } = useTranslation();
 
@@ -107,30 +109,41 @@ export function UserForm({
             />
           </div>
 
-          {/* Role */}
-          <div className="space-y-2">
-            <Label htmlFor="role">{t("users.role")}</Label>
-            <Select
-              value={selectedRole}
-              onValueChange={(v) =>
-                setValue("role", v as UserUpdateFormValues["role"])
-              }
-            >
-              <SelectTrigger id="role">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {USER_ROLES.map((role) => (
-                  <SelectItem key={role} value={role}>
-                    {t(`users.roles.${role}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.role && (
-              <p className="text-sm text-destructive">{errors.role.message}</p>
-            )}
-          </div>
+          {/* Role — only admins can change roles */}
+          {isAdmin ? (
+            <div className="space-y-2">
+              <Label htmlFor="role">{t("users.role")}</Label>
+              <Select
+                value={selectedRole}
+                onValueChange={(v) =>
+                  setValue("role", v as UserUpdateFormValues["role"])
+                }
+              >
+                <SelectTrigger id="role">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {USER_ROLES.map((role) => (
+                    <SelectItem key={role} value={role}>
+                      {t(`users.roles.${role}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.role && (
+                <p className="text-sm text-destructive">{errors.role.message}</p>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Label>{t("users.role")}</Label>
+              <Input
+                value={t(`users.roles.${user.role}`)}
+                disabled
+                className="bg-muted text-muted-foreground"
+              />
+            </div>
+          )}
 
           {/* Active toggle */}
           <div className="flex items-center justify-between rounded-lg border p-3">

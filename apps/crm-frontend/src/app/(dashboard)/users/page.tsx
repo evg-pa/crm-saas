@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useUsers, useDeleteUser } from "@/lib/hooks/use-users";
+import { useAuthStore } from "@/lib/stores/auth-store";
+import { useHasRole } from "@/components/auth/role-guard";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import {
   PageHeader,
   SearchInput,
@@ -40,8 +43,22 @@ export default function UsersPage() {
   const router = useRouter();
   const { t } = useTranslation();
   const { locale } = useLocale();
+  const isAdmin = useHasRole(["admin"]);
+  const token = useAuthStore((s) => s.token);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
+
+  // Redirect non-admin users away from this page
+  useEffect(() => {
+    if (token && !isAdmin) {
+      router.replace("/");
+    }
+  }, [token, isAdmin, router]);
+
+  // If not admin, show nothing while redirecting
+  if (!isAdmin) {
+    return null;
+  }
 
   const limit = 20;
   const { data, isLoading, isError, error } = useUsers({
@@ -50,22 +67,41 @@ export default function UsersPage() {
     limit,
   });
 
+  const currentUserId = useAuthStore((s) => s.user?.id);
+
+  const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
+
   const deleteUser = useDeleteUser();
 
-  const handleDelete = useCallback(
+  const handleDeleteConfirm = useCallback(() => {
+    if (!deleteTarget) return;
+    deleteUser.mutate(deleteTarget.id, {
+      onSuccess: () => {
+        toast.success(
+          t("users.userDeleted", {
+            name: deleteTarget.full_name ?? deleteTarget.email,
+          })
+        );
+        setDeleteTarget(null);
+      },
+      onError: (err) => {
+        toast.error(
+          err instanceof Error ? err.message : t("users.deleteError")
+        );
+        setDeleteTarget(null);
+      },
+    });
+  }, [deleteUser, deleteTarget, t]);
+
+  const handleDeleteClick = useCallback(
     (user: User) => {
-      deleteUser.mutate(user.id, {
-        onSuccess: () =>
-          toast.success(
-            t("users.userDeleted", { name: user.full_name ?? user.email })
-          ),
-        onError: (err) =>
-          toast.error(
-            err instanceof Error ? err.message : t("users.deleteError")
-          ),
-      });
+      if (user.id === currentUserId) {
+        toast.error(t("users.cannotDeleteSelf"));
+        return;
+      }
+      setDeleteTarget(user);
     },
-    [deleteUser, t]
+    [currentUserId, t]
   );
 
   const handleSearchChange = useCallback((value: string) => {
@@ -165,6 +201,27 @@ export default function UsersPage() {
         </div>
       )}
 
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+        title={t("users.deleteConfirmTitle")}
+        description={
+          deleteTarget
+            ? t("users.deleteConfirmDesc", {
+                name: deleteTarget.full_name ?? deleteTarget.email,
+              })
+            : ""
+        }
+        confirmLabel={t("common.delete")}
+        cancelLabel={t("common.cancel")}
+        variant="destructive"
+        onConfirm={handleDeleteConfirm}
+        isLoading={deleteUser.isPending}
+      />
+
       {!isError && (
         <>
           <DataTable
@@ -179,7 +236,7 @@ export default function UsersPage() {
               },
               {
                 label: t("common.delete"),
-                onClick: handleDelete,
+                onClick: handleDeleteClick,
                 variant: "destructive",
               },
             ]}
