@@ -15,6 +15,7 @@ from app.models import (
     Deal,
     Note,
     Organization,
+    User,
 )
 from app.repositories.base import BaseRepository
 
@@ -84,3 +85,10 @@ class NoteRepository(BaseRepository[Note]):
 
     def _searchable_fields(self) -> list[str]:
         return ["content"]
+
+
+class UserRepository(BaseRepository[User]):
+    model = User
+
+    def _searchable_fields(self) -> list[str]:
+        return ["full_name", "email"]

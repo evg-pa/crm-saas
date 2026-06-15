@@ -20,6 +20,7 @@ from app.routes import (
     deals,
     notes,
     organizations,
+    users,
 )
 
 logger = logging.getLogger(__name__)
@@ -67,6 +68,7 @@ app.include_router(companies.router, prefix="/api/v1/companies")
 app.include_router(deals.router, prefix="/api/v1/deals")
 app.include_router(activities.router, prefix="/api/v1/activities")
 app.include_router(notes.router, prefix="/api/v1/notes")
+app.include_router(users.router, prefix="/api/v1/users")
 
 
 @app.get("/health", tags=["Health"])
