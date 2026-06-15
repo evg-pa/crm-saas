@@ -10,6 +10,7 @@ import {
   Handshake,
   Activity,
   Settings,
+  UserCog,
   ChevronLeft,
   ChevronRight,
   type LucideIcon,
@@ -37,6 +38,7 @@ export function Sidebar() {
     { labelKey: "nav.companies", href: "/companies", icon: Building2 },
     { labelKey: "nav.deals", href: "/deals", icon: Handshake },
     { labelKey: "nav.activities", href: "/activities", icon: Activity },
+    { labelKey: "nav.users", href: "/users", icon: UserCog },
     { labelKey: "nav.settings", href: "/settings", icon: Settings },
   ];
 
