@@ -350,3 +350,159 @@ async def test_reset_password_weak_new_password(client, caplog):
         json={"token": token, "new_password": "1234567"},
     )
     assert resp.status_code == 422, resp.text
+
+
+# ── Refresh token flow ─────────────────────────────────────────────────────
+
+_REGISTER_PAYLOAD = {
+    "email": "refresh-test@example.com",
+    "password": "securepass123",
+    "full_name": "Refresh Test",
+    "organization_name": "Refresh Org",
+    "organization_slug": "refresh-org",
+}
+
+
+@pytest.mark.asyncio
+async def test_register_returns_refresh_token(client):
+    """POST /auth/register — returns a refresh_token alongside the access token."""
+    resp = await client.post(f"{AUTH_URL}/register", json=_REGISTER_PAYLOAD)
+    assert resp.status_code == 201, resp.text
+    data = resp.json()
+    assert "refresh_token" in data
+    assert isinstance(data["refresh_token"], str)
+    assert len(data["refresh_token"]) > 0
+
+
+@pytest.mark.asyncio
+async def test_login_returns_refresh_token(client):
+    """POST /auth/login — returns a refresh_token alongside the access token."""
+    # Register first
+    resp = await client.post(
+        f"{AUTH_URL}/register",
+        json={**_REGISTER_PAYLOAD, "email": "login-refresh@example.com", "organization_slug": "login-refresh-org"},
+    )
+    assert resp.status_code == 201
+
+    # Login
+    resp = await client.post(
+        f"{AUTH_URL}/login",
+        json={"email": "login-refresh@example.com", "password": _REGISTER_PAYLOAD["password"]},
+    )
+    assert resp.status_code == 200, resp.text
+    data = resp.json()
+    assert "refresh_token" in data
+    assert isinstance(data["refresh_token"], str)
+    assert len(data["refresh_token"]) > 0
+
+
+@pytest.mark.asyncio
+async def test_refresh_returns_new_token_pair(client):
+    """POST /auth/refresh — valid refresh token returns new access + refresh pair."""
+    # Register to get tokens
+    reg_resp = await client.post(f"{AUTH_URL}/register", json=_REGISTER_PAYLOAD)
+    assert reg_resp.status_code == 201
+    refresh_token = reg_resp.json()["refresh_token"]
+
+    # Refresh
+    resp = await client.post(
+        f"{AUTH_URL}/refresh",
+        json={"refresh_token": refresh_token},
+    )
+    assert resp.status_code == 200, resp.text
+    data = resp.json()
+    assert "access_token" in data
+    assert "refresh_token" in data
+    assert data["token_type"] == "bearer"
+    # Tokens should be new (different from the originals)
+    assert data["access_token"] != reg_resp.json()["access_token"]
+    assert data["refresh_token"] != refresh_token
+    # User + org info should still be present
+    assert "user" in data
+    assert "organization_id" in data
+
+
+@pytest.mark.asyncio
+async def test_refresh_token_is_single_use(client):
+    """POST /auth/refresh — using the same refresh token twice fails with 401."""
+    # Register to get tokens
+    resp = await client.post(
+        f"{AUTH_URL}/register",
+        json={**_REGISTER_PAYLOAD, "email": "single-use@example.com", "organization_slug": "single-use-org"},
+    )
+    assert resp.status_code == 201
+    refresh_token = resp.json()["refresh_token"]
+
+    # First refresh — succeeds
+    resp1 = await client.post(
+        f"{AUTH_URL}/refresh",
+        json={"refresh_token": refresh_token},
+    )
+    assert resp1.status_code == 200, resp1.text
+
+    # Second refresh with the same token — must fail
+    resp2 = await client.post(
+        f"{AUTH_URL}/refresh",
+        json={"refresh_token": refresh_token},
+    )
+    assert resp2.status_code == 401, resp2.text
+    assert "already used" in resp2.json()["detail"].lower()
+
+
+@pytest.mark.asyncio
+async def test_refresh_with_invalid_token_fails(client):
+    """POST /auth/refresh — bogus token returns 401."""
+    resp = await client.post(
+        f"{AUTH_URL}/refresh",
+        json={"refresh_token": "this-is-not-a-valid-jwt"},
+    )
+    assert resp.status_code == 401, resp.text
+
+
+@pytest.mark.asyncio
+async def test_refresh_with_access_token_fails(client):
+    """POST /auth/refresh — access token (type=access) cannot be used as refresh token."""
+    # Register to get an access token
+    resp = await client.post(
+        f"{AUTH_URL}/register",
+        json={**_REGISTER_PAYLOAD, "email": "access-as-refresh@example.com", "organization_slug": "access-as-refresh-org"},
+    )
+    assert resp.status_code == 201
+    access_token = resp.json()["access_token"]
+
+    # Try to use access token for refresh
+    resp = await client.post(
+        f"{AUTH_URL}/refresh",
+        json={"refresh_token": access_token},
+    )
+    assert resp.status_code == 401, resp.text
+
+
+@pytest.mark.asyncio
+async def test_refresh_chain_works(client):
+    """POST /auth/refresh — chained refresh calls work (rotating tokens)."""
+    # Register to get tokens
+    resp = await client.post(
+        f"{AUTH_URL}/register",
+        json={**_REGISTER_PAYLOAD, "email": "chain@example.com", "organization_slug": "chain-org"},
+    )
+    assert resp.status_code == 201
+    refresh_token = resp.json()["refresh_token"]
+
+    # Chain 3 refreshes
+    for i in range(3):
+        resp = await client.post(
+            f"{AUTH_URL}/refresh",
+            json={"refresh_token": refresh_token},
+        )
+        assert resp.status_code == 200, f"Refresh {i} failed: {resp.text}"
+        data = resp.json()
+        assert data["refresh_token"] != refresh_token
+        refresh_token = data["refresh_token"]
+
+
+@pytest.mark.asyncio
+async def test_refresh_token_missing_body(client):
+    """POST /auth/refresh — 422 when refresh_token field is missing."""
+    resp = await client.post(f"{AUTH_URL}/refresh", json={})
+    assert resp.status_code == 422, resp.text

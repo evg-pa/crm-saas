@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     jwt_secret_key: str = "development-secret-change-in-production"
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 30
+    jwt_refresh_token_expire_minutes: int = 10080  # 7 days
 
     # Redis
     redis_url: str = "redis://localhost:6379/0"

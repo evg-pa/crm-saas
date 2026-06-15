@@ -37,12 +37,49 @@ def create_access_token(
     expire = now + (
         expires_delta or timedelta(minutes=settings.jwt_access_token_expire_minutes)
     )
-    to_encode.update({"iat": now, "exp": expire})
+    jti = str(uuid.uuid4())
+    to_encode.update({"iat": now, "exp": expire, "type": "access", "jti": jti})
     return jwt.encode(
         to_encode,
         settings.jwt_secret_key,
         algorithm=settings.jwt_algorithm,
     )
+
+
+def create_refresh_token(
+    data: dict,
+    expires_delta: timedelta | None = None,
+) -> tuple[str, str]:
+    """Create a signed JWT refresh token.
+
+    Returns (encoded_token, jti) — the jti is stored in DB for single-use tracking.
+    """
+    to_encode = data.copy()
+    now = datetime.now(timezone.utc)
+    expire = now + (
+        expires_delta
+        or timedelta(minutes=settings.jwt_refresh_token_expire_minutes)
+    )
+    jti = str(uuid.uuid4())
+    to_encode.update({"iat": now, "exp": expire, "type": "refresh", "jti": jti})
+    token = jwt.encode(
+        to_encode,
+        settings.jwt_secret_key,
+        algorithm=settings.jwt_algorithm,
+    )
+    return token, jti
+
+
+def decode_refresh_token(token: str) -> dict:
+    """Decode and validate a JWT refresh token (must have type=refresh)."""
+    payload = jwt.decode(
+        token,
+        settings.jwt_secret_key,
+        algorithms=[settings.jwt_algorithm],
+    )
+    if payload.get("type") != "refresh":
+        raise jwt.InvalidTokenError("Token is not a refresh token")
+    return payload
 
 
 PASSWORD_RESET_PURPOSE = "password_reset"

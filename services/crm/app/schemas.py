@@ -53,13 +53,20 @@ class UserLogin(BaseModel):
     password: str = Field(..., min_length=1)
 
 
+class RefreshTokenRequest(BaseModel):
+    """Body for POST /auth/refresh."""
+
+    refresh_token: str = Field(..., min_length=1)
+
+
 class TokenResponse(BaseModel):
-    """JWT token response returned by login and register."""
+    """JWT token response returned by login, register, and refresh."""
 
     access_token: str
     token_type: str = "bearer"
     organization_id: uuid.UUID
     user: "UserResponse"
+    refresh_token: str | None = None
 
 
 class UserResponse(BaseModel):
@@ -89,6 +96,14 @@ class ResetPasswordRequest(BaseModel):
 
     token: str
     new_password: str = Field(..., min_length=8, max_length=128)
+
+
+class UserUpdate(BaseModel):
+    """Body for PATCH /users/{id}. Only name, role, and is_active are editable."""
+
+    full_name: str | None = Field(default=None, min_length=1, max_length=255)
+    role: Literal["admin", "member", "manager"] | None = None
+    is_active: bool | None = None
 
 
 class MessageResponse(BaseModel):
