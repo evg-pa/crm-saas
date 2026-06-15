@@ -184,6 +184,30 @@ export interface NoteUpdate {
   content?: string;
 }
 
+// ── User ───────────────────────────────────────────────────────────────────
+
+export type UserRole = "admin" | "manager" | "member";
+
+export const USER_ROLES: UserRole[] = ["admin", "manager", "member"];
+
+export interface User {
+  id: UUID;
+  organization_id: UUID;
+  email: string;
+  full_name: string | null;
+  role: UserRole;
+  email_verified: boolean;
+  is_active: boolean;
+  created_at: ISODateString;
+  updated_at: ISODateString;
+}
+
+export interface UserUpdate {
+  full_name?: string | null;
+  role?: UserRole;
+  is_active?: boolean;
+}
+
 // ── Pagination ─────────────────────────────────────────────────────────────
 
 export interface PaginatedResponse<T> {
