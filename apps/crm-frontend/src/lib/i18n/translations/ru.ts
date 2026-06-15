@@ -190,6 +190,24 @@ const ru: Translations = {
     loginError: "Неверные учётные данные",
     loginErrorDetail: "Проверьте email и пароль.",
     logout: "Выйти",
+    forgotPassword: "Забыли пароль?",
+    forgotPasswordTitle: "Забыли пароль?",
+    forgotPasswordSubtitle: "Введите email, и мы отправим ссылку для сброса",
+    forgotPasswordButton: "Отправить ссылку",
+    forgotPasswordLoading: "Отправка...",
+    forgotPasswordSuccess: "Если учётная запись существует, ссылка для сброса пароля отправлена на email.",
+    forgotPasswordCheckEmail: "Проверьте почту",
+    forgotPasswordCheckEmailDesc: "Если учётная запись существует, вы получите ссылку для сброса",
+    resetPasswordTitle: "Сброс пароля",
+    resetPasswordSubtitle: "Введите новый пароль",
+    resetPasswordButton: "Сбросить пароль",
+    resetPasswordLoading: "Сброс...",
+    resetPasswordSuccess: "Пароль успешно изменён.",
+    resetPasswordInvalidToken: "Недействительная или отсутствующая ссылка для сброса. Запросите новую.",
+    resetPasswordExpiredToken: "Недействительная или истёкшая ссылка для сброса. Запросите новую.",
+    requestNewLink: "Запросить новую ссылку",
+    signInWithNewPassword: "Войти с новым паролем",
+    backToLogin: "Вернуться ко входу",
   },
 
   // ── Deal Stages ─────────────────────────────────────────────────
@@ -200,6 +218,21 @@ const ru: Translations = {
     negotiation: "Переговоры",
     closed_won: "Закрыта (успех)",
     closed_lost: "Закрыта (проигрыш)",
+  },
+
+  // ── Notes ──────────────────────────────────────────────────────
+  notes: {
+    title: "Заметки",
+    noNotes: "Заметок пока нет",
+    noNotesDesc: "Добавьте заметку, чтобы сохранить важную информацию о контакте.",
+    addNote: "Добавить заметку",
+    createError: "Не удалось создать заметку",
+    deleteError: "Не удалось удалить заметку",
+    loadError: "Не удалось загрузить заметки",
+    contentLabel: "Заметка",
+    contentPlaceholder: "Напишите заметку...",
+    deleteConfirmTitle: "Удалить заметку?",
+    deleteConfirmDesc: "Это действие нельзя отменить.",
   },
 
   // ── Activity Types ──────────────────────────────────────────────

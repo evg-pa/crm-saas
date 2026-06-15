@@ -199,6 +199,24 @@ const en = {
     loginError: "Invalid credentials",
     loginErrorDetail: "Please check your email and password.",
     logout: "Log out",
+    forgotPassword: "Forgot password?",
+    forgotPasswordTitle: "Forgot your password?",
+    forgotPasswordSubtitle: "Enter your email and we'll send you a reset link",
+    forgotPasswordButton: "Send Reset Link",
+    forgotPasswordLoading: "Sending...",
+    forgotPasswordSuccess: "If the email exists, a password reset link has been emailed.",
+    forgotPasswordCheckEmail: "Check your email",
+    forgotPasswordCheckEmailDesc: "If an account exists, you'll receive a reset link",
+    resetPasswordTitle: "Reset your password",
+    resetPasswordSubtitle: "Enter a new password for your account",
+    resetPasswordButton: "Reset Password",
+    resetPasswordLoading: "Resetting...",
+    resetPasswordSuccess: "Your password has been reset successfully.",
+    resetPasswordInvalidToken: "Invalid or missing reset token. Please request a new password reset link.",
+    resetPasswordExpiredToken: "Invalid or expired reset token. Please request a new one.",
+    requestNewLink: "Request a new reset link",
+    signInWithNewPassword: "Sign in with new password",
+    backToLogin: "Back to sign in",
   },
 
   // ── Deal Stages ─────────────────────────────────────────────────
@@ -209,6 +227,21 @@ const en = {
     negotiation: "Negotiation",
     closed_won: "Closed Won",
     closed_lost: "Closed Lost",
+  },
+
+  // ── Notes ──────────────────────────────────────────────────────
+  notes: {
+    title: "Notes",
+    noNotes: "No notes yet",
+    noNotesDesc: "Add a note to capture important information about this contact.",
+    addNote: "Add Note",
+    createError: "Failed to create note",
+    deleteError: "Failed to delete note",
+    loadError: "Failed to load notes",
+    contentLabel: "Note",
+    contentPlaceholder: "Write your note here...",
+    deleteConfirmTitle: "Delete note?",
+    deleteConfirmDesc: "This action cannot be undone.",
   },
 
   // ── Activity Types ──────────────────────────────────────────────

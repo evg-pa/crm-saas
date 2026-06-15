@@ -44,3 +44,48 @@ export async function login(payload: LoginPayload): Promise<TokenResponse> {
   const { data } = await apiClient.post<TokenResponse>("/auth/login", payload);
   return data;
 }
+
+export interface ForgotPasswordPayload {
+  email: string;
+}
+
+export interface ForgotPasswordResponse {
+  message: string;
+}
+
+/**
+ * Request a password reset link. Does not reveal whether the email exists.
+ * POST /api/v1/auth/forgot-password
+ */
+export async function forgotPassword(
+  payload: ForgotPasswordPayload
+): Promise<ForgotPasswordResponse> {
+  const { data } = await apiClient.post<ForgotPasswordResponse>(
+    "/auth/forgot-password",
+    payload
+  );
+  return data;
+}
+
+export interface ResetPasswordPayload {
+  token: string;
+  new_password: string;
+}
+
+export interface ResetPasswordResponse {
+  message: string;
+}
+
+/**
+ * Reset password using a token from the reset-password email.
+ * POST /api/v1/auth/reset-password
+ */
+export async function resetPassword(
+  payload: ResetPasswordPayload
+): Promise<ResetPasswordResponse> {
+  const { data } = await apiClient.post<ResetPasswordResponse>(
+    "/auth/reset-password",
+    payload
+  );
+  return data;
+}
