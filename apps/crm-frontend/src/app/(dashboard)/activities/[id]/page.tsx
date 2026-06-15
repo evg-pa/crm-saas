@@ -17,7 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ArrowLeft, MoreHorizontal, Pencil, Trash2, Loader2, Clock } from "lucide-react";
+import { ArrowLeft, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n/use-translation";
 import { useLocale } from "@/lib/i18n/use-locale";
