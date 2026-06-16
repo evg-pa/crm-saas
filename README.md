@@ -71,7 +71,7 @@ All services run in Docker containers orchestrated by Docker Compose. The Next.j
 
 ---
 
-## Quick Start
+|## Quick Start
 
 ### Prerequisites
 
@@ -94,6 +94,8 @@ cp .env.example .env
 docker compose up --build
 ```
 
+Wait 20–30 seconds for all services to become healthy (migrations run automatically).
+
 Once all containers are healthy:
 
 | Service  | URL                          |
@@ -103,18 +105,50 @@ Once all containers are healthy:
 | Swagger  | http://localhost:8000/docs    |
 | ReDoc    | http://localhost:8000/redoc   |
 
+> **Note:** The first time you open the frontend, it auto-registers a dev user
+> (`dev@crm.local` / `devpass123`) and immediately logs you in. No manual
+> registration is needed for local development.
+
 ### Verify It Works
 
 ```bash
-# Health check
+# 1. Health check (no auth required)
 curl http://localhost:8000/health
 # → {"status": "ok", "version": "0.1.0"}
 
-# Create an organization
-curl -X POST http://localhost:8000/api/v1/organizations \
+# 2. Register a user (creates an organization automatically)
+curl -X POST http://localhost:8000/api/v1/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"name": "Acme Corp", "slug": "acme-corp"}'
+  -d '{
+    "email": "demo@example.com",
+    "password": "mypassword",
+    "full_name": "Demo User",
+    "organization_name": "My Organization",
+    "organization_slug": "my-org"
+  }'
+# → Returns JWT access_token, refresh_token, and user info
+
+# 3. Or login with the auto-created dev user
+TOKEN=$(curl -s -X POST http://localhost:8000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"dev@crm.local","password":"devpass123"}' \
+  | python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
+
+# 4. Use the token for authenticated API calls
+curl -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8000/api/v1/contacts?limit=5
+# → {"total": 0, "items": []}
+
+# 5. Create a contact
+curl -X POST http://localhost:8000/api/v1/contacts \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"first_name":"Jane","last_name":"Doe","email":"jane@example.com"}'
 ```
+
+> **Important:** All CRUD endpoints require a JWT Bearer token. The
+> frontend handles this automatically — the curl examples above show
+> the manual flow for API-first usage.
 
 ---
 
@@ -283,30 +317,44 @@ crm-saas/
 
 ## Default Credentials
 
-The application currently operates without mandatory authentication for development convenience. All API endpoints are accessible directly.
+The application requires JWT authentication on all API endpoints. For local
+development, the frontend auto-registers a dev user on first load:
 
-When authentication is enforced, the default development credentials will be:
+| Field              | Value          |
+|--------------------|----------------|
+| Email              | `dev@crm.local`|
+| Password           | `devpass123`   |
 
-| Field    | Value                          |
-|----------|--------------------------------|
-| Username | `admin@crm.local`              |
-| Password | `admin`                         |
+The auto-registration happens automatically when you open `http://localhost:3000`
+— no manual setup required. The `AuthInitializer` component tries to register the
+dev user on first load and falls back to login if the user already exists.
 
 ---
 
 ## API Overview
 
-All endpoints are prefixed with `/api/v1/`. Full interactive documentation is available at `/docs` when the server is running.
+All endpoints other than `/auth/register`, `/auth/login`, and `/health` require
+a JWT Bearer token in the `Authorization` header. Full interactive documentation
+is available at `/docs` when the server is running.
 
-| Resource       | Endpoint                    | Operations              |
-|----------------|-----------------------------|-------------------------|
-| Organizations  | `/api/v1/organizations`     | CRUD + list + search    |
-| Contacts       | `/api/v1/contacts`          | CRUD + list + search    |
-| Companies      | `/api/v1/companies`         | CRUD + list + search    |
-| Deals          | `/api/v1/deals`             | CRUD + list + search    |
-| Activities     | `/api/v1/activities`        | CRUD + list + search    |
-| Notes          | `/api/v1/notes`             | CRUD + list + search    |
-| Health         | `/health`                   | GET                     |
+| Resource       | Endpoint                    | Operations              | Auth Required |
+|----------------|-----------------------------|-------------------------|--------------|
+| Auth           | `/api/v1/auth/register`     | Register + auto-create org | No         |
+| Auth           | `/api/v1/auth/login`        | Login, get JWT tokens   | No           |
+| Auth           | `/api/v1/auth/refresh`      | Refresh access token    | No*          |
+| Auth           | `/api/v1/auth/forgot-password` | Request reset        | No           |
+| Auth           | `/api/v1/auth/reset-password`  | Reset password       | No           |
+| Auth           | `/api/v1/auth/verify-email` | Verify email address    | No*          |
+| Organizations  | `/api/v1/organizations`     | CRUD + list + search    | Yes          |
+| Users          | `/api/v1/users`             | CRUD + list + search    | Yes          |
+| Contacts       | `/api/v1/contacts`          | CRUD + list + search    | Yes          |
+| Companies      | `/api/v1/companies`         | CRUD + list + search    | Yes          |
+| Deals          | `/api/v1/deals`             | CRUD + list + search    | Yes          |
+| Activities     | `/api/v1/activities`        | CRUD + list + search    | Yes          |
+| Notes          | `/api/v1/notes`             | CRUD + list + search    | Yes          |
+| Health         | `/health`                   | GET                     | No           |
+
+*\* Token-based endpoints require the token from the previous step, not a user login session.*
 
 ### Pagination
 
