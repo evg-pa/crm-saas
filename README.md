@@ -82,6 +82,18 @@ All services run in Docker containers orchestrated by Docker Compose. The Next.j
 
 ### One-Command Start
 
+> **Important — API_URL trap:** If you copy `.env.example` to `.env`, make sure
+> `API_URL` is **removed or commented out** when running with Docker Compose.
+> The `.env.example` sets `API_URL=http://localhost:8000` for local dev **without
+> Docker**, but this breaks the proxy **inside** Docker because `localhost` points
+> to the container itself, not the backend. Docker Compose handles this
+> automatically when `API_URL` is unset.
+>
+> ```bash
+> # Quick fix if you already copied .env:
+> sed -i '/^API_URL=/d' .env
+> ```
+
 ```bash
 # 1. Clone the repository
 git clone https://github.com/evg-pa/crm-saas.git
