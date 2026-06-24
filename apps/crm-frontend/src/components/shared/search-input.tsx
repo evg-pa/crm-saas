@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useState, useCallback, useRef, useEffect } from "react";
-import { Search, X } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { Search, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
 
 interface SearchInputProps {
   placeholder?: string;
@@ -24,7 +24,7 @@ interface SearchInputProps {
  *         Cognition — Recognition over Recall (search icon is universally recognized)
  */
 export function SearchInput({
-  placeholder = "Search...",
+  placeholder = 'Search...',
   value,
   onChange,
   debounceMs = 300,
@@ -45,7 +45,7 @@ export function SearchInput({
         onChange(newValue);
       }, debounceMs);
     },
-    [onChange, debounceMs]
+    [onChange, debounceMs],
   );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,9 +55,9 @@ export function SearchInput({
   };
 
   const handleClear = () => {
-    setLocalValue("");
+    setLocalValue('');
     if (timerRef.current) clearTimeout(timerRef.current);
-    onChange("");
+    onChange('');
   };
 
   // Cleanup on unmount
@@ -68,7 +68,7 @@ export function SearchInput({
   }, []);
 
   return (
-    <div className={cn("relative", className)}>
+    <div className={cn('relative', className)}>
       <Search
         className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none"
         aria-hidden="true"

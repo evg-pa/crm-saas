@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import Link from "next/link";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { AuthLayout } from "@/components/shared/auth-layout";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import * as authApi from "@/lib/api/auth";
+import { useState } from 'react';
+import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { AuthLayout } from '@/components/shared/auth-layout';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import * as authApi from '@/lib/api/auth';
 
 const forgotPasswordSchema = z.object({
-  email: z.string().min(1, "Email is required").email("Invalid email address"),
+  email: z.string().min(1, 'Email is required').email('Invalid email address'),
 });
 
 type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
@@ -27,7 +27,7 @@ export default function ForgotPasswordPage() {
     formState: { errors, isSubmitting },
   } = useForm<ForgotPasswordFormValues>({
     resolver: zodResolver(forgotPasswordSchema),
-    defaultValues: { email: "" },
+    defaultValues: { email: '' },
   });
 
   const onSubmit = async (values: ForgotPasswordFormValues) => {
@@ -36,7 +36,7 @@ export default function ForgotPasswordPage() {
       await authApi.forgotPassword(values);
       setSuccess(true);
     } catch {
-      setServerError("An unexpected error occurred. Please try again.");
+      setServerError('An unexpected error occurred. Please try again.');
     }
   };
 
@@ -90,16 +90,14 @@ export default function ForgotPasswordPage() {
             type="email"
             placeholder="you@company.com"
             autoComplete="email"
-            {...register("email")}
+            {...register('email')}
           />
-          {errors.email && (
-            <p className="text-sm text-destructive">{errors.email.message}</p>
-          )}
+          {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
         </div>
 
         {/* Submit */}
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? "Sending..." : "Send Reset Link"}
+          {isSubmitting ? 'Sending...' : 'Send Reset Link'}
         </Button>
       </form>
 

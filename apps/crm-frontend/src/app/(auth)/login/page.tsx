@@ -1,22 +1,22 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { AuthLayout } from "@/components/shared/auth-layout";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useAuthStore } from "@/lib/stores/auth-store";
-import { useTranslation } from "@/lib/i18n/use-translation";
-import * as authApi from "@/lib/api/auth";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { AuthLayout } from '@/components/shared/auth-layout';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useAuthStore } from '@/lib/stores/auth-store';
+import { useTranslation } from '@/lib/i18n/use-translation';
+import * as authApi from '@/lib/api/auth';
 
 const loginSchema = z.object({
-  email: z.string().min(1, "Email is required").email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
+  email: z.string().min(1, 'Email is required').email('Invalid email address'),
+  password: z.string().min(1, 'Password is required'),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -28,13 +28,13 @@ export default function LoginPage() {
   const { t } = useTranslation();
   const [serverError, setServerError] = useState<string | null>(null);
   const [emailNotVerified, setEmailNotVerified] = useState(false);
-  const [verificationEmail, setVerificationEmail] = useState("");
+  const [verificationEmail, setVerificationEmail] = useState('');
   const [resendLoading, setResendLoading] = useState(false);
   const [resendMessage, setResendMessage] = useState<string | null>(null);
 
   // Already logged in → redirect to dashboard
   if (token) {
-    router.replace("/");
+    router.replace('/');
     return null;
   }
 
@@ -44,7 +44,7 @@ export default function LoginPage() {
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { email: '', password: '' },
   });
 
   const onSubmit = async (values: LoginFormValues) => {
@@ -54,21 +54,21 @@ export default function LoginPage() {
     try {
       const result = await authApi.login(values);
       setAuth(result.access_token, result.organization_id, result.user);
-      router.push("/");
+      router.push('/');
     } catch (err: any) {
       const status = err?.response?.status;
       const detail = err?.response?.data?.detail;
       if (status === 401) {
-        setServerError("Invalid email or password.");
+        setServerError('Invalid email or password.');
       } else if (status === 403) {
-        if (detail && detail.toLowerCase().includes("email not verified")) {
+        if (detail && detail.toLowerCase().includes('email not verified')) {
           setEmailNotVerified(true);
           setVerificationEmail(values.email);
         } else {
-          setServerError("Account is inactive. Please contact support.");
+          setServerError('Account is inactive. Please contact support.');
         }
       } else {
-        setServerError("An unexpected error occurred. Please try again.");
+        setServerError('An unexpected error occurred. Please try again.');
       }
     }
   };
@@ -78,25 +78,22 @@ export default function LoginPage() {
     setResendMessage(null);
     try {
       await authApi.sendVerificationEmail({ email: verificationEmail });
-      setResendMessage(t("auth.resendVerificationSuccess"));
+      setResendMessage(t('auth.resendVerificationSuccess'));
     } catch {
-      setResendMessage(t("auth.resendVerificationError"));
+      setResendMessage(t('auth.resendVerificationError'));
     } finally {
       setResendLoading(false);
     }
   };
 
   return (
-    <AuthLayout
-      title="Welcome back"
-      description="Sign in to your workspace"
-    >
+    <AuthLayout title="Welcome back" description="Sign in to your workspace">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* Email not verified banner */}
         {emailNotVerified && (
           <div className="space-y-3 rounded-md bg-amber-50 px-4 py-3 dark:bg-amber-950/50">
             <p className="text-sm text-amber-800 dark:text-amber-200">
-              {t("auth.emailNotVerified")}
+              {t('auth.emailNotVerified')}
             </p>
             <Button
               type="button"
@@ -105,14 +102,10 @@ export default function LoginPage() {
               disabled={resendLoading}
               onClick={handleResendVerification}
             >
-              {resendLoading
-                ? t("auth.resendVerificationLoading")
-                : t("auth.resendVerification")}
+              {resendLoading ? t('auth.resendVerificationLoading') : t('auth.resendVerification')}
             </Button>
             {resendMessage && (
-              <p className="text-sm text-emerald-700 dark:text-emerald-400">
-                {resendMessage}
-              </p>
+              <p className="text-sm text-emerald-700 dark:text-emerald-400">{resendMessage}</p>
             )}
           </div>
         )}
@@ -135,11 +128,9 @@ export default function LoginPage() {
             type="email"
             placeholder="you@company.com"
             autoComplete="email"
-            {...register("email")}
+            {...register('email')}
           />
-          {errors.email && (
-            <p className="text-sm text-destructive">{errors.email.message}</p>
-          )}
+          {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
         </div>
 
         {/* Password */}
@@ -150,18 +141,14 @@ export default function LoginPage() {
             type="password"
             placeholder="••••••••"
             autoComplete="current-password"
-            {...register("password")}
+            {...register('password')}
           />
-          {errors.password && (
-            <p className="text-sm text-destructive">
-              {errors.password.message}
-            </p>
-          )}
+          {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
         </div>
 
         {/* Submit */}
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? "Signing in..." : "Sign In"}
+          {isSubmitting ? 'Signing in...' : 'Sign In'}
         </Button>
 
         {/* Forgot password */}
@@ -177,7 +164,7 @@ export default function LoginPage() {
 
       {/* Register link */}
       <p className="text-center text-sm text-muted-foreground">
-        Don&apos;t have an account?{" "}
+        Don&apos;t have an account?{' '}
         <Link
           href="/register"
           className="font-medium text-primary underline underline-offset-4 hover:text-primary/80"

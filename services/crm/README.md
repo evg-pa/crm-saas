@@ -33,14 +33,14 @@ services/crm/
 
 ### Entities
 
-| Entity         | Endpoint                    | Description                          |
-|----------------|-----------------------------|--------------------------------------|
-| Organizations  | `/api/v1/organizations`     | Multi-tenant boundary (top-level)    |
-| Contacts       | `/api/v1/contacts`          | Individual people                    |
-| Companies      | `/api/v1/companies`         | Business/organization records        |
-| Deals          | `/api/v1/deals`             | Sales opportunities                  |
-| Activities     | `/api/v1/activities`        | Logged interactions (calls, emails)  |
-| Notes          | `/api/v1/notes`             | Free-form notes on contacts          |
+| Entity        | Endpoint                | Description                         |
+| ------------- | ----------------------- | ----------------------------------- |
+| Organizations | `/api/v1/organizations` | Multi-tenant boundary (top-level)   |
+| Contacts      | `/api/v1/contacts`      | Individual people                   |
+| Companies     | `/api/v1/companies`     | Business/organization records       |
+| Deals         | `/api/v1/deals`         | Sales opportunities                 |
+| Activities    | `/api/v1/activities`    | Logged interactions (calls, emails) |
+| Notes         | `/api/v1/notes`         | Free-form notes on contacts         |
 
 All business entities (contacts, companies, deals, activities, notes) are tenant-scoped via `organization_id`. Soft deletes use a `deleted_at` timestamp. IDs are UUIDv4.
 
@@ -90,17 +90,17 @@ curl http://localhost:8000/api/v1/organizations
 
 ## Environment Variables
 
-| Variable                | Default                                                          | Description                         |
-|-------------------------|------------------------------------------------------------------|-------------------------------------|
-| `DATABASE_URL`          | `postgresql+asyncpg://crm_user:crm_pass@db:5432/crm_db`         | Async database connection string    |
-| `DATABASE_URL_SYNC`     | `postgresql+psycopg2://crm_user:crm_pass@db:5432/crm_db`        | Sync database connection string     |
-| `JWT_SECRET_KEY`        | `development-secret-change-in-production`                        | Secret key for JWT token signing    |
-| `JWT_ALGORITHM`         | `HS256`                                                          | JWT signing algorithm               |
-| `JWT_ACCESS_TOKEN_EXPIRE_MINUTES` | `30`                                                    | Access token lifetime in minutes    |
-| `DEBUG`                 | `false`                                                          | Enable SQL echo and debug mode      |
-| `CORS_ORIGINS`          | `["*"]`                                                          | Allowed CORS origins (JSON array)   |
-| `APP_NAME`              | `CRM Backend`                                                    | Application display name            |
-| `APP_VERSION`           | `0.1.0`                                                          | Application version string          |
+| Variable                          | Default                                                  | Description                       |
+| --------------------------------- | -------------------------------------------------------- | --------------------------------- |
+| `DATABASE_URL`                    | `postgresql+asyncpg://crm_user:crm_pass@db:5432/crm_db`  | Async database connection string  |
+| `DATABASE_URL_SYNC`               | `postgresql+psycopg2://crm_user:crm_pass@db:5432/crm_db` | Sync database connection string   |
+| `JWT_SECRET_KEY`                  | `development-secret-change-in-production`                | Secret key for JWT token signing  |
+| `JWT_ALGORITHM`                   | `HS256`                                                  | JWT signing algorithm             |
+| `JWT_ACCESS_TOKEN_EXPIRE_MINUTES` | `30`                                                     | Access token lifetime in minutes  |
+| `DEBUG`                           | `false`                                                  | Enable SQL echo and debug mode    |
+| `CORS_ORIGINS`                    | `["*"]`                                                  | Allowed CORS origins (JSON array) |
+| `APP_NAME`                        | `CRM Backend`                                            | Application display name          |
+| `APP_VERSION`                     | `0.1.0`                                                  | Application version string        |
 
 All variables are loaded via `pydantic-settings` with `.env` file support for local development. In Docker, variables are set in `docker-compose.yml`.
 

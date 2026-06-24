@@ -81,20 +81,20 @@ export interface CompanyUpdate {
 // ── Deal ───────────────────────────────────────────────────────────────────
 
 export type DealStage =
-  | "new"
-  | "discovery"
-  | "proposal"
-  | "negotiation"
-  | "closed_won"
-  | "closed_lost";
+  | 'new'
+  | 'discovery'
+  | 'proposal'
+  | 'negotiation'
+  | 'closed_won'
+  | 'closed_lost';
 
 export const DEAL_STAGES: DealStage[] = [
-  "new",
-  "discovery",
-  "proposal",
-  "negotiation",
-  "closed_won",
-  "closed_lost",
+  'new',
+  'discovery',
+  'proposal',
+  'negotiation',
+  'closed_won',
+  'closed_lost',
 ];
 
 export interface Deal {
@@ -186,9 +186,9 @@ export interface NoteUpdate {
 
 // ── User ───────────────────────────────────────────────────────────────────
 
-export type UserRole = "admin" | "manager" | "member";
+export type UserRole = 'admin' | 'manager' | 'member';
 
-export const USER_ROLES: UserRole[] = ["admin", "manager", "member"];
+export const USER_ROLES: UserRole[] = ['admin', 'manager', 'member'];
 
 export interface User {
   id: UUID;

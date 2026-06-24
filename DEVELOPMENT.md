@@ -6,18 +6,18 @@ Comprehensive developer onboarding for the **Autonomous SaaS App Generation** pr
 
 ## Prerequisites
 
-| Tool | Minimum Version | How to Check |
-|---|---|---|
+| Tool        | Minimum Version      | How to Check     |
+| ----------- | -------------------- | ---------------- |
 | **Node.js** | v20+ (v22 preferred) | `node --version` |
-| **pnpm** | 9.0+ (11.2 pinned) | `pnpm --version` |
-| **git** | 2.40+ | `git --version` |
+| **pnpm**    | 9.0+ (11.2 pinned)   | `pnpm --version` |
+| **git**     | 2.40+                | `git --version`  |
 
 **Optional / future**:
 
-| Tool | Purpose | Notes |
-|---|---|---|
-| Docker | PostgreSQL, Redis (Phase 2+) | Not yet available on host |
-| Docker Compose | Dev service orchestration | Not yet available on host |
+| Tool           | Purpose                      | Notes                     |
+| -------------- | ---------------------------- | ------------------------- |
+| Docker         | PostgreSQL, Redis (Phase 2+) | Not yet available on host |
+| Docker Compose | Dev service orchestration    | Not yet available on host |
 
 ### Installing pnpm
 
@@ -71,12 +71,12 @@ Copy `.env.example` to `.env` (when it exists) and fill in required values:
 cp .env.example .env
 ```
 
-| Variable | Required | Purpose |
-|---|---|---|
-| `DATABASE_URL` | Yes | SQLite file path (e.g., `file:./data/dev.db`) or PostgreSQL URL |
-| `NODE_ENV` | No | `development` (default), `test`, `production` |
-| `PORT` | No | API server port (default: `3001`) |
-| `LOG_LEVEL` | No | `debug`, `info` (default), `warn`, `error` |
+| Variable       | Required | Purpose                                                         |
+| -------------- | -------- | --------------------------------------------------------------- |
+| `DATABASE_URL` | Yes      | SQLite file path (e.g., `file:./data/dev.db`) or PostgreSQL URL |
+| `NODE_ENV`     | No       | `development` (default), `test`, `production`                   |
+| `PORT`         | No       | API server port (default: `3001`)                               |
+| `LOG_LEVEL`    | No       | `debug`, `info` (default), `warn`, `error`                      |
 
 ---
 
@@ -131,12 +131,12 @@ app-monorepo/
 
 ### Key Directories
 
-| Directory | Purpose |
-|---|---|
+| Directory   | Purpose                                                       |
+| ----------- | ------------------------------------------------------------- |
 | `packages/` | Internal shared libraries consumed by apps and other packages |
-| `apps/` | Deployable applications (API server, web frontend) |
-| `data/` | Local development data (SQLite DBs) — gitignored |
-| `scripts/` | Developer utility scripts |
+| `apps/`     | Deployable applications (API server, web frontend)            |
+| `data/`     | Local development data (SQLite DBs) — gitignored              |
+| `scripts/`  | Developer utility scripts                                     |
 
 ### Package Naming Convention
 
@@ -265,18 +265,18 @@ This project enforces [Conventional Commits](https://www.conventionalcommits.org
 
 ### Allowed Types
 
-| Type | Usage |
-|---|---|
-| `feat` | New feature |
-| `fix` | Bug fix |
-| `docs` | Documentation only |
-| `style` | Formatting, missing semicolons (no code change) |
+| Type       | Usage                                                   |
+| ---------- | ------------------------------------------------------- |
+| `feat`     | New feature                                             |
+| `fix`      | Bug fix                                                 |
+| `docs`     | Documentation only                                      |
+| `style`    | Formatting, missing semicolons (no code change)         |
 | `refactor` | Code change that neither fixes a bug nor adds a feature |
-| `test` | Adding or updating tests |
-| `chore` | Build process, tooling, dependencies |
-| `ci` | CI/CD configuration |
-| `perf` | Performance improvement |
-| `revert` | Revert a previous commit |
+| `test`     | Adding or updating tests                                |
+| `chore`    | Build process, tooling, dependencies                    |
+| `ci`       | CI/CD configuration                                     |
+| `perf`     | Performance improvement                                 |
+| `revert`   | Revert a previous commit                                |
 
 ### Scope
 
@@ -333,14 +333,14 @@ Closes #42
 
 ### Types
 
-| Prefix | Purpose | Example |
-|---|---|---|
-| `feat/` | New feature | `feat/app-spec-parser` |
-| `fix/` | Bug fix | `fix/project-duplication` |
-| `docs/` | Documentation | `docs/api-endpoints` |
-| `refactor/` | Code refactoring | `refactor/type-system` |
-| `chore/` | Tooling, config | `chore/update-deps` |
-| `test/` | Test additions | `test/deployment-flow` |
+| Prefix      | Purpose          | Example                   |
+| ----------- | ---------------- | ------------------------- |
+| `feat/`     | New feature      | `feat/app-spec-parser`    |
+| `fix/`      | Bug fix          | `fix/project-duplication` |
+| `docs/`     | Documentation    | `docs/api-endpoints`      |
+| `refactor/` | Code refactoring | `refactor/type-system`    |
+| `chore/`    | Tooling, config  | `chore/update-deps`       |
+| `test/`     | Test additions   | `test/deployment-flow`    |
 
 ### Guidelines
 
@@ -432,7 +432,7 @@ If the package depends on other workspace packages, add them to `references`:
 ```typescript
 // packages/my-new-package/src/index.ts
 export function hello(): string {
-  return "Hello from @app/my-new-package";
+  return 'Hello from @app/my-new-package';
 }
 ```
 
@@ -440,8 +440,8 @@ export function hello(): string {
 
 ```yaml
 packages:
-  - "packages/*"
-  - "apps/*"
+  - 'packages/*'
+  - 'apps/*'
 ```
 
 If the existing globs already cover your new package, no change needed.
@@ -464,7 +464,7 @@ pnpm --filter @app/api add @app/my-new-package@workspace:*
 
 ```typescript
 // In @app/api
-import { hello } from "@app/my-new-package";
+import { hello } from '@app/my-new-package';
 ```
 
 ---

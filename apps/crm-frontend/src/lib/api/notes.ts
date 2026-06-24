@@ -1,5 +1,5 @@
-import apiClient from "./client";
-import type { Note, NoteCreate, NoteUpdate, PaginatedResponse } from "@/types";
+import apiClient from './client';
+import type { Note, NoteCreate, NoteUpdate, PaginatedResponse } from '@/types';
 
 export async function listNotes(params?: {
   q?: string;
@@ -7,7 +7,7 @@ export async function listNotes(params?: {
   offset?: number;
   limit?: number;
 }): Promise<PaginatedResponse<Note>> {
-  const { data } = await apiClient.get<PaginatedResponse<Note>>("/notes", {
+  const { data } = await apiClient.get<PaginatedResponse<Note>>('/notes', {
     params,
   });
   return data;
@@ -19,14 +19,11 @@ export async function getNote(id: string): Promise<Note> {
 }
 
 export async function createNote(body: NoteCreate): Promise<Note> {
-  const { data } = await apiClient.post<Note>("/notes", body);
+  const { data } = await apiClient.post<Note>('/notes', body);
   return data;
 }
 
-export async function updateNote(
-  id: string,
-  body: NoteUpdate
-): Promise<Note> {
+export async function updateNote(id: string, body: NoteUpdate): Promise<Note> {
   const { data } = await apiClient.patch<Note>(`/notes/${id}`, body);
   return data;
 }

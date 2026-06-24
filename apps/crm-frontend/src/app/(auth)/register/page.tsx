@@ -1,42 +1,37 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { AuthLayout } from "@/components/shared/auth-layout";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useAuthStore } from "@/lib/stores/auth-store";
-import * as authApi from "@/lib/api/auth";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { AuthLayout } from '@/components/shared/auth-layout';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useAuthStore } from '@/lib/stores/auth-store';
+import * as authApi from '@/lib/api/auth';
 
 const registerSchema = z
   .object({
-    email: z.string().min(1, "Email is required").email("Invalid email address"),
-    password: z
-      .string()
-      .min(8, "Password must be at least 8 characters"),
-    confirmPassword: z.string().min(1, "Please confirm your password"),
+    email: z.string().min(1, 'Email is required').email('Invalid email address'),
+    password: z.string().min(8, 'Password must be at least 8 characters'),
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
     full_name: z.string().optional(),
     organization_name: z
       .string()
-      .min(1, "Organization name is required")
-      .max(255, "Organization name must be at most 255 characters"),
+      .min(1, 'Organization name is required')
+      .max(255, 'Organization name must be at most 255 characters'),
     organization_slug: z
       .string()
-      .min(1, "Organization slug is required")
-      .max(100, "Slug must be at most 100 characters")
-      .regex(
-        /^[a-z0-9-]+$/,
-        "Slug must contain only lowercase letters, numbers, and hyphens"
-      ),
+      .min(1, 'Organization slug is required')
+      .max(100, 'Slug must be at most 100 characters')
+      .regex(/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens'),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
   });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -49,7 +44,7 @@ export default function RegisterPage() {
 
   // Already logged in → redirect to dashboard
   if (token) {
-    router.replace("/");
+    router.replace('/');
     return null;
   }
 
@@ -60,12 +55,12 @@ export default function RegisterPage() {
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      email: "",
-      password: "",
-      confirmPassword: "",
-      full_name: "",
-      organization_name: "",
-      organization_slug: "",
+      email: '',
+      password: '',
+      confirmPassword: '',
+      full_name: '',
+      organization_name: '',
+      organization_slug: '',
     },
   });
 
@@ -80,32 +75,29 @@ export default function RegisterPage() {
         organization_slug: values.organization_slug,
       });
       setAuth(result.access_token, result.organization_id, result.user);
-      router.push("/");
+      router.push('/');
     } catch (err: any) {
       const status = err?.response?.status;
       const detail = err?.response?.data?.detail;
 
       if (status === 409) {
-        if (detail?.includes("email")) {
-          setServerError("An account with this email already exists.");
-        } else if (detail?.includes("slug")) {
+        if (detail?.includes('email')) {
+          setServerError('An account with this email already exists.');
+        } else if (detail?.includes('slug')) {
           setServerError(
-            "An organization with this slug already exists. Please choose a different one."
+            'An organization with this slug already exists. Please choose a different one.',
           );
         } else {
-          setServerError(detail || "A user or organization with these details already exists.");
+          setServerError(detail || 'A user or organization with these details already exists.');
         }
       } else {
-        setServerError("An unexpected error occurred. Please try again.");
+        setServerError('An unexpected error occurred. Please try again.');
       }
     }
   };
 
   return (
-    <AuthLayout
-      title="Create your workspace"
-      description="Set up your account and organization"
-    >
+    <AuthLayout title="Create your workspace" description="Set up your account and organization">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* Server error banner */}
         {serverError && (
@@ -124,12 +116,10 @@ export default function RegisterPage() {
             id="full_name"
             placeholder="Jane Smith"
             autoComplete="name"
-            {...register("full_name")}
+            {...register('full_name')}
           />
           {errors.full_name && (
-            <p className="text-sm text-destructive">
-              {errors.full_name.message}
-            </p>
+            <p className="text-sm text-destructive">{errors.full_name.message}</p>
           )}
         </div>
 
@@ -141,11 +131,9 @@ export default function RegisterPage() {
             type="email"
             placeholder="you@company.com"
             autoComplete="email"
-            {...register("email")}
+            {...register('email')}
           />
-          {errors.email && (
-            <p className="text-sm text-destructive">{errors.email.message}</p>
-          )}
+          {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
         </div>
 
         {/* Password */}
@@ -156,13 +144,9 @@ export default function RegisterPage() {
             type="password"
             placeholder="At least 8 characters"
             autoComplete="new-password"
-            {...register("password")}
+            {...register('password')}
           />
-          {errors.password && (
-            <p className="text-sm text-destructive">
-              {errors.password.message}
-            </p>
-          )}
+          {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
         </div>
 
         {/* Confirm Password */}
@@ -173,12 +157,10 @@ export default function RegisterPage() {
             type="password"
             placeholder="Re-enter your password"
             autoComplete="new-password"
-            {...register("confirmPassword")}
+            {...register('confirmPassword')}
           />
           {errors.confirmPassword && (
-            <p className="text-sm text-destructive">
-              {errors.confirmPassword.message}
-            </p>
+            <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
           )}
         </div>
 
@@ -188,27 +170,19 @@ export default function RegisterPage() {
           <Input
             id="organization_name"
             placeholder="Acme Inc."
-            {...register("organization_name")}
+            {...register('organization_name')}
           />
           {errors.organization_name && (
-            <p className="text-sm text-destructive">
-              {errors.organization_name.message}
-            </p>
+            <p className="text-sm text-destructive">{errors.organization_name.message}</p>
           )}
         </div>
 
         {/* Organization Slug */}
         <div className="space-y-2">
           <Label htmlFor="organization_slug">Organization Slug *</Label>
-          <Input
-            id="organization_slug"
-            placeholder="acme-inc"
-            {...register("organization_slug")}
-          />
+          <Input id="organization_slug" placeholder="acme-inc" {...register('organization_slug')} />
           {errors.organization_slug && (
-            <p className="text-sm text-destructive">
-              {errors.organization_slug.message}
-            </p>
+            <p className="text-sm text-destructive">{errors.organization_slug.message}</p>
           )}
           <p className="text-xs text-muted-foreground">
             Used in URLs. Only lowercase letters, numbers, and hyphens.
@@ -217,13 +191,13 @@ export default function RegisterPage() {
 
         {/* Submit */}
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? "Creating account..." : "Create Account"}
+          {isSubmitting ? 'Creating account...' : 'Create Account'}
         </Button>
       </form>
 
       {/* Login link */}
       <p className="text-center text-sm text-muted-foreground">
-        Already have an account?{" "}
+        Already have an account?{' '}
         <Link
           href="/login"
           className="font-medium text-primary underline underline-offset-4 hover:text-primary/80"

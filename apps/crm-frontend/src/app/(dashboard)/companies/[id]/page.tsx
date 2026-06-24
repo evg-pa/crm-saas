@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { useCompany, useUpdateCompany, useDeleteCompany } from "@/lib/hooks/use-companies";
-import { useContacts } from "@/lib/hooks/use-contacts";
-import { useDeals } from "@/lib/hooks/use-deals";
-import { CompanyForm } from "@/features/companies/components/company-form";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { useCompany, useUpdateCompany, useDeleteCompany } from '@/lib/hooks/use-companies';
+import { useContacts } from '@/lib/hooks/use-contacts';
+import { useDeals } from '@/lib/hooks/use-deals';
+import { CompanyForm } from '@/features/companies/components/company-form';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -17,28 +17,27 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ArrowLeft, MoreHorizontal, Pencil, Trash2, Loader2 } from "lucide-react";
-import { formatDate, formatCurrency } from "@/lib/utils";
-import type { CompanyFormValues } from "@/lib/validators/company";
+} from '@/components/ui/dropdown-menu';
+import { ArrowLeft, MoreHorizontal, Pencil, Trash2, Loader2 } from 'lucide-react';
+import { formatDate, formatCurrency } from '@/lib/utils';
+import type { CompanyFormValues } from '@/lib/validators/company';
 
 const stageColors: Record<string, string> = {
-  new: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-  discovery: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
-  proposal: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
-  negotiation: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
-  closed_won: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-  closed_lost: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+  new: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+  discovery: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+  proposal: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+  negotiation: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+  closed_won: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+  closed_lost: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
 };
 
-const stageLabel = (s: string) =>
-  s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+const stageLabel = (s: string) => s.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
 export default function CompanyDetailPage() {
   const params = useParams();
@@ -61,16 +60,13 @@ export default function CompanyDetailPage() {
   const deleteCompany = useDeleteCompany();
 
   const handleUpdate = (values: CompanyFormValues) => {
-    updateCompany.mutate(
-      { id, ...values },
-      { onSuccess: () => setFormOpen(false) }
-    );
+    updateCompany.mutate({ id, ...values }, { onSuccess: () => setFormOpen(false) });
   };
 
   const handleDelete = () => {
     setDeleting(true);
     deleteCompany.mutate(id, {
-      onSuccess: () => router.push("/companies"),
+      onSuccess: () => router.push('/companies'),
       onSettled: () => setDeleting(false),
     });
   };
@@ -92,14 +88,14 @@ export default function CompanyDetailPage() {
   if (isError || !company) {
     return (
       <div className="space-y-6">
-        <Button variant="ghost" onClick={() => router.push("/companies")}>
+        <Button variant="ghost" onClick={() => router.push('/companies')}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Companies
         </Button>
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-6 text-center">
           <p className="text-sm text-destructive font-medium">Failed to load company</p>
           <p className="text-xs text-muted-foreground mt-1">
-            {error instanceof Error ? error.message : "Company not found"}
+            {error instanceof Error ? error.message : 'Company not found'}
           </p>
         </div>
       </div>
@@ -109,7 +105,7 @@ export default function CompanyDetailPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={() => router.push("/companies")}>
+        <Button variant="ghost" onClick={() => router.push('/companies')}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Companies
         </Button>
@@ -194,14 +190,10 @@ export default function CompanyDetailPage() {
                         {contact.first_name} {contact.last_name}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {contact.email ?? "—"}
+                        {contact.email ?? '—'}
                       </TableCell>
                       <TableCell>
-                        {contact.title ? (
-                          <Badge variant="secondary">{contact.title}</Badge>
-                        ) : (
-                          "—"
-                        )}
+                        {contact.title ? <Badge variant="secondary">{contact.title}</Badge> : '—'}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -246,10 +238,7 @@ export default function CompanyDetailPage() {
                         {formatCurrency(deal.amount)}
                       </TableCell>
                       <TableCell>
-                        <Badge
-                          className={stageColors[deal.stage] ?? ""}
-                          variant="outline"
-                        >
+                        <Badge className={stageColors[deal.stage] ?? ''} variant="outline">
                           {stageLabel(deal.stage)}
                         </Badge>
                       </TableCell>
@@ -280,10 +269,8 @@ export default function CompanyDetailPage() {
 function DetailRow({ label, value }: { label: string; value: string | null | undefined }) {
   return (
     <div>
-      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-        {label}
-      </p>
-      <p className="text-sm mt-0.5">{value || "—"}</p>
+      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</p>
+      <p className="text-sm mt-0.5">{value || '—'}</p>
     </div>
   );
 }

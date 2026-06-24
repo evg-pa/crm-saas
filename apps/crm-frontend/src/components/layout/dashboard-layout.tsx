@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { usePathname } from "next/navigation";
-import Link from "next/link";
+import * as React from 'react';
+import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 import {
   LayoutDashboard,
   Users,
@@ -11,13 +11,13 @@ import {
   Activity,
   Settings,
   type LucideIcon,
-} from "lucide-react";
+} from 'lucide-react';
 
-import { cn } from "@/lib/utils";
-import { useSidebarStore } from "@/lib/stores/sidebar-store";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Sidebar } from "./sidebar";
-import { Header } from "./header";
+import { cn } from '@/lib/utils';
+import { useSidebarStore } from '@/lib/stores/sidebar-store';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sidebar } from './sidebar';
+import { Header } from './header';
 
 interface NavItem {
   label: string;
@@ -26,12 +26,12 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: "Dashboard", href: "/", icon: LayoutDashboard },
-  { label: "Contacts", href: "/contacts", icon: Users },
-  { label: "Companies", href: "/companies", icon: Building2 },
-  { label: "Deals", href: "/deals", icon: Handshake },
-  { label: "Activities", href: "/activities", icon: Activity },
-  { label: "Settings", href: "/settings", icon: Settings },
+  { label: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { label: 'Contacts', href: '/contacts', icon: Users },
+  { label: 'Companies', href: '/companies', icon: Building2 },
+  { label: 'Deals', href: '/deals', icon: Handshake },
+  { label: 'Activities', href: '/activities', icon: Activity },
+  { label: 'Settings', href: '/settings', icon: Settings },
 ];
 
 function MobileNav() {
@@ -52,18 +52,17 @@ function MobileNav() {
         <nav className="flex-1 space-y-1 p-2">
           {navItems.map((item) => {
             const isActive =
-              pathname === item.href ||
-              (item.href !== "/" && pathname.startsWith(item.href));
+              pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
                   isActive
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                    ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+                    : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground',
                 )}
               >
                 <item.icon className="h-5 w-5 shrink-0" />

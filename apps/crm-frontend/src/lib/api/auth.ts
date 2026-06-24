@@ -1,5 +1,5 @@
-import apiClient from "./client";
-import type { UserRole } from "@/types";
+import apiClient from './client';
+import type { UserRole } from '@/types';
 
 export interface RegisterPayload {
   email: string;
@@ -34,7 +34,7 @@ export interface TokenResponse {
  * POST /api/v1/auth/register
  */
 export async function register(payload: RegisterPayload): Promise<TokenResponse> {
-  const { data } = await apiClient.post<TokenResponse>("/auth/register", payload);
+  const { data } = await apiClient.post<TokenResponse>('/auth/register', payload);
   return data;
 }
 
@@ -43,7 +43,7 @@ export async function register(payload: RegisterPayload): Promise<TokenResponse>
  * POST /api/v1/auth/login
  */
 export async function login(payload: LoginPayload): Promise<TokenResponse> {
-  const { data } = await apiClient.post<TokenResponse>("/auth/login", payload);
+  const { data } = await apiClient.post<TokenResponse>('/auth/login', payload);
   return data;
 }
 
@@ -60,12 +60,9 @@ export interface ForgotPasswordResponse {
  * POST /api/v1/auth/forgot-password
  */
 export async function forgotPassword(
-  payload: ForgotPasswordPayload
+  payload: ForgotPasswordPayload,
 ): Promise<ForgotPasswordResponse> {
-  const { data } = await apiClient.post<ForgotPasswordResponse>(
-    "/auth/forgot-password",
-    payload
-  );
+  const { data } = await apiClient.post<ForgotPasswordResponse>('/auth/forgot-password', payload);
   return data;
 }
 
@@ -82,13 +79,8 @@ export interface ResetPasswordResponse {
  * Reset password using a token from the reset-password email.
  * POST /api/v1/auth/reset-password
  */
-export async function resetPassword(
-  payload: ResetPasswordPayload
-): Promise<ResetPasswordResponse> {
-  const { data } = await apiClient.post<ResetPasswordResponse>(
-    "/auth/reset-password",
-    payload
-  );
+export async function resetPassword(payload: ResetPasswordPayload): Promise<ResetPasswordResponse> {
+  const { data } = await apiClient.post<ResetPasswordResponse>('/auth/reset-password', payload);
   return data;
 }
 
@@ -105,11 +97,11 @@ export interface SendVerificationResponse {
  * POST /api/v1/auth/send-verification
  */
 export async function sendVerificationEmail(
-  payload: SendVerificationPayload
+  payload: SendVerificationPayload,
 ): Promise<SendVerificationResponse> {
   const { data } = await apiClient.post<SendVerificationResponse>(
-    "/auth/send-verification",
-    payload
+    '/auth/send-verification',
+    payload,
   );
   return data;
 }
@@ -126,12 +118,7 @@ export interface VerifyEmailResponse {
  * Verify email using a token from the verification email.
  * POST /api/v1/auth/verify-email
  */
-export async function verifyEmail(
-  payload: VerifyEmailPayload
-): Promise<VerifyEmailResponse> {
-  const { data } = await apiClient.post<VerifyEmailResponse>(
-    "/auth/verify-email",
-    payload
-  );
+export async function verifyEmail(payload: VerifyEmailPayload): Promise<VerifyEmailResponse> {
+  const { data } = await apiClient.post<VerifyEmailResponse>('/auth/verify-email', payload);
   return data;
 }

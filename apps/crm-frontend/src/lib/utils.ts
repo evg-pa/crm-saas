@@ -1,5 +1,5 @@
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 /**
  * Merge Tailwind CSS classes with clsx + tailwind-merge.
@@ -14,15 +14,15 @@ export function cn(...inputs: ClassValue[]) {
  */
 export function formatDate(
   date: string | Date | null | undefined,
-  locale = "en-US",
-  options?: Intl.DateTimeFormatOptions
+  locale = 'en-US',
+  options?: Intl.DateTimeFormatOptions,
 ): string {
-  if (!date) return "—";
-  const d = typeof date === "string" ? new Date(date) : date;
+  if (!date) return '—';
+  const d = typeof date === 'string' ? new Date(date) : date;
   return d.toLocaleDateString(locale, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
     ...options,
   });
 }
@@ -33,12 +33,12 @@ export function formatDate(
  */
 export function formatCurrency(
   amount: number | null | undefined,
-  locale = "en-US",
-  currency = "USD"
+  locale = 'en-US',
+  currency = 'USD',
 ): string {
-  if (amount == null) return "—";
+  if (amount == null) return '—';
   return new Intl.NumberFormat(locale, {
-    style: "currency",
+    style: 'currency',
     currency,
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,

@@ -1,5 +1,5 @@
-import apiClient from "./client";
-import type { Organization, PaginatedResponse } from "@/types";
+import apiClient from './client';
+import type { Organization, PaginatedResponse } from '@/types';
 
 /**
  * Fetch a single organization by ID.
@@ -15,6 +15,6 @@ export async function getOrganization(id: string): Promise<Organization> {
  * GET /api/v1/organizations
  */
 export async function listOrganizations(): Promise<PaginatedResponse<Organization>> {
-  const { data } = await apiClient.get<PaginatedResponse<Organization>>("/organizations");
+  const { data } = await apiClient.get<PaginatedResponse<Organization>>('/organizations');
   return data;
 }

@@ -1,6 +1,6 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import type { UserInfo } from "@/lib/api/auth";
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import type { UserInfo } from '@/lib/api/auth';
 
 interface AuthState {
   token: string | null;
@@ -21,12 +21,12 @@ export const useAuthStore = create<AuthState>()(
       logout: () => set({ token: null, orgId: null, user: null }),
     }),
     {
-      name: "crm-auth",
+      name: 'crm-auth',
       partialize: (state) => ({
         token: state.token,
         orgId: state.orgId,
         user: state.user,
       }),
-    }
-  )
+    },
+  ),
 );

@@ -1,27 +1,25 @@
-"use client";
+'use client';
 
-import { Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { AuthLayout } from "@/components/shared/auth-layout";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import * as authApi from "@/lib/api/auth";
+import { Suspense, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { AuthLayout } from '@/components/shared/auth-layout';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import * as authApi from '@/lib/api/auth';
 
 const resetPasswordSchema = z
   .object({
-    newPassword: z
-      .string()
-      .min(8, "Password must be at least 8 characters"),
-    confirmPassword: z.string().min(1, "Please confirm your password"),
+    newPassword: z.string().min(8, 'Password must be at least 8 characters'),
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
   });
 
 type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
@@ -29,7 +27,7 @@ type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
 function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const token = searchParams.get("token");
+  const token = searchParams.get('token');
 
   const [serverError, setServerError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -41,25 +39,21 @@ function ResetPasswordForm() {
   } = useForm<ResetPasswordFormValues>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
-      newPassword: "",
-      confirmPassword: "",
+      newPassword: '',
+      confirmPassword: '',
     },
   });
 
   // Missing token
   if (!token) {
     return (
-      <AuthLayout
-        title="Reset your password"
-        description="Enter a new password for your account"
-      >
+      <AuthLayout title="Reset your password" description="Enter a new password for your account">
         <div className="space-y-4">
           <div
             role="alert"
             className="rounded-md bg-destructive/10 px-4 py-3 text-sm text-destructive"
           >
-            Invalid or missing reset token. Please request a new password reset
-            link.
+            Invalid or missing reset token. Please request a new password reset link.
           </div>
           <p className="text-center text-sm text-muted-foreground">
             <Link
@@ -87,21 +81,16 @@ function ResetPasswordForm() {
       const detail = err?.response?.data?.detail;
 
       if (status === 400) {
-        setServerError(
-          detail || "Invalid or expired reset token. Please request a new one."
-        );
+        setServerError(detail || 'Invalid or expired reset token. Please request a new one.');
       } else {
-        setServerError("An unexpected error occurred. Please try again.");
+        setServerError('An unexpected error occurred. Please try again.');
       }
     }
   };
 
   if (success) {
     return (
-      <AuthLayout
-        title="Password reset"
-        description="Your password has been updated"
-      >
+      <AuthLayout title="Password reset" description="Your password has been updated">
         <div className="space-y-4">
           <div
             role="status"
@@ -109,10 +98,7 @@ function ResetPasswordForm() {
           >
             Your password has been reset successfully.
           </div>
-          <Button
-            className="w-full"
-            onClick={() => router.push("/login")}
-          >
+          <Button className="w-full" onClick={() => router.push('/login')}>
             Sign in with new password
           </Button>
         </div>
@@ -121,10 +107,7 @@ function ResetPasswordForm() {
   }
 
   return (
-    <AuthLayout
-      title="Reset your password"
-      description="Enter a new password for your account"
-    >
+    <AuthLayout title="Reset your password" description="Enter a new password for your account">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* Server error banner */}
         {serverError && (
@@ -144,12 +127,10 @@ function ResetPasswordForm() {
             type="password"
             placeholder="At least 8 characters"
             autoComplete="new-password"
-            {...register("newPassword")}
+            {...register('newPassword')}
           />
           {errors.newPassword && (
-            <p className="text-sm text-destructive">
-              {errors.newPassword.message}
-            </p>
+            <p className="text-sm text-destructive">{errors.newPassword.message}</p>
           )}
         </div>
 
@@ -161,18 +142,16 @@ function ResetPasswordForm() {
             type="password"
             placeholder="Re-enter your new password"
             autoComplete="new-password"
-            {...register("confirmPassword")}
+            {...register('confirmPassword')}
           />
           {errors.confirmPassword && (
-            <p className="text-sm text-destructive">
-              {errors.confirmPassword.message}
-            </p>
+            <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
           )}
         </div>
 
         {/* Submit */}
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? "Resetting..." : "Reset Password"}
+          {isSubmitting ? 'Resetting...' : 'Reset Password'}
         </Button>
       </form>
 
@@ -193,10 +172,7 @@ export default function ResetPasswordPage() {
   return (
     <Suspense
       fallback={
-        <AuthLayout
-          title="Reset your password"
-          description="Loading..."
-        >
+        <AuthLayout title="Reset your password" description="Loading...">
           <div className="flex items-center justify-center py-8">
             <p className="text-sm text-muted-foreground">Loading...</p>
           </div>

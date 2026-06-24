@@ -1,5 +1,5 @@
-import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
-import { useAuthStore } from "@/lib/stores/auth-store";
+import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import { useAuthStore } from '@/lib/stores/auth-store';
 
 /**
  * Base Axios instance for the CRM backend API.
@@ -10,9 +10,9 @@ import { useAuthStore } from "@/lib/stores/auth-store";
  */
 
 const apiClient = axios.create({
-  baseURL: "/api/v1",
+  baseURL: '/api/v1',
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   },
 });
 
@@ -25,7 +25,7 @@ apiClient.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 // Response interceptor: handle 401
@@ -36,7 +36,7 @@ apiClient.interceptors.response.use(
       useAuthStore.getState().logout();
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default apiClient;

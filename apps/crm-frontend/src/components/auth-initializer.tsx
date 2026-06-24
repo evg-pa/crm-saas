@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useAuthStore } from "@/lib/stores/auth-store";
-import * as authApi from "@/lib/api/auth";
+import { useEffect, useState } from 'react';
+import { useAuthStore } from '@/lib/stores/auth-store';
+import * as authApi from '@/lib/api/auth';
 
 /**
  * AuthInitializer — auto-registers a dev user and gets a real JWT token
@@ -25,11 +25,11 @@ export function AuthInitializer({ children }: { children: React.ReactNode }) {
 
     async function init() {
       const payload = {
-        email: "dev@crm.local",
-        password: "devpass123",
-        full_name: "Dev User",
-        organization_name: "Dev Org",
-        organization_slug: "dev-org",
+        email: 'dev@crm.local',
+        password: 'devpass123',
+        full_name: 'Dev User',
+        organization_name: 'Dev Org',
+        organization_slug: 'dev-org',
       };
 
       try {

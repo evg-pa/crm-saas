@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/lib/stores/auth-store";
-import type { UserRole } from "@/types";
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/lib/stores/auth-store';
+import type { UserRole } from '@/types';
 
 interface RoleGuardProps {
   /** Minimum role required to access the children. */
@@ -33,7 +33,7 @@ const ROLE_HIERARCHY: Record<UserRole, number> = {
  */
 export function RoleGuard({
   role: requiredRole,
-  fallbackPath = "/",
+  fallbackPath = '/',
   fallback,
   children,
 }: RoleGuardProps) {
@@ -53,7 +53,7 @@ export function RoleGuard({
   }
 
   // Redirect if on client side and no fallback.
-  if (typeof window !== "undefined") {
+  if (typeof window !== 'undefined') {
     router.replace(fallbackPath);
     return null;
   }

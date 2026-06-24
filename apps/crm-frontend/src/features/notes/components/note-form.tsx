@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { noteSchema, type NoteFormValues } from "@/lib/validators/note";
-import { Button } from "@/components/ui/button";
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { noteSchema, type NoteFormValues } from '@/lib/validators/note';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -12,9 +12,9 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 
 interface NoteFormProps {
   open: boolean;
@@ -23,12 +23,7 @@ interface NoteFormProps {
   isSubmitting?: boolean;
 }
 
-export function NoteForm({
-  open,
-  onOpenChange,
-  onSubmit,
-  isSubmitting = false,
-}: NoteFormProps) {
+export function NoteForm({ open, onOpenChange, onSubmit, isSubmitting = false }: NoteFormProps) {
   const {
     register,
     handleSubmit,
@@ -36,7 +31,7 @@ export function NoteForm({
     formState: { errors },
   } = useForm<NoteFormValues>({
     resolver: zodResolver(noteSchema),
-    defaultValues: { content: "" },
+    defaultValues: { content: '' },
   });
 
   const handleFormSubmit = async (values: NoteFormValues) => {
@@ -57,8 +52,7 @@ export function NoteForm({
         <DialogHeader>
           <DialogTitle>Add Note</DialogTitle>
           <DialogDescription>
-            Write a note for this contact. Notes are private to your
-            organization.
+            Write a note for this contact. Notes are private to your organization.
           </DialogDescription>
         </DialogHeader>
 
@@ -71,25 +65,17 @@ export function NoteForm({
               id="content"
               placeholder="Write your note here..."
               rows={6}
-              {...register("content")}
+              {...register('content')}
             />
-            {errors.content && (
-              <p className="text-sm text-destructive">
-                {errors.content.message}
-              </p>
-            )}
+            {errors.content && <p className="text-sm text-destructive">{errors.content.message}</p>}
           </div>
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : "Add Note"}
+              {isSubmitting ? 'Saving...' : 'Add Note'}
             </Button>
           </DialogFooter>
         </form>

@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
-import { cn } from "@/lib/utils";
+import type { ReactNode } from 'react';
+import { cn } from '@/lib/utils';
 
 interface Breadcrumb {
   label: string;
@@ -29,7 +29,7 @@ export function PageHeader({
   className,
 }: PageHeaderProps) {
   return (
-    <div className={cn("mb-6", className)}>
+    <div className={cn('mb-6', className)}>
       {/* Breadcrumbs */}
       {breadcrumbs && breadcrumbs.length > 0 && (
         <nav className="mb-2 flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -41,16 +41,11 @@ export function PageHeader({
                 </span>
               )}
               {crumb.href ? (
-                <a
-                  href={crumb.href}
-                  className="hover:text-foreground transition-colors"
-                >
+                <a href={crumb.href} className="hover:text-foreground transition-colors">
                   {crumb.label}
                 </a>
               ) : (
-                <span className="text-foreground font-medium">
-                  {crumb.label}
-                </span>
+                <span className="text-foreground font-medium">{crumb.label}</span>
               )}
             </span>
           ))}
@@ -60,16 +55,10 @@ export function PageHeader({
       {/* Title row with actions */}
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            {title}
-          </h1>
-          {description && (
-            <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-          )}
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h1>
+          {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
         </div>
-        {actions && (
-          <div className="flex shrink-0 items-center gap-2">{actions}</div>
-        )}
+        {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
       </div>
     </div>
   );

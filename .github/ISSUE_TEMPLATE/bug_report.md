@@ -1,8 +1,8 @@
 ---
 name: Bug Report
 about: Report a bug to help us improve the CRM
-title: "[Bug] "
-labels: ["bug", "triage"]
+title: '[Bug] '
+labels: ['bug', 'triage']
 assignees: []
 ---
 

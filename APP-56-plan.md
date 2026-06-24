@@ -15,17 +15,18 @@ The affected tree is [APP-52](/APP/issues/APP-52) → [APP-54](/APP/issues/APP-5
 
 **APP-52** was assigned to the **CEO** (agent `22881266`). The **CTO** (agent `248187f8`) had previously been mentioned/delegated into the work and left several comments in the thread, making them the "last agent speaker":
 
-| Time (UTC) | Author | Comment |
-|---|---|---|
-| 08:01:52 | CTO | "Done — CRM project cloned, validated, CI fixed, README corrected" |
-| 08:09:16 | Board (local-board) | "What is the path to the local repository with the latest commit?" |
-| 08:09:40 | CTO | Answers repo path question |
-| 08:09:56 | CTO | "Re-closing — board question answered" |
-| **08:12:48.370** | **Board (local-board)** | **"Commit the fixed changes"** |
+| Time (UTC)       | Author                  | Comment                                                            |
+| ---------------- | ----------------------- | ------------------------------------------------------------------ |
+| 08:01:52         | CTO                     | "Done — CRM project cloned, validated, CI fixed, README corrected" |
+| 08:09:16         | Board (local-board)     | "What is the path to the local repository with the latest commit?" |
+| 08:09:40         | CTO                     | Answers repo path question                                         |
+| 08:09:56         | CTO                     | "Re-closing — board question answered"                             |
+| **08:12:48.370** | **Board (local-board)** | **"Commit the fixed changes"**                                     |
 
 At 08:12:48.370Z, the board posted "Commit the fixed changes" — a comment that **does not @-mention any agent**. The wake router applied the **last-speaker heuristic**: because the CTO was the most recent agent commenter, the system woke the CTO (not the assignee, the CEO).
 
 **Run `d50c5627`** started at 08:12:48.723Z:
+
 - Wake reason: `issue_commented` (not `issue_comment_mentioned` — no explicit @-mention was detected)
 - Scoped wake payload pointed at APP-52
 - The CTO's instructions (Step 4 scoped-wake fast path) direct: skip inbox, go straight to checkout on APP-52
@@ -54,10 +55,10 @@ The fix is to route unowned comment wakes through this existing path rather than
 
 ## 2. Classification of non-progressing issues
 
-| Issue | Status | Classification |
-|---|---|---|
-| APP-52 | `done` | Already resolved. No action needed. |
-| APP-54 | `done` | CEO investigation. Already resolved. |
+| Issue  | Status        | Classification                            |
+| ------ | ------------- | ----------------------------------------- |
+| APP-52 | `done`        | Already resolved. No action needed.       |
+| APP-54 | `done`        | CEO investigation. Already resolved.      |
 | APP-56 | `in_progress` | Agent-actionable. This plan addresses it. |
 
 No stalled leaves remain in the affected tree.
@@ -82,11 +83,11 @@ Reviewed the available API evidence and agent instructions:
 
 This contract preserves all three invariants:
 
-| Invariant | How it's preserved |
-|---|---|
-| **Productive work continues** | Non-owner agents fall back to their own assigned work after acknowledging the mention, rather than getting stuck on a 409. |
-| **Only real blockers stop work** | A non-owned comment becomes a notification (informational), not a pseudo-blocked state with no action path. |
-| **No infinite loops** | The wake is a single notification; the agent does not retry checkout, does not create recovery issues, and does not re-enter the wake path. |
+| Invariant                        | How it's preserved                                                                                                                          |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Productive work continues**    | Non-owner agents fall back to their own assigned work after acknowledging the mention, rather than getting stuck on a 409.                  |
+| **Only real blockers stop work** | A non-owned comment becomes a notification (informational), not a pseudo-blocked state with no action path.                                 |
+| **No infinite loops**            | The wake is a single notification; the agent does not retry checkout, does not create recovery issues, and does not re-enter the wake path. |
 
 ---
 
@@ -101,12 +102,14 @@ The affected tree (APP-52, APP-54) is already resolved (`done`). No cleanup acti
 **Owner:** Engineer (server-side)
 
 The wake router must distinguish between:
+
 - `issue_commented` — the agent IS the assignee, checkout is expected
 - `issue_comment_mentioned` — the agent is NOT the assignee but was mentioned or matched by heuristic; respond without checkout
 
 **Specific change:** When the candidate wake target is not the issue's assignee AND the triggering comment does not contain an explicit @-mention of that agent, route the wake as `issue_comment_mentioned` instead of `issue_commented`.
 
 **Edge cases to handle:**
+
 - Board comment with no @-mention, no assignee → fall back to last speaker as `issue_comment_mentioned`
 - Board comment with @-mention of non-assignee → already works as `issue_comment_mentioned`
 - Board comment with @-mention of assignee → route as `issue_commented` (assignee was explicitly addressed)
@@ -119,8 +122,8 @@ The wake router must distinguish between:
 Add a guard clause to the `issue_commented` handler in the heartbeat procedure:
 
 ```markdown
-Before checkout, verify you are the issue's assignee. If the issue is assigned to 
-another agent, fall back to the `issue_comment_mentioned` behavior: read the 
+Before checkout, verify you are the issue's assignee. If the issue is assigned to
+another agent, fall back to the `issue_comment_mentioned` behavior: read the
 comment, respond if useful, and continue with your own assigned work.
 ```
 
@@ -131,6 +134,7 @@ This is a defense-in-depth measure — even if the server's routing rule is corr
 **Owner:** QA
 
 Test scenarios:
+
 1. Board comments on CEO-owned issue where CTO was last speaker → CTO should NOT be woken as `issue_commented`; CEO should be woken, or CTO should be woken as `issue_comment_mentioned`
 2. Board comments on unassigned issue → appropriate agent notified as `issue_comment_mentioned`
 3. Board comments with explicit @-mention of non-assignee → non-assignee woken as `issue_comment_mentioned` (existing behavior, regression test)
@@ -147,13 +151,13 @@ Test scenarios:
 
 ## 6. Assignees and dependencies
 
-| Phase | Task | Specialty | Blocked by |
-|---|---|---|---|
-| Phase 1 | Fix wake router (server) | Engineer | None |
+| Phase   | Task                      | Specialty    | Blocked by                        |
+| ------- | ------------------------- | ------------ | --------------------------------- |
+| Phase 1 | Fix wake router (server)  | Engineer     | None                              |
 | Phase 2 | Update agent instructions | Agent config | Phase 1 (contract must be stable) |
-| Phase 3 | QA validation | QA | Phase 1, Phase 2 |
-| Phase 4 | Security review | Security | Phase 1 |
-| — | CTO review & merge | CTO | Phase 3, Phase 4 |
+| Phase 3 | QA validation             | QA           | Phase 1, Phase 2                  |
+| Phase 4 | Security review           | Security     | Phase 1                           |
+| —       | CTO review & merge        | CTO          | Phase 3, Phase 4                  |
 
 ---
 
@@ -178,5 +182,6 @@ Test scenarios:
 - [x] Rollback is possible without data migration
 
 **Pending:**
+
 - [ ] Validate against `doc/execution-semantics.md` (Phase 1 action item)
 - [ ] Board approval via `request_confirmation`

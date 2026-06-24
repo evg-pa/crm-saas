@@ -4,7 +4,7 @@
 # Jobs:
 #   lint-backend     — Ruff format/lint + mypy type checking
 #   test-backend     — Pytest integration tests (SQLite in-memory)
-#   lint-frontend    — ESLint + Prettier + TypeScript type checking
+#   lint-frontend    — Prettier format + ESLint + TypeScript type checking
 #   test-frontend    — Vitest unit/component tests
 #   docker-build     — Validate that Docker images build successfully
 
@@ -25,6 +25,7 @@ jobs:
   lint-backend:
     name: Lint Backend
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     defaults:
       run:
         working-directory: services/crm
@@ -34,6 +35,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ runner.os }}-${{ hashFiles('services/crm/requirements.txt') }}
+          restore-keys: |
+            pip-${{ runner.os }}-
 
       - name: Install dependencies
         run: pip install ruff mypy -r requirements.txt
@@ -51,6 +60,7 @@ jobs:
   test-backend:
     name: Test Backend
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: services/crm
@@ -60,6 +70,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ runner.os }}-${{ hashFiles('services/crm/requirements.txt') }}
+          restore-keys: |
+            pip-${{ runner.os }}-
 
       - name: Install dependencies
         run: |
@@ -73,6 +91,7 @@ jobs:
   lint-frontend:
     name: Lint Frontend
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -88,6 +107,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Prettier format check
+        run: pnpm format:check
+
       - name: ESLint
         run: cd apps/crm-frontend && pnpm lint
 
@@ -98,6 +120,7 @@ jobs:
   test-frontend:
     name: Test Frontend
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -120,6 +143,7 @@ jobs:
   docker-build:
     name: Docker Build
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     needs: [lint-backend, test-backend, lint-frontend, test-frontend]
     steps:
       - uses: actions/checkout@v4

@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { useLanguageStore } from "@/lib/stores/language-store";
+import { useEffect } from 'react';
+import { useLanguageStore } from '@/lib/stores/language-store';
 
 /**
  * LanguageProvider — syncs the HTML lang attribute with the language store.

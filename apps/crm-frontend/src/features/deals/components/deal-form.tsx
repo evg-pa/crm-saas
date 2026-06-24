@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { dealSchema, type DealFormValues } from "@/lib/validators/deal";
-import { useContacts } from "@/lib/hooks/use-contacts";
-import { useCompanies } from "@/lib/hooks/use-companies";
-import { Button } from "@/components/ui/button";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { dealSchema, type DealFormValues } from '@/lib/validators/deal';
+import { useContacts } from '@/lib/hooks/use-contacts';
+import { useCompanies } from '@/lib/hooks/use-companies';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -13,18 +13,18 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { DEAL_STAGES } from "@/types";
-import type { Deal } from "@/types";
+} from '@/components/ui/select';
+import { DEAL_STAGES } from '@/types';
+import type { Deal } from '@/types';
 
 interface DealFormProps {
   open: boolean;
@@ -62,21 +62,21 @@ export function DealForm({
           contact_id: deal.contact_id,
           company_id: deal.company_id,
           expected_close_date: deal.expected_close_date
-            ? deal.expected_close_date.split("T")[0]
+            ? deal.expected_close_date.split('T')[0]
             : null,
         }
       : {
-          name: "",
+          name: '',
           amount: null,
-          stage: "new",
+          stage: 'new',
           contact_id: null,
           company_id: null,
           expected_close_date: null,
         },
   });
 
-  const selectedContactId = watch("contact_id");
-  const selectedCompanyId = watch("company_id");
+  const selectedContactId = watch('contact_id');
+  const selectedCompanyId = watch('company_id');
 
   const handleFormSubmit = (values: DealFormValues) => {
     onSubmit(values);
@@ -87,25 +87,19 @@ export function DealForm({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Edit Deal" : "New Deal"}</DialogTitle>
+          <DialogTitle>{isEditing ? 'Edit Deal' : 'New Deal'}</DialogTitle>
           <DialogDescription>
             {isEditing
               ? "Update the deal's information below."
-              : "Fill in the details to create a new deal."}
+              : 'Fill in the details to create a new deal.'}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Deal Name *</Label>
-            <Input
-              id="name"
-              placeholder="Enterprise license"
-              {...register("name")}
-            />
-            {errors.name && (
-              <p className="text-sm text-destructive">{errors.name.message}</p>
-            )}
+            <Input id="name" placeholder="Enterprise license" {...register('name')} />
+            {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -115,28 +109,22 @@ export function DealForm({
                 id="amount"
                 type="number"
                 placeholder="10000"
-                {...register("amount", {
-                  setValueAs: (v: string) =>
-                    v === "" ? null : parseInt(v, 10),
+                {...register('amount', {
+                  setValueAs: (v: string) => (v === '' ? null : parseInt(v, 10)),
                 })}
               />
-              {errors.amount && (
-                <p className="text-sm text-destructive">{errors.amount.message}</p>
-              )}
+              {errors.amount && <p className="text-sm text-destructive">{errors.amount.message}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="stage">Stage</Label>
-              <Select
-                value={watch("stage")}
-                onValueChange={(v) => setValue("stage", v)}
-              >
+              <Select value={watch('stage')} onValueChange={(v) => setValue('stage', v)}>
                 <SelectTrigger id="stage">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {DEAL_STAGES.map((s) => (
                     <SelectItem key={s} value={s}>
-                      {s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                      {s.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -148,10 +136,8 @@ export function DealForm({
             <div className="space-y-2">
               <Label htmlFor="contact_id">Contact</Label>
               <Select
-                value={selectedContactId ?? "none"}
-                onValueChange={(v) =>
-                  setValue("contact_id", v === "none" ? null : v)
-                }
+                value={selectedContactId ?? 'none'}
+                onValueChange={(v) => setValue('contact_id', v === 'none' ? null : v)}
               >
                 <SelectTrigger id="contact_id">
                   <SelectValue placeholder="Select a contact..." />
@@ -169,10 +155,8 @@ export function DealForm({
             <div className="space-y-2">
               <Label htmlFor="company_id">Company</Label>
               <Select
-                value={selectedCompanyId ?? "none"}
-                onValueChange={(v) =>
-                  setValue("company_id", v === "none" ? null : v)
-                }
+                value={selectedCompanyId ?? 'none'}
+                onValueChange={(v) => setValue('company_id', v === 'none' ? null : v)}
               >
                 <SelectTrigger id="company_id">
                   <SelectValue placeholder="Select a company..." />
@@ -194,26 +178,18 @@ export function DealForm({
             <Input
               id="expected_close_date"
               type="date"
-              {...register("expected_close_date", {
-                setValueAs: (v: string) => (v === "" ? null : v),
+              {...register('expected_close_date', {
+                setValueAs: (v: string) => (v === '' ? null : v),
               })}
             />
           </div>
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting
-                ? "Saving..."
-                : isEditing
-                  ? "Save Changes"
-                  : "Create Deal"}
+              {isSubmitting ? 'Saving...' : isEditing ? 'Save Changes' : 'Create Deal'}
             </Button>
           </DialogFooter>
         </form>

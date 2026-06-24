@@ -1,46 +1,46 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { useActivity, useUpdateActivity, useDeleteActivity } from "@/lib/hooks/use-activities";
-import { useContact } from "@/lib/hooks/use-contacts";
-import { useDeal } from "@/lib/hooks/use-deals";
-import { ActivityForm } from "@/features/activities/components/activity-form";
-import { ConfirmDialog } from "@/components/shared/confirm-dialog";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { useActivity, useUpdateActivity, useDeleteActivity } from '@/lib/hooks/use-activities';
+import { useContact } from '@/lib/hooks/use-contacts';
+import { useDeal } from '@/lib/hooks/use-deals';
+import { ActivityForm } from '@/features/activities/components/activity-form';
+import { ConfirmDialog } from '@/components/shared/confirm-dialog';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ArrowLeft, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
-import { formatDate } from "@/lib/utils";
-import { useTranslation } from "@/lib/i18n/use-translation";
-import { useLocale } from "@/lib/i18n/use-locale";
-import type { ActivityFormValues } from "@/lib/validators/activity";
-import { toast } from "sonner";
+} from '@/components/ui/dropdown-menu';
+import { ArrowLeft, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { formatDate } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n/use-translation';
+import { useLocale } from '@/lib/i18n/use-locale';
+import type { ActivityFormValues } from '@/lib/validators/activity';
+import { toast } from 'sonner';
 
 // Distinct badge colors per activity type
 const activityTypeStyles: Record<string, string> = {
-  call: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-  email: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-  meeting: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
-  note: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
-  task: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
-  follow_up: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+  call: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+  email: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+  meeting: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+  note: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
+  task: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+  follow_up: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
 };
 
 const ACTIVITY_TYPE_KEYS: Record<string, string> = {
-  call: "activityTypes.call",
-  email: "activityTypes.email",
-  meeting: "activityTypes.meeting",
-  note: "activityTypes.note",
-  task: "activityTypes.task",
-  follow_up: "activityTypes.follow_up",
+  call: 'activityTypes.call',
+  email: 'activityTypes.email',
+  meeting: 'activityTypes.meeting',
+  note: 'activityTypes.note',
+  task: 'activityTypes.task',
+  follow_up: 'activityTypes.follow_up',
 };
 
 export default function ActivityDetailPage() {
@@ -55,8 +55,8 @@ export default function ActivityDetailPage() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   const { data: activity, isLoading, isError, error } = useActivity(id);
-  const { data: contact } = useContact(activity?.contact_id ?? "");
-  const { data: deal } = useDeal(activity?.deal_id ?? "");
+  const { data: contact } = useContact(activity?.contact_id ?? '');
+  const { data: deal } = useDeal(activity?.deal_id ?? '');
 
   const updateActivity = useUpdateActivity();
   const deleteActivity = useDeleteActivity();
@@ -70,28 +70,24 @@ export default function ActivityDetailPage() {
       },
       {
         onSuccess: () => {
-          toast.success(t("activities.activityUpdated", { name: values.subject }));
+          toast.success(t('activities.activityUpdated', { name: values.subject }));
           setFormOpen(false);
         },
         onError: (err) => {
-          toast.error(
-            err instanceof Error ? err.message : t("activities.updateError")
-          );
+          toast.error(err instanceof Error ? err.message : t('activities.updateError'));
         },
-      }
+      },
     );
   };
 
   const handleDelete = () => {
     deleteActivity.mutate(id, {
       onSuccess: () => {
-        toast.success(t("activities.activityDeleted", { name: activity?.subject ?? "" }));
-        router.push("/activities");
+        toast.success(t('activities.activityDeleted', { name: activity?.subject ?? '' }));
+        router.push('/activities');
       },
       onError: (err) => {
-        toast.error(
-          err instanceof Error ? err.message : t("activities.deleteError")
-        );
+        toast.error(err instanceof Error ? err.message : t('activities.deleteError'));
         setDeleteConfirmOpen(false);
       },
     });
@@ -122,16 +118,14 @@ export default function ActivityDetailPage() {
   if (isError || !activity) {
     return (
       <div className="space-y-6">
-        <Button variant="ghost" onClick={() => router.push("/activities")}>
+        <Button variant="ghost" onClick={() => router.push('/activities')}>
           <ArrowLeft className="mr-2 h-4 w-4" />
-          {t("activities.backToList")}
+          {t('activities.backToList')}
         </Button>
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-6 text-center">
-          <p className="text-sm text-destructive font-medium">
-            {t("activities.loadError")}
-          </p>
+          <p className="text-sm text-destructive font-medium">{t('activities.loadError')}</p>
           <p className="text-xs text-muted-foreground mt-1">
-            {error instanceof Error ? error.message : t("activities.notFound")}
+            {error instanceof Error ? error.message : t('activities.notFound')}
           </p>
         </div>
       </div>
@@ -142,9 +136,9 @@ export default function ActivityDetailPage() {
     <div className="space-y-6">
       {/* Back + Actions */}
       <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={() => router.push("/activities")}>
+        <Button variant="ghost" onClick={() => router.push('/activities')}>
           <ArrowLeft className="mr-2 h-4 w-4" />
-          {t("activities.backToList")}
+          {t('activities.backToList')}
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -155,14 +149,14 @@ export default function ActivityDetailPage() {
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => setFormOpen(true)}>
               <Pencil className="mr-2 h-4 w-4" />
-              {t("activities.editActivity")}
+              {t('activities.editActivity')}
             </DropdownMenuItem>
             <DropdownMenuItem
               className="text-destructive"
               onClick={() => setDeleteConfirmOpen(true)}
             >
               <Trash2 className="mr-2 h-4 w-4" />
-              {t("activities.deleteActivity")}
+              {t('activities.deleteActivity')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -171,13 +165,11 @@ export default function ActivityDetailPage() {
       {/* Activity Header */}
       <div>
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold tracking-tight">
-            {activity.subject}
-          </h1>
+          <h1 className="text-2xl font-bold tracking-tight">{activity.subject}</h1>
           <Badge
             className={
               activityTypeStyles[activity.activity_type] ??
-              "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
+              'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'
             }
             variant="outline"
           >
@@ -190,21 +182,24 @@ export default function ActivityDetailPage() {
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">{t("activities.detailTitle")}</CardTitle>
+            <CardTitle className="text-base">{t('activities.detailTitle')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <DetailRow label={t("activities.type")} value={typeLabel(activity.activity_type)} />
-            <DetailRow label={t("activities.descField")} value={activity.description} />
-            <DetailRow label={t("activities.contact")} value={contact ? `${contact.first_name} ${contact.last_name}` : null} />
-            <DetailRow label={t("activities.deal")} value={deal?.name ?? null} />
+            <DetailRow label={t('activities.type')} value={typeLabel(activity.activity_type)} />
+            <DetailRow label={t('activities.descField')} value={activity.description} />
             <DetailRow
-              label={t("activities.date")}
+              label={t('activities.contact')}
+              value={contact ? `${contact.first_name} ${contact.last_name}` : null}
+            />
+            <DetailRow label={t('activities.deal')} value={deal?.name ?? null} />
+            <DetailRow
+              label={t('activities.date')}
               value={formatDate(activity.occurred_at, locale, {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
               })}
             />
           </CardContent>
@@ -212,23 +207,29 @@ export default function ActivityDetailPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">{t("activities.metadata")}</CardTitle>
+            <CardTitle className="text-base">{t('activities.metadata')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <DetailRow label={t("activities.created")} value={formatDate(activity.created_at, locale, {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })} />
-            <DetailRow label={t("activities.updated")} value={formatDate(activity.updated_at, locale, {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })} />
+            <DetailRow
+              label={t('activities.created')}
+              value={formatDate(activity.created_at, locale, {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            />
+            <DetailRow
+              label={t('activities.updated')}
+              value={formatDate(activity.updated_at, locale, {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            />
           </CardContent>
         </Card>
       </div>
@@ -237,7 +238,7 @@ export default function ActivityDetailPage() {
       {activity.description && activity.description.length > 100 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">{t("activities.descField")}</CardTitle>
+            <CardTitle className="text-base">{t('activities.descField')}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="whitespace-pre-wrap text-sm text-muted-foreground">
@@ -260,10 +261,10 @@ export default function ActivityDetailPage() {
       <ConfirmDialog
         open={deleteConfirmOpen}
         onOpenChange={setDeleteConfirmOpen}
-        title={t("activities.deleteConfirmTitle")}
-        description={t("activities.deleteConfirmDesc")}
-        confirmLabel={t("common.delete")}
-        cancelLabel={t("common.cancel")}
+        title={t('activities.deleteConfirmTitle')}
+        description={t('activities.deleteConfirmDesc')}
+        confirmLabel={t('common.delete')}
+        cancelLabel={t('common.cancel')}
         variant="destructive"
         onConfirm={handleDelete}
         isLoading={deleteActivity.isPending}
@@ -275,10 +276,8 @@ export default function ActivityDetailPage() {
 function DetailRow({ label, value }: { label: string; value: string | null | undefined }) {
   return (
     <div>
-      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-        {label}
-      </p>
-      <p className="text-sm mt-0.5">{value || "—"}</p>
+      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</p>
+      <p className="text-sm mt-0.5">{value || '—'}</p>
     </div>
   );
 }

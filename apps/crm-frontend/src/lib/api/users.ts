@@ -1,9 +1,5 @@
-import apiClient from "./client";
-import type {
-  User,
-  UserUpdate,
-  PaginatedResponse,
-} from "@/types";
+import apiClient from './client';
+import type { User, UserUpdate, PaginatedResponse } from '@/types';
 
 /**
  * List users in the authenticated user's organization.
@@ -14,7 +10,7 @@ export async function listUsers(params?: {
   offset?: number;
   limit?: number;
 }): Promise<PaginatedResponse<User>> {
-  const { data } = await apiClient.get<PaginatedResponse<User>>("/users", {
+  const { data } = await apiClient.get<PaginatedResponse<User>>('/users', {
     params,
   });
   return data;
@@ -31,10 +27,7 @@ export async function getUser(id: string): Promise<User> {
 /**
  * Update a user's full_name, role, or is_active flag.
  */
-export async function updateUser(
-  id: string,
-  body: UserUpdate
-): Promise<User> {
+export async function updateUser(id: string, body: UserUpdate): Promise<User> {
   const { data } = await apiClient.patch<User>(`/users/${id}`, body);
   return data;
 }

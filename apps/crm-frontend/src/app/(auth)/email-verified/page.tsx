@@ -1,23 +1,21 @@
-"use client";
+'use client';
 
-import { Suspense, useEffect, useState, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
-import { AuthLayout } from "@/components/shared/auth-layout";
-import { Button } from "@/components/ui/button";
-import { useTranslation } from "@/lib/i18n/use-translation";
-import * as authApi from "@/lib/api/auth";
+import { Suspense, useEffect, useState, useRef } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { AuthLayout } from '@/components/shared/auth-layout';
+import { Button } from '@/components/ui/button';
+import { useTranslation } from '@/lib/i18n/use-translation';
+import * as authApi from '@/lib/api/auth';
 
 function EmailVerifiedContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { t } = useTranslation();
-  const token = searchParams.get("token");
+  const token = searchParams.get('token');
 
-  const [status, setStatus] = useState<"loading" | "success" | "error">(
-    "loading"
-  );
-  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [errorMessage, setErrorMessage] = useState<string>('');
   const attemptedRef = useRef(false);
 
   useEffect(() => {
@@ -26,8 +24,8 @@ function EmailVerifiedContent() {
     attemptedRef.current = true;
 
     if (!token) {
-      setStatus("error");
-      setErrorMessage(t("auth.verifyEmailInvalidToken"));
+      setStatus('error');
+      setErrorMessage(t('auth.verifyEmailInvalidToken'));
       return;
     }
 
@@ -37,18 +35,16 @@ function EmailVerifiedContent() {
       try {
         await authApi.verifyEmail({ token });
         if (!cancelled) {
-          setStatus("success");
+          setStatus('success');
         }
       } catch (err: any) {
         if (cancelled) return;
         const detail = err?.response?.data?.detail;
-        setStatus("error");
+        setStatus('error');
         if (err?.response?.status === 400) {
-          setErrorMessage(
-            detail || t("auth.verifyEmailExpiredToken")
-          );
+          setErrorMessage(detail || t('auth.verifyEmailExpiredToken'));
         } else {
-          setErrorMessage(t("auth.verifyEmailExpiredToken"));
+          setErrorMessage(t('auth.verifyEmailExpiredToken'));
         }
       }
     };
@@ -60,39 +56,28 @@ function EmailVerifiedContent() {
     };
   }, [token, t]);
 
-  if (status === "loading") {
+  if (status === 'loading') {
     return (
-      <AuthLayout
-        title={t("auth.verifyEmailTitle")}
-        description={t("auth.verifyEmailSubtitle")}
-      >
+      <AuthLayout title={t('auth.verifyEmailTitle')} description={t('auth.verifyEmailSubtitle')}>
         <div className="flex items-center justify-center py-8">
-          <p className="text-sm text-muted-foreground">
-            {t("common.loading")}
-          </p>
+          <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
         </div>
       </AuthLayout>
     );
   }
 
-  if (status === "success") {
+  if (status === 'success') {
     return (
-      <AuthLayout
-        title={t("auth.verifyEmailTitle")}
-        description={t("auth.verifyEmailSubtitle")}
-      >
+      <AuthLayout title={t('auth.verifyEmailTitle')} description={t('auth.verifyEmailSubtitle')}>
         <div className="space-y-4">
           <div
             role="status"
             className="rounded-md bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400"
           >
-            {t("auth.verifyEmailSuccess")}
+            {t('auth.verifyEmailSuccess')}
           </div>
-          <Button
-            className="w-full"
-            onClick={() => router.push("/login")}
-          >
-            {t("auth.verifyEmailSignIn")}
+          <Button className="w-full" onClick={() => router.push('/login')}>
+            {t('auth.verifyEmailSignIn')}
           </Button>
         </div>
       </AuthLayout>
@@ -101,10 +86,7 @@ function EmailVerifiedContent() {
 
   // Error state
   return (
-    <AuthLayout
-      title={t("auth.verifyEmailTitle")}
-      description={t("auth.verifyEmailSubtitle")}
-    >
+    <AuthLayout title={t('auth.verifyEmailTitle')} description={t('auth.verifyEmailSubtitle')}>
       <div className="space-y-4">
         <div
           role="alert"
@@ -117,7 +99,7 @@ function EmailVerifiedContent() {
             href="/login"
             className="font-medium text-primary underline underline-offset-4 hover:text-primary/80"
           >
-            {t("auth.backToLogin")}
+            {t('auth.backToLogin')}
           </Link>
         </p>
       </div>
@@ -130,14 +112,9 @@ export default function EmailVerifiedPage() {
   return (
     <Suspense
       fallback={
-        <AuthLayout
-          title={t("auth.verifyEmailTitle")}
-          description={t("auth.verifyEmailSubtitle")}
-        >
+        <AuthLayout title={t('auth.verifyEmailTitle')} description={t('auth.verifyEmailSubtitle')}>
           <div className="flex items-center justify-center py-8">
-            <p className="text-sm text-muted-foreground">
-              {t("common.loading")}
-            </p>
+            <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
           </div>
         </AuthLayout>
       }

@@ -1,11 +1,11 @@
-import type { ReactNode } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, type RenderOptions } from "@testing-library/react";
-import { useAuthStore } from "@/lib/stores/auth-store";
+import type { ReactNode } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, type RenderOptions } from '@testing-library/react';
+import { useAuthStore } from '@/lib/stores/auth-store';
 
 /** Set a fake auth token + org so hooks are enabled. */
 export function setFakeAuth() {
-  useAuthStore.setState({ token: "test-token", orgId: "test-org-id" });
+  useAuthStore.setState({ token: 'test-token', orgId: 'test-org-id' });
 }
 
 /** Reset the auth store and query client between tests. */
@@ -41,16 +41,12 @@ interface WrapperOptions {
  */
 export function renderWithProviders(
   ui: ReactNode,
-  options?: WrapperOptions & Omit<RenderOptions, "wrapper">
+  options?: WrapperOptions & Omit<RenderOptions, 'wrapper'>,
 ): ReturnType<typeof render> & { queryClient: QueryClient } {
   const queryClient = options?.queryClient ?? makeQueryClient();
 
   function Wrapper({ children }: { children: ReactNode }) {
-    return (
-      <QueryClientProvider client={queryClient}>
-        {children}
-      </QueryClientProvider>
-    );
+    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
   }
 
   return {

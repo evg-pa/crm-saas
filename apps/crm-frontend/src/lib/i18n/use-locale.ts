@@ -1,4 +1,4 @@
-import { useTranslation } from "./use-translation";
+import { useTranslation } from './use-translation';
 
 /**
  * useLocale — returns locale-aware formatting settings.
@@ -7,8 +7,8 @@ import { useTranslation } from "./use-translation";
 export function useLocale() {
   const { language } = useTranslation();
 
-  const locale = language === "ru" ? "ru-RU" : "en-US";
-  const currency = language === "ru" ? "RUB" : "USD";
+  const locale = language === 'ru' ? 'ru-RU' : 'en-US';
+  const currency = language === 'ru' ? 'RUB' : 'USD';
 
   return { locale, currency, language };
 }

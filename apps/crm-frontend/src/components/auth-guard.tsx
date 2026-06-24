@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/lib/stores/auth-store";
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/lib/stores/auth-store';
 
 /**
  * AuthGuard — wraps dashboard routes. Redirects to /login if the user
@@ -21,7 +21,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     const timeout = setTimeout(() => {
       const currentToken = useAuthStore.getState().token;
       if (!currentToken) {
-        router.replace("/login");
+        router.replace('/login');
       }
     }, 50);
 

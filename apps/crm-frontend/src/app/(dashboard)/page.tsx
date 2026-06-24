@@ -1,23 +1,18 @@
-"use client";
+'use client';
 
-import { useContacts } from "@/lib/hooks/use-contacts";
-import { useCompanies } from "@/lib/hooks/use-companies";
-import { useDeals } from "@/lib/hooks/use-deals";
-import { useActivities } from "@/lib/hooks/use-activities";
-import { useTranslation } from "@/lib/i18n";
-import { useLocale } from "@/lib/i18n/use-locale";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import Link from "next/link";
-import {
-  Users,
-  Building2,
-  Handshake,
-  Activity,
-} from "lucide-react";
-import { formatDate } from "@/lib/utils";
+import { useContacts } from '@/lib/hooks/use-contacts';
+import { useCompanies } from '@/lib/hooks/use-companies';
+import { useDeals } from '@/lib/hooks/use-deals';
+import { useActivities } from '@/lib/hooks/use-activities';
+import { useTranslation } from '@/lib/i18n';
+import { useLocale } from '@/lib/i18n/use-locale';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import Link from 'next/link';
+import { Users, Building2, Handshake, Activity } from 'lucide-react';
+import { formatDate } from '@/lib/utils';
 
 export default function DashboardPage() {
   const { t } = useTranslation();
@@ -33,19 +28,19 @@ export default function DashboardPage() {
 
   const kpis = [
     {
-      label: t("dashboard.totalContacts"),
+      label: t('dashboard.totalContacts'),
       value: contactsData?.total,
       icon: Users,
       loading: contactsLoading,
     },
     {
-      label: t("dashboard.totalCompanies"),
+      label: t('dashboard.totalCompanies'),
       value: companiesData?.total,
       icon: Building2,
       loading: companiesLoading,
     },
     {
-      label: t("dashboard.totalDeals"),
+      label: t('dashboard.totalDeals'),
       value: dealsData?.total,
       icon: Handshake,
       loading: dealsLoading,
@@ -55,12 +50,8 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">
-          {t("dashboard.title")}
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          {t("dashboard.description")}
-        </p>
+        <h1 className="text-2xl font-bold tracking-tight">{t('dashboard.title')}</h1>
+        <p className="text-sm text-muted-foreground mt-1">{t('dashboard.description')}</p>
       </div>
 
       {/* KPI Cards */}
@@ -78,7 +69,7 @@ export default function DashboardPage() {
                 <Skeleton className="h-8 w-16" />
               ) : (
                 <p className="text-2xl font-bold">
-                  {kpi.value != null ? kpi.value.toLocaleString() : "—"}
+                  {kpi.value != null ? kpi.value.toLocaleString() : '—'}
                 </p>
               )}
             </CardContent>
@@ -89,21 +80,21 @@ export default function DashboardPage() {
       {/* Quick Links */}
       <div className="grid gap-4 md:grid-cols-3">
         <QuickLinkCard
-          title={t("nav.contacts")}
+          title={t('nav.contacts')}
           description="Manage people and their details"
           href="/contacts"
           count={contactsData?.total}
           loading={contactsLoading}
         />
         <QuickLinkCard
-          title={t("nav.companies")}
+          title={t('nav.companies')}
           description="Organizations you work with"
           href="/companies"
           count={companiesData?.total}
           loading={companiesLoading}
         />
         <QuickLinkCard
-          title={t("nav.deals")}
+          title={t('nav.deals')}
           description="Track opportunities and pipeline"
           href="/deals"
           count={dealsData?.total}
@@ -114,14 +105,12 @@ export default function DashboardPage() {
       {/* Recent Activity */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-base">
-            {t("dashboard.recentActivities")}
-          </CardTitle>
+          <CardTitle className="text-base">{t('dashboard.recentActivities')}</CardTitle>
           <Link
             href="/activities"
             className="text-sm text-muted-foreground hover:text-primary transition-colors"
           >
-            {t("common.viewAll")}
+            {t('common.viewAll')}
           </Link>
         </CardHeader>
         <CardContent>
@@ -157,9 +146,7 @@ export default function DashboardPage() {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">
-              {t("dashboard.noRecentActivity")}
-            </p>
+            <p className="text-sm text-muted-foreground">{t('dashboard.noRecentActivity')}</p>
           )}
         </CardContent>
       </Card>

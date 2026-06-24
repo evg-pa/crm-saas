@@ -12,6 +12,7 @@ docker/
 ```
 
 Individual Dockerfiles live in their service directories:
+
 - `services/crm/Dockerfile` — Backend (FastAPI on Python 3.12)
 - `apps/crm-frontend/Dockerfile` — Frontend (Next.js standalone)
 
@@ -25,6 +26,7 @@ docker compose up --build
 ```
 
 Access the app at:
+
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:8000/docs
 
@@ -43,17 +45,17 @@ docker compose -f docker-compose.yml -f docker/docker-compose.prod.yml up -d --b
 
 ### What the production override does
 
-| Feature | Development | Production |
-|---|---|---|
-| Entry point | Direct port 3000 / 8000 | nginx on :80/:443 |
-| Restart policy | `unless-stopped` | `always` |
-| Resource limits | None | CPU + memory limits |
-| Logging | stdout text | JSON files with rotation |
-| Backend logging | `LOG_FORMAT=text` | `LOG_FORMAT=json`, uvicorn `--log-level warning` |
-| Backend workers | 1 (uvicorn default) | Configurable via `UVICORN_WORKERS` (default: 2) |
-| DB/Redis ports | Exposed to host | DB: localhost only; Redis: internal only |
-| Backup labels | None | `com.crm.backup.target: true` on volumes |
-| SSL | No | Uncomment the HTTPS block in `nginx/nginx.conf` + certbot |
+| Feature         | Development             | Production                                                |
+| --------------- | ----------------------- | --------------------------------------------------------- |
+| Entry point     | Direct port 3000 / 8000 | nginx on :80/:443                                         |
+| Restart policy  | `unless-stopped`        | `always`                                                  |
+| Resource limits | None                    | CPU + memory limits                                       |
+| Logging         | stdout text             | JSON files with rotation                                  |
+| Backend logging | `LOG_FORMAT=text`       | `LOG_FORMAT=json`, uvicorn `--log-level warning`          |
+| Backend workers | 1 (uvicorn default)     | Configurable via `UVICORN_WORKERS` (default: 2)           |
+| DB/Redis ports  | Exposed to host         | DB: localhost only; Redis: internal only                  |
+| Backup labels   | None                    | `com.crm.backup.target: true` on volumes                  |
+| SSL             | No                      | Uncomment the HTTPS block in `nginx/nginx.conf` + certbot |
 
 ### SSL Setup (Production)
 

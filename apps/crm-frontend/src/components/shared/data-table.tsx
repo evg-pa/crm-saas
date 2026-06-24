@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import * as React from "react";
+import * as React from 'react';
 import {
   type ColumnDef,
   flexRender,
@@ -9,16 +9,11 @@ import {
   type SortingState,
   useReactTable,
   type VisibilityState,
-} from "@tanstack/react-table";
-import {
-  ChevronDown,
-  ChevronUp,
-  ChevronsUpDown,
-  MoreHorizontal,
-} from "lucide-react";
+} from '@tanstack/react-table';
+import { ChevronDown, ChevronUp, ChevronsUpDown, MoreHorizontal } from 'lucide-react';
 
-import { cn } from "@/lib/utils";
-import { useTranslation } from "@/lib/i18n";
+import { cn } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n';
 import {
   Table,
   TableBody,
@@ -26,16 +21,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Skeleton } from "@/components/ui/skeleton";
+} from '@/components/ui/dropdown-menu';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -46,7 +41,7 @@ interface DataTableProps<TData, TValue> {
   rowActions?: {
     label: string;
     onClick: (row: TData) => void;
-    variant?: "default" | "destructive";
+    variant?: 'default' | 'destructive';
   }[];
   emptyState?: React.ReactNode;
 }
@@ -75,26 +70,24 @@ export function DataTable<TData, TValue>({
   const { t } = useTranslation();
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [rowSelection, setRowSelection] = React.useState({});
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
 
   const selectionColumn: ColumnDef<TData, TValue> = {
-    id: "select",
+    id: 'select',
     header: ({ table }) => (
       <Checkbox
         checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
+          table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label={t("forms.selectAll")}
+        aria-label={t('forms.selectAll')}
       />
     ),
     cell: ({ row }) => (
       <Checkbox
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label={t("forms.selectRow", { row: row.index + 1 })}
+        aria-label={t('forms.selectRow', { row: row.index + 1 })}
       />
     ),
     enableSorting: false,
@@ -102,13 +95,13 @@ export function DataTable<TData, TValue>({
   };
 
   const actionsColumn: ColumnDef<TData, TValue> = {
-    id: "actions",
+    id: 'actions',
     cell: ({ row }) => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" className="h-8 w-8">
             <MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">{t("forms.openRowActions")}</span>
+            <span className="sr-only">{t('forms.openRowActions')}</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
@@ -119,9 +112,7 @@ export function DataTable<TData, TValue>({
                 e.stopPropagation();
                 action.onClick(row.original);
               }}
-              className={cn(
-                action.variant === "destructive" && "text-destructive"
-              )}
+              className={cn(action.variant === 'destructive' && 'text-destructive')}
             >
               {action.label}
             </DropdownMenuItem>
@@ -192,55 +183,45 @@ export function DataTable<TData, TValue>({
                 const canSort = header.column.getCanSort();
                 const sortDir = header.column.getIsSorted();
                 const ariaSort =
-                  sortDir === "asc"
-                    ? "ascending"
-                    : sortDir === "desc"
-                      ? "descending"
-                      : "none";
+                  sortDir === 'asc' ? 'ascending' : sortDir === 'desc' ? 'descending' : 'none';
                 return (
-                <TableHead
-                  key={header.id}
-                  aria-sort={canSort ? (ariaSort as React.AriaAttributes["aria-sort"]) : undefined}
-                  className={cn(
-                    "h-10 bg-muted/50 text-xs font-medium text-muted-foreground uppercase tracking-wider",
-                    canSort && "cursor-pointer select-none"
-                  )}
-                  onClick={
-                    canSort
-                      ? header.column.getToggleSortingHandler()
-                      : undefined
-                  }
-                  onKeyDown={
-                    canSort
-                      ? (e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            header.column.toggleSorting();
+                  <TableHead
+                    key={header.id}
+                    aria-sort={
+                      canSort ? (ariaSort as React.AriaAttributes['aria-sort']) : undefined
+                    }
+                    className={cn(
+                      'h-10 bg-muted/50 text-xs font-medium text-muted-foreground uppercase tracking-wider',
+                      canSort && 'cursor-pointer select-none',
+                    )}
+                    onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
+                    onKeyDown={
+                      canSort
+                        ? (e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              header.column.toggleSorting();
+                            }
                           }
-                        }
-                      : undefined
-                  }
-                  tabIndex={canSort ? 0 : undefined}
-
-                >
-                  <div className="flex items-center gap-1">
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
-                    {canSort && (
-                      <span className="ml-1">
-                        {sortDir === "asc" ? (
-                          <ChevronUp className="h-3.5 w-3.5" />
-                        ) : sortDir === "desc" ? (
-                          <ChevronDown className="h-3.5 w-3.5" />
-                        ) : (
-                          <ChevronsUpDown className="h-3.5 w-3.5 text-muted-foreground/60" />
-                        )}
-                      </span>
-                    )}
-                  </div>
-                </TableHead>
+                        : undefined
+                    }
+                    tabIndex={canSort ? 0 : undefined}
+                  >
+                    <div className="flex items-center gap-1">
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                      {canSort && (
+                        <span className="ml-1">
+                          {sortDir === 'asc' ? (
+                            <ChevronUp className="h-3.5 w-3.5" />
+                          ) : sortDir === 'desc' ? (
+                            <ChevronDown className="h-3.5 w-3.5" />
+                          ) : (
+                            <ChevronsUpDown className="h-3.5 w-3.5 text-muted-foreground/60" />
+                          )}
+                        </span>
+                      )}
+                    </div>
+                  </TableHead>
                 );
               })}
             </TableRow>
@@ -251,10 +232,10 @@ export function DataTable<TData, TValue>({
             table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
-                data-state={row.getIsSelected() && "selected"}
+                data-state={row.getIsSelected() && 'selected'}
                 className={cn(
-                  "border-b border-border transition-colors hover:bg-muted/50",
-                  onRowClick && "cursor-pointer"
+                  'border-b border-border transition-colors hover:bg-muted/50',
+                  onRowClick && 'cursor-pointer',
                 )}
                 onClick={() => onRowClick?.(row.original)}
               >
@@ -267,14 +248,9 @@ export function DataTable<TData, TValue>({
             ))
           ) : (
             <TableRow>
-              <TableCell
-                colSpan={finalColumns.length}
-                className="h-24 text-center"
-              >
+              <TableCell colSpan={finalColumns.length} className="h-24 text-center">
                 {emptyState || (
-                  <p className="text-sm text-muted-foreground">
-                    {t("common.noResults")}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{t('common.noResults')}</p>
                 )}
               </TableCell>
             </TableRow>

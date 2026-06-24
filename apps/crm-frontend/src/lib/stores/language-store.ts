@@ -1,7 +1,7 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
-export type Language = "en" | "ru";
+export type Language = 'en' | 'ru';
 
 interface LanguageState {
   language: Language;
@@ -14,11 +14,11 @@ interface LanguageState {
 export const useLanguageStore = create<LanguageState>()(
   persist(
     (set) => ({
-      language: "en",
+      language: 'en',
       setLanguage: (language) => set({ language }),
     }),
     {
-      name: "crm-language",
-    }
-  )
+      name: 'crm-language',
+    },
+  ),
 );

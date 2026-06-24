@@ -58,16 +58,16 @@ All services run in Docker containers orchestrated by Docker Compose. The Next.j
 
 ## Tech Stack
 
-| Layer      | Technology                                              |
-|------------|---------------------------------------------------------|
-| Frontend   | Next.js 15, React 19, TypeScript, Tailwind CSS 4, shadcn/ui |
-| Backend    | FastAPI (Python 3.12), SQLAlchemy 2.0 (async), Pydantic v2 |
-| Database   | PostgreSQL 16                                           |
-| Cache      | Redis 7                                                 |
-| Auth       | JWT (bcrypt + PyJWT)                                    |
-| Testing    | Pytest (backend), Vitest + Playwright (frontend)        |
-| Linting    | Ruff + mypy (backend), ESLint + Prettier (frontend)     |
-| DevOps     | Docker, Docker Compose, GitHub Actions CI               |
+| Layer    | Technology                                                  |
+| -------- | ----------------------------------------------------------- |
+| Frontend | Next.js 15, React 19, TypeScript, Tailwind CSS 4, shadcn/ui |
+| Backend  | FastAPI (Python 3.12), SQLAlchemy 2.0 (async), Pydantic v2  |
+| Database | PostgreSQL 16                                               |
+| Cache    | Redis 7                                                     |
+| Auth     | JWT (bcrypt + PyJWT)                                        |
+| Testing  | Pytest (backend), Vitest + Playwright (frontend)            |
+| Linting  | Ruff + mypy (backend), ESLint + Prettier (frontend)         |
+| DevOps   | Docker, Docker Compose, GitHub Actions CI                   |
 
 ---
 
@@ -110,12 +110,12 @@ Wait 20–30 seconds for all services to become healthy (migrations run automati
 
 Once all containers are healthy:
 
-| Service  | URL                          |
-|----------|------------------------------|
-| Frontend | http://localhost:3000         |
-| Backend  | http://localhost:8000         |
-| Swagger  | http://localhost:8000/docs    |
-| ReDoc    | http://localhost:8000/redoc   |
+| Service  | URL                         |
+| -------- | --------------------------- |
+| Frontend | http://localhost:3000       |
+| Backend  | http://localhost:8000       |
+| Swagger  | http://localhost:8000/docs  |
+| ReDoc    | http://localhost:8000/redoc |
 
 > **Note:** The first time you open the frontend, it auto-registers a dev user
 > (`dev@crm.local` / `devpass123`) and immediately logs you in. No manual
@@ -182,12 +182,12 @@ make lint       # Run all linters
 
 ### Services
 
-| Service    | Container Name | Port  | Volume        |
-|------------|---------------|-------|---------------|
-| PostgreSQL | crm-db        | 5432  | `pgdata`      |
-| Redis      | crm-redis     | 6379  | `redisdata`   |
-| Backend    | crm-backend   | 8000  | (none)        |
-| Frontend   | crm-frontend  | 3000  | (none)        |
+| Service    | Container Name | Port | Volume      |
+| ---------- | -------------- | ---- | ----------- |
+| PostgreSQL | crm-db         | 5432 | `pgdata`    |
+| Redis      | crm-redis      | 6379 | `redisdata` |
+| Backend    | crm-backend    | 8000 | (none)      |
+| Frontend   | crm-frontend   | 3000 | (none)      |
 
 ### Viewing Logs
 
@@ -332,10 +332,10 @@ crm-saas/
 The application requires JWT authentication on all API endpoints. For local
 development, the frontend auto-registers a dev user on first load:
 
-| Field              | Value          |
-|--------------------|----------------|
-| Email              | `dev@crm.local`|
-| Password           | `devpass123`   |
+| Field    | Value           |
+| -------- | --------------- |
+| Email    | `dev@crm.local` |
+| Password | `devpass123`    |
 
 The auto-registration happens automatically when you open `http://localhost:3000`
 — no manual setup required. The `AuthInitializer` component tries to register the
@@ -349,24 +349,24 @@ All endpoints other than `/auth/register`, `/auth/login`, and `/health` require
 a JWT Bearer token in the `Authorization` header. Full interactive documentation
 is available at `/docs` when the server is running.
 
-| Resource       | Endpoint                    | Operations              | Auth Required |
-|----------------|-----------------------------|-------------------------|--------------|
-| Auth           | `/api/v1/auth/register`     | Register + auto-create org | No         |
-| Auth           | `/api/v1/auth/login`        | Login, get JWT tokens   | No           |
-| Auth           | `/api/v1/auth/refresh`      | Refresh access token    | No*          |
-| Auth           | `/api/v1/auth/forgot-password` | Request reset        | No           |
-| Auth           | `/api/v1/auth/reset-password`  | Reset password       | No           |
-| Auth           | `/api/v1/auth/verify-email` | Verify email address    | No*          |
-| Organizations  | `/api/v1/organizations`     | CRUD + list + search    | Yes          |
-| Users          | `/api/v1/users`             | CRUD + list + search    | Yes          |
-| Contacts       | `/api/v1/contacts`          | CRUD + list + search    | Yes          |
-| Companies      | `/api/v1/companies`         | CRUD + list + search    | Yes          |
-| Deals          | `/api/v1/deals`             | CRUD + list + search    | Yes          |
-| Activities     | `/api/v1/activities`        | CRUD + list + search    | Yes          |
-| Notes          | `/api/v1/notes`             | CRUD + list + search    | Yes          |
-| Health         | `/health`                   | GET                     | No           |
+| Resource      | Endpoint                       | Operations                 | Auth Required |
+| ------------- | ------------------------------ | -------------------------- | ------------- |
+| Auth          | `/api/v1/auth/register`        | Register + auto-create org | No            |
+| Auth          | `/api/v1/auth/login`           | Login, get JWT tokens      | No            |
+| Auth          | `/api/v1/auth/refresh`         | Refresh access token       | No\*          |
+| Auth          | `/api/v1/auth/forgot-password` | Request reset              | No            |
+| Auth          | `/api/v1/auth/reset-password`  | Reset password             | No            |
+| Auth          | `/api/v1/auth/verify-email`    | Verify email address       | No\*          |
+| Organizations | `/api/v1/organizations`        | CRUD + list + search       | Yes           |
+| Users         | `/api/v1/users`                | CRUD + list + search       | Yes           |
+| Contacts      | `/api/v1/contacts`             | CRUD + list + search       | Yes           |
+| Companies     | `/api/v1/companies`            | CRUD + list + search       | Yes           |
+| Deals         | `/api/v1/deals`                | CRUD + list + search       | Yes           |
+| Activities    | `/api/v1/activities`           | CRUD + list + search       | Yes           |
+| Notes         | `/api/v1/notes`                | CRUD + list + search       | Yes           |
+| Health        | `/health`                      | GET                        | No            |
 
-*\* Token-based endpoints require the token from the previous step, not a user login session.*
+_\* Token-based endpoints require the token from the previous step, not a user login session._
 
 ### Pagination
 

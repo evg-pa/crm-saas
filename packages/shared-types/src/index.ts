@@ -16,7 +16,7 @@ export type SemVer = string;
 // ---------------------------------------------------------------------------
 
 /** System role for authorization. */
-export type UserRole = "admin" | "editor" | "viewer";
+export type UserRole = 'admin' | 'editor' | 'viewer';
 
 /** Core user profile. */
 export interface User {
@@ -34,7 +34,7 @@ export interface User {
 // ---------------------------------------------------------------------------
 
 /** Project status lifecycle. */
-export type ProjectStatus = "draft" | "active" | "archived";
+export type ProjectStatus = 'draft' | 'active' | 'archived';
 
 /** A top-level project. */
 export interface Project {
@@ -90,6 +90,4 @@ export interface ApiError {
 }
 
 /** Generic API result — success or error discriminated union. */
-export type ApiResult<T> =
-  | { success: true; data: T }
-  | { success: false; error: ApiError };
+export type ApiResult<T> = { success: true; data: T } | { success: false; error: ApiError };

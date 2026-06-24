@@ -1,25 +1,20 @@
-"use client";
+'use client';
 
-import { useState, useMemo, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import type { ColumnDef } from "@tanstack/react-table";
-import { useUsers, useDeleteUser } from "@/lib/hooks/use-users";
-import { useAuthStore } from "@/lib/stores/auth-store";
-import { ConfirmDialog } from "@/components/shared/confirm-dialog";
-import {
-  PageHeader,
-  SearchInput,
-  DataTable,
-  EmptyState,
-} from "@/components/shared";
-import { useTranslation } from "@/lib/i18n";
-import { useLocale } from "@/lib/i18n/use-locale";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Shield, ShieldCheck, UserRoundCheck, Users } from "lucide-react";
-import { toast } from "sonner";
-import { formatDate } from "@/lib/utils";
-import type { User, UserRole } from "@/types";
+import { useState, useMemo, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import type { ColumnDef } from '@tanstack/react-table';
+import { useUsers, useDeleteUser } from '@/lib/hooks/use-users';
+import { useAuthStore } from '@/lib/stores/auth-store';
+import { ConfirmDialog } from '@/components/shared/confirm-dialog';
+import { PageHeader, SearchInput, DataTable, EmptyState } from '@/components/shared';
+import { useTranslation } from '@/lib/i18n';
+import { useLocale } from '@/lib/i18n/use-locale';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Shield, ShieldCheck, UserRoundCheck, Users } from 'lucide-react';
+import { toast } from 'sonner';
+import { formatDate } from '@/lib/utils';
+import type { User, UserRole } from '@/types';
 
 const ROLE_ICON_MAP: Record<UserRole, typeof Shield> = {
   admin: ShieldCheck,
@@ -42,7 +37,7 @@ export default function UsersPage() {
   const router = useRouter();
   const { t } = useTranslation();
   const { locale } = useLocale();
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
 
   const limit = 20;
@@ -63,15 +58,15 @@ export default function UsersPage() {
     deleteUser.mutate(deleteTarget.id, {
       onSuccess: () => {
         toast.success(
-          t("users.userDeleted", {
+          t('users.userDeleted', {
             name: deleteTarget.full_name ?? deleteTarget.email,
-          })
+          }),
         );
         setDeleteTarget(null);
       },
       onError: (err) => {
         toast.error(
-          err instanceof Error ? err.message ?? t("users.deleteError") : t("users.deleteError")
+          err instanceof Error ? (err.message ?? t('users.deleteError')) : t('users.deleteError'),
         );
         setDeleteTarget(null);
       },
@@ -81,12 +76,12 @@ export default function UsersPage() {
   const handleDeleteClick = useCallback(
     (user: User) => {
       if (user.id === currentUserId) {
-        toast.error(t("users.cannotDeleteSelf"));
+        toast.error(t('users.cannotDeleteSelf'));
         return;
       }
       setDeleteTarget(user);
     },
-    [currentUserId, t]
+    [currentUserId, t],
   );
 
   const handleSearchChange = useCallback((value: string) => {
@@ -97,77 +92,65 @@ export default function UsersPage() {
   const USER_COLUMNS: ColumnDef<User>[] = useMemo(
     () => [
       {
-        accessorKey: "full_name",
-        header: t("users.fullName"),
+        accessorKey: 'full_name',
+        header: t('users.fullName'),
         cell: ({ row }) => (
-          <span className="font-medium">
-            {row.original.full_name ?? t("common.none")}
-          </span>
+          <span className="font-medium">{row.original.full_name ?? t('common.none')}</span>
         ),
       },
       {
-        accessorKey: "email",
-        header: t("users.email"),
-        cell: ({ getValue }) => (
-          <span className="text-muted-foreground">{getValue<string>()}</span>
-        ),
+        accessorKey: 'email',
+        header: t('users.email'),
+        cell: ({ getValue }) => <span className="text-muted-foreground">{getValue<string>()}</span>,
       },
       {
-        accessorKey: "role",
-        header: t("users.role"),
-        cell: ({ getValue }) => (
-          <RoleBadge role={getValue<UserRole>()} />
-        ),
+        accessorKey: 'role',
+        header: t('users.role'),
+        cell: ({ getValue }) => <RoleBadge role={getValue<UserRole>()} />,
       },
       {
-        accessorKey: "is_active",
-        header: t("users.status"),
+        accessorKey: 'is_active',
+        header: t('users.status'),
         cell: ({ getValue }) => {
           const active = getValue<boolean>();
           return (
-            <Badge variant={active ? "default" : "secondary"}>
-              {active ? t("forms.active") : t("forms.inactive")}
+            <Badge variant={active ? 'default' : 'secondary'}>
+              {active ? t('forms.active') : t('forms.inactive')}
             </Badge>
           );
         },
       },
       {
-        accessorKey: "created_at",
-        header: t("users.created"),
+        accessorKey: 'created_at',
+        header: t('users.created'),
         cell: ({ getValue }) => (
           <span className="text-muted-foreground text-sm">
-            {formatDate(getValue<User["created_at"]>(), locale)}
+            {formatDate(getValue<User['created_at']>(), locale)}
           </span>
         ),
       },
     ],
-    [t, locale]
+    [t, locale],
   );
 
   const emptyState = useMemo(
     () => (
-      <EmptyState
-        icon={Users}
-        title={t("users.noUsers")}
-        description={t("users.noUsersDesc")}
-      />
+      <EmptyState icon={Users} title={t('users.noUsers')} description={t('users.noUsersDesc')} />
     ),
-    [t]
+    [t],
   );
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title={t("users.title")}
+        title={t('users.title')}
         description={
-          data
-            ? t("users.description", { count: data.total })
-            : t("users.noDescription")
+          data ? t('users.description', { count: data.total }) : t('users.noDescription')
         }
       />
 
       <SearchInput
-        placeholder={t("users.searchPlaceholder")}
+        placeholder={t('users.searchPlaceholder')}
         value={search}
         onChange={handleSearchChange}
         className="max-w-md"
@@ -175,13 +158,9 @@ export default function UsersPage() {
 
       {isError && (
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-6 text-center">
-          <p className="text-sm text-destructive font-medium">
-            {t("users.loadError")}
-          </p>
+          <p className="text-sm text-destructive font-medium">{t('users.loadError')}</p>
           <p className="text-xs text-muted-foreground mt-1">
-            {error instanceof Error
-              ? error.message
-              : t("users.loadErrorDetail")}
+            {error instanceof Error ? error.message : t('users.loadErrorDetail')}
           </p>
         </div>
       )}
@@ -192,16 +171,16 @@ export default function UsersPage() {
         onOpenChange={(open) => {
           if (!open) setDeleteTarget(null);
         }}
-        title={t("users.deleteConfirmTitle")}
+        title={t('users.deleteConfirmTitle')}
         description={
           deleteTarget
-            ? t("users.deleteConfirmDesc", {
+            ? t('users.deleteConfirmDesc', {
                 name: deleteTarget.full_name ?? deleteTarget.email,
               })
-            : ""
+            : ''
         }
-        confirmLabel={t("common.delete")}
-        cancelLabel={t("common.cancel")}
+        confirmLabel={t('common.delete')}
+        cancelLabel={t('common.cancel')}
         variant="destructive"
         onConfirm={handleDeleteConfirm}
         isLoading={deleteUser.isPending}
@@ -216,13 +195,13 @@ export default function UsersPage() {
             onRowClick={(user) => router.push(`/users/${user.id}`)}
             rowActions={[
               {
-                label: t("common.edit"),
+                label: t('common.edit'),
                 onClick: (user) => router.push(`/users/${user.id}`),
               },
               {
-                label: t("common.delete"),
+                label: t('common.delete'),
                 onClick: handleDeleteClick,
-                variant: "destructive",
+                variant: 'destructive',
               },
             ]}
             emptyState={emptyState}
@@ -231,9 +210,8 @@ export default function UsersPage() {
           {data && data.total > limit && (
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
-                {t("common.showing")} {page * limit + 1}–
-                {Math.min((page + 1) * limit, data.total)} {t("common.of")}{" "}
-                {data.total}
+                {t('common.showing')} {page * limit + 1}–{Math.min((page + 1) * limit, data.total)}{' '}
+                {t('common.of')} {data.total}
               </p>
               <div className="flex gap-2">
                 <Button
@@ -242,7 +220,7 @@ export default function UsersPage() {
                   disabled={page === 0}
                   onClick={() => setPage((p) => p - 1)}
                 >
-                  {t("common.previous")}
+                  {t('common.previous')}
                 </Button>
                 <Button
                   variant="outline"
@@ -250,7 +228,7 @@ export default function UsersPage() {
                   disabled={(page + 1) * limit >= data.total}
                   onClick={() => setPage((p) => p + 1)}
                 >
-                  {t("common.next")}
+                  {t('common.next')}
                 </Button>
               </div>
             </div>

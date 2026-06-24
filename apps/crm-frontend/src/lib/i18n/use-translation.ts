@@ -1,11 +1,11 @@
-import { useCallback, useMemo } from "react";
-import { useLanguageStore } from "@/lib/stores/language-store";
-import en from "./translations/en";
-import ru from "./translations/ru";
-import type { Translations } from "./translations/en";
+import { useCallback, useMemo } from 'react';
+import { useLanguageStore } from '@/lib/stores/language-store';
+import en from './translations/en';
+import ru from './translations/ru';
+import type { Translations } from './translations/en';
 
 export type { Translations };
-export type TFn = ReturnType<typeof useTranslation>["t"];
+export type TFn = ReturnType<typeof useTranslation>['t'];
 
 const dictionaries: Record<string, Translations> = { en, ru };
 
@@ -23,14 +23,14 @@ export function useTranslation() {
 
   const t = useCallback(
     (key: string, params?: Record<string, string | number>): string => {
-      const keys = key.split(".");
+      const keys = key.split('.');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let value: any = dict;
       for (const k of keys) {
         if (value == null) break;
         value = value[k];
       }
-      if (typeof value !== "string") {
+      if (typeof value !== 'string') {
         // Fallback to English
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let fallback: any = en;
@@ -38,7 +38,7 @@ export function useTranslation() {
           if (fallback == null) break;
           fallback = fallback[k];
         }
-        if (typeof fallback === "string") {
+        if (typeof fallback === 'string') {
           value = fallback;
         } else {
           return key;
@@ -46,12 +46,12 @@ export function useTranslation() {
       }
       if (params) {
         return value.replace(/\{(\w+)\}/g, (_match: string, param: string) =>
-          String(params[param] ?? `{${param}}`)
+          String(params[param] ?? `{${param}}`),
         );
       }
       return value;
     },
-    [dict]
+    [dict],
   );
 
   return useMemo(() => ({ t, language }), [t, language]);

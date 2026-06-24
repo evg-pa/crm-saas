@@ -1,8 +1,8 @@
 ---
 name: Feature Request
 about: Suggest an idea for the CRM
-title: "[Feature] "
-labels: ["enhancement"]
+title: '[Feature] '
+labels: ['enhancement']
 assignees: []
 ---
 

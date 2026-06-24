@@ -1,21 +1,17 @@
-"use client";
+'use client';
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import * as usersApi from "@/lib/api/users";
-import type { UserUpdate } from "@/types";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import * as usersApi from '@/lib/api/users';
+import type { UserUpdate } from '@/types';
 
 const STALE_TIME = 30_000; // 30 seconds
 
 /**
  * List users with optional search and pagination.
  */
-export function useUsers(params?: {
-  q?: string;
-  offset?: number;
-  limit?: number;
-}) {
+export function useUsers(params?: { q?: string; offset?: number; limit?: number }) {
   return useQuery({
-    queryKey: ["users", params],
+    queryKey: ['users', params],
     queryFn: () => usersApi.listUsers(params),
     staleTime: STALE_TIME,
   });
@@ -26,7 +22,7 @@ export function useUsers(params?: {
  */
 export function useUser(id: string) {
   return useQuery({
-    queryKey: ["users", id],
+    queryKey: ['users', id],
     queryFn: () => usersApi.getUser(id),
     enabled: !!id,
     staleTime: STALE_TIME,
@@ -39,11 +35,10 @@ export function useUser(id: string) {
 export function useUpdateUser() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, ...body }: { id: string } & UserUpdate) =>
-      usersApi.updateUser(id, body),
+    mutationFn: ({ id, ...body }: { id: string } & UserUpdate) => usersApi.updateUser(id, body),
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-      queryClient.invalidateQueries({ queryKey: ["users", variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['users', variables.id] });
     },
   });
 }
@@ -56,7 +51,7 @@ export function useDeleteUser() {
   return useMutation({
     mutationFn: (id: string) => usersApi.deleteUser(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
     },
   });
 }
